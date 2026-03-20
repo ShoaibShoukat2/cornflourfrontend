@@ -9,9 +9,7 @@ const ManagePackages = () => {
   const [preview, setPreview] = useState(null);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    fetchAll();
-  }, [filter]);
+  useEffect(() => { fetchAll(); }, [filter]);
 
   const fetchAll = async () => {
     try {
@@ -20,10 +18,8 @@ const ManagePackages = () => {
         api.get('/admin/payment-account/'),
       ]);
       setPayments(paymentsRes.data);
-      if (accountRes.data && accountRes.data.bank_name) setAccount(accountRes.data);
-    } catch (e) {
-      console.error(e);
-    }
+      if (accountRes.data?.bank_name) setAccount(accountRes.data);
+    } catch (e) { console.error(e); }
   };
 
   const saveAccount = async () => {
@@ -31,15 +27,13 @@ const ManagePackages = () => {
       await api.post('/admin/payment-account/', account);
       setAccountSaved(true);
       setTimeout(() => setAccountSaved(false), 2000);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   };
 
   const approve = async (id) => {
     try {
       await api.post(`/admin/approve-package/${id}/`);
-      setMessage('Approved');
+      setMessage('✅ Approved');
       fetchAll();
     } catch (e) { console.error(e); }
   };
@@ -48,66 +42,57 @@ const ManagePackages = () => {
     const reason = prompt('Rejection reason (optional):') || 'Rejected by admin';
     try {
       await api.post(`/admin/reject-package/${id}/`, { reason });
-      setMessage('Rejected');
+      setMessage('✅ Rejected');
       fetchAll();
     } catch (e) { console.error(e); }
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-800">📦 Manage Packages</h1>
 
         {message && (
           <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-xl text-sm font-semibold">
-            ✅ {message}
+            {message}
           </div>
         )}
 
-        {/* Payment Account Settings */}
+        {/* Bank Account Settings */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h2 className="font-bold text-gray-700 mb-4">Bank Account Details (shown to users)</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Bank Name</label>
-              <input
-                value={account.bank_name}
+              <input value={account.bank_name}
                 onChange={e => setAccount({ ...account, bank_name: e.target.value })}
                 placeholder="e.g. JazzCash"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm"
-              />
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Account Title</label>
-              <input
-                value={account.account_title}
+              <input value={account.account_title}
                 onChange={e => setAccount({ ...account, account_title: e.target.value })}
                 placeholder="e.g. Muhammad Ali"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm"
-              />
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Account Number</label>
-              <input
-                value={account.account_number}
+              <input value={account.account_number}
                 onChange={e => setAccount({ ...account, account_number: e.target.value })}
                 placeholder="e.g. 03001234567"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm"
-              />
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Instructions (optional)</label>
-              <input
-                value={account.instructions}
+              <input value={account.instructions}
                 onChange={e => setAccount({ ...account, instructions: e.target.value })}
                 placeholder="e.g. Send Rs 1800 and upload screenshot"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm"
-              />
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
             </div>
           </div>
-          <button
-            onClick={saveAccount}
-            className="mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-bold text-sm hover:opacity-90 transition"
-          >
+          <button onClick={saveAccount}
+            className="mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-bold text-sm hover:opacity-90 transition">
             {accountSaved ? '✅ Saved!' : 'Save Account Details'}
           </button>
         </div>
@@ -118,11 +103,8 @@ const ManagePackages = () => {
             <h2 className="font-bold text-gray-700">Payment Submissions</h2>
             <div className="flex gap-2">
               {['pending', 'approved', 'rejected', 'all'].map(s => (
-                <button
-                  key={s}
-                  onClick={() => setFilter(s)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold capitalize transition ${filter === s ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                >
+                <button key={s} onClick={() => setFilter(s)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold capitalize transition ${filter === s ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                   {s}
                 </button>
               ))}
@@ -152,18 +134,18 @@ const ManagePackages = () => {
                     }`}>
                       {p.status.toUpperCase()}
                     </span>
-                    <button
-                      onClick={() => setPreview(p.screenshot)}
-                      className="text-xs text-blue-500 underline"
-                    >
+                    <button onClick={() => setPreview(p.screenshot)}
+                      className="text-xs text-blue-500 underline">
                       View Screenshot
                     </button>
                     {p.status === 'pending' && (
                       <div className="flex gap-2">
-                        <button onClick={() => approve(p.id)} className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
+                        <button onClick={() => approve(p.id)}
+                          className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
                           Approve
                         </button>
-                        <button onClick={() => reject(p.id)} className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
+                        <button onClick={() => reject(p.id)}
+                          className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
                           Reject
                         </button>
                       </div>
@@ -178,19 +160,18 @@ const ManagePackages = () => {
 
       {/* Screenshot Modal */}
       {preview && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-          onClick={() => setPreview(null)}
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+          onClick={() => setPreview(null)}>
           <div className="bg-white rounded-2xl p-4 max-w-sm w-full" onClick={e => e.stopPropagation()}>
             <img src={preview} alt="Payment screenshot" className="w-full rounded-xl object-contain max-h-96" />
-            <button onClick={() => setPreview(null)} className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">
+            <button onClick={() => setPreview(null)}
+              className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">
               Close
             </button>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

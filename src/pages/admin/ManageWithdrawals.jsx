@@ -7,16 +7,13 @@ const ManageWithdrawals = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchWithdrawals();
-  }, [filter]);
+  useEffect(() => { fetchWithdrawals(); }, [filter]);
 
   const fetchWithdrawals = async () => {
     try {
-      const response = await api.get(`/admin/withdrawals/?status=${filter}`);
-      setWithdrawals(response.data);
-    } catch (error) {
-      console.error(error);
+      const res = await api.get(`/admin/withdrawals/?status=${filter}`);
+      setWithdrawals(res.data);
+    } catch {
       setMessage('Failed to load withdrawals');
     } finally {
       setLoading(false);
@@ -25,140 +22,121 @@ const ManageWithdrawals = () => {
 
   const handleApprove = async (id, username) => {
     const note = prompt(`Approve withdrawal for ${username}? Add note (optional):`);
-    if (note === null) return; // User cancelled
-    
+    if (note === null) return;
     try {
       await api.post(`/admin/approve-withdrawal/${id}/`, { note });
-      setMessage(`✅ Withdrawal approved for ${username}`);
+      setMessage(`✅ Approved for ${username}`);
       fetchWithdrawals();
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'Failed to approve withdrawal');
+    } catch (e) {
+      setMessage(e.response?.data?.error || 'Failed to approve');
     }
   };
 
   const handleReject = async (id, username) => {
     const reason = prompt(`Reject withdrawal for ${username}? Enter reason:`);
     if (!reason) return;
-    
     try {
       await api.post(`/admin/reject-withdrawal/${id}/`, { reason });
-      setMessage(`✅ Withdrawal rejected for ${username}`);
+      setMessage(`✅ Rejected for ${username}`);
       fetchWithdrawals();
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'Failed to reject withdrawal');
+    } catch (e) {
+      setMessage(e.response?.data?.error || 'Failed to reject');
     }
   };
 
   const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
     approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800'
+    rejected: 'bg-red-100 text-red-800',
   };
 
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Withdrawals 💸</h1>
+      <h1 className="text-2xl font-bold text-gray-800">Manage Withdrawals 💸</h1>
 
-        {message && (
-          <div className={`${message.includes('✅') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded mb-6`}>
-            {message}
-          </div>
-        )}
-
-        <div className="bg-white rounded-xl p-4 md:p-6 shadow-md mb-6">
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setFilter('pending')}
-              className={`px-4 py-2 rounded-lg font-semibold ${filter === 'pending' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              Pending
-            </button>
-            <button
-              onClick={() => setFilter('approved')}
-              className={`px-4 py-2 rounded-lg font-semibold ${filter === 'approved' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              Approved
-            </button>
-            <button
-              onClick={() => setFilter('rejected')}
-              className={`px-4 py-2 rounded-lg font-semibold ${filter === 'rejected' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              Rejected
-            </button>
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold ${filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              All
-            </button>
-          </div>
+      {message && (
+        <div className={`border px-4 py-3 rounded-xl text-sm font-semibold ${message.includes('✅') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`}>
+          {message}
         </div>
+      )}
 
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50">
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="flex flex-wrap gap-2">
+          {['pending', 'approved', 'rejected', 'all'].map(s => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition ${
+                filter === s
+                  ? s === 'pending' ? 'bg-yellow-500 text-white'
+                    : s === 'approved' ? 'bg-green-500 text-white'
+                    : s === 'rejected' ? 'bg-red-500 text-white'
+                    : 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Method</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Details</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {withdrawals.length === 0 ? (
                 <tr>
-                  <th className="px-4 py-3 text-left text-gray-600">User</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Amount</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Method</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Details</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Status</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Date</th>
-                  <th className="px-4 py-3 text-left text-gray-600">Actions</th>
+                  <td colSpan="7" className="px-4 py-8 text-center text-gray-400">No withdrawals found</td>
                 </tr>
-              </thead>
-              <tbody>
-                {withdrawals.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
-                      No withdrawals found
-                    </td>
-                  </tr>
-                ) : (
-                  withdrawals.map((withdrawal) => (
-                    <tr key={withdrawal.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 font-semibold">{withdrawal.user.username}</td>
-                      <td className="px-4 py-3 text-green-600 font-bold">₹{(withdrawal.amount * 100).toFixed(0)}</td>
-                      <td className="px-4 py-3 capitalize">{withdrawal.payment_method}</td>
-                      <td className="px-4 py-3 text-sm max-w-xs truncate" title={withdrawal.payment_details}>
-                        {withdrawal.payment_details}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[withdrawal.status]}`}>
-                          {withdrawal.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm">{new Date(withdrawal.created_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3">
-                        {withdrawal.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleApprove(withdrawal.id, withdrawal.user.username)}
-                              className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleReject(withdrawal.id, withdrawal.user.username)}
-                              className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                        {withdrawal.admin_note && (
-                          <p className="text-xs text-gray-500 mt-1">{withdrawal.admin_note}</p>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+              ) : withdrawals.map(w => (
+                <tr key={w.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="px-4 py-3 font-semibold text-sm">{w.user.username}</td>
+                  <td className="px-4 py-3 text-green-600 font-bold text-sm">Rs {(w.amount * 100).toFixed(0)}</td>
+                  <td className="px-4 py-3 capitalize text-sm">{w.payment_method}</td>
+                  <td className="px-4 py-3 text-sm max-w-xs truncate" title={w.payment_details}>{w.payment_details}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColors[w.status]}`}>
+                      {w.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500">{new Date(w.created_at).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">
+                    {w.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <button onClick={() => handleApprove(w.id, w.user.username)}
+                          className="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-green-600 transition">
+                          Approve
+                        </button>
+                        <button onClick={() => handleReject(w.id, w.user.username)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition">
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                    {w.admin_note && <p className="text-xs text-gray-400 mt-1">{w.admin_note}</p>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
