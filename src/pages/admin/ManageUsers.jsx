@@ -92,9 +92,8 @@ const ManageUsers = () => {
   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 md:py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Manage Users 👥</h1>
+    <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-gray-800">Manage Users 👥</h1>
 
         {message && (
           <div className={`px-4 py-3 rounded-lg mb-4 text-sm font-semibold border ${message.includes('✅') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>

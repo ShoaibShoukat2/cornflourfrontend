@@ -6,9 +6,7 @@ const AdminDashboard = () => {
   const [activities, setActivities] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
@@ -25,129 +23,100 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (!stats) return <div className="flex justify-center items-center h-screen">No data available</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (!stats) return <div className="text-center text-gray-400 py-20">No data available</div>;
+
+  const statCards = [
+    { label: 'Total Users', value: stats.users.total, sub: `Active: ${stats.users.active}`, color: 'from-blue-500 to-blue-600', icon: '👥' },
+    { label: 'Total Earnings', value: `Rs ${(stats.financial.total_earnings * 100).toFixed(0)}`, sub: `Revenue: Rs ${(stats.financial.revenue * 100).toFixed(0)}`, color: 'from-green-500 to-green-600', icon: '💰' },
+    { label: 'Withdrawals', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-purple-500 to-purple-600', icon: '💸' },
+    { label: 'Tasks', value: stats.tasks.total, sub: `Completed: ${stats.tasks.total_completed}`, color: 'from-orange-500 to-red-500', icon: '🎯' },
+  ];
+
+  const infoCards = [
+    { label: 'New Users Today', value: stats.users.new_today, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Blocked Users', value: stats.users.blocked, color: 'text-red-600', bg: 'bg-red-50' },
+    { label: 'Fraud Alerts', value: stats.security.fraud_alerts, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    { label: 'Pending Withdrawals', value: `Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'text-purple-600', bg: 'bg-purple-50' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 md:py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-6 md:mb-8">Admin Dashboard 👨‍💼</h1>
+    <div className="space-y-6">
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-          <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-4 md:p-6 text-white shadow-lg">
-            <p className="text-xs md:text-sm opacity-90">Total Users</p>
-            <p className="text-2xl md:text-4xl font-bold">{stats.users.total}</p>
-            <p className="text-xs md:text-sm mt-2">Active: {stats.users.active}</p>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        {statCards.map((s, i) => (
+          <div key={i} className={`bg-gradient-to-br ${s.color} rounded-2xl p-5 text-white shadow-sm`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm opacity-80">{s.label}</p>
+              <span className="text-2xl">{s.icon}</span>
+            </div>
+            <p className="text-2xl font-black">{s.value}</p>
+            <p className="text-xs opacity-70 mt-1">{s.sub}</p>
           </div>
+        ))}
+      </div>
 
-          <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-4 md:p-6 text-white shadow-lg">
-            <p className="text-xs md:text-sm opacity-90">Total Earnings</p>
-            <p className="text-2xl md:text-4xl font-bold">₹{(stats.financial.total_earnings * 100).toFixed(0)}</p>
-            <p className="text-xs md:text-sm mt-2">Revenue: ₹{(stats.financial.revenue * 100).toFixed(0)}</p>
+      {/* Info Cards */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        {infoCards.map((c, i) => (
+          <div key={i} className={`${c.bg} rounded-2xl p-5`}>
+            <p className="text-xs text-gray-500 mb-2">{c.label}</p>
+            <p className={`text-2xl font-black ${c.color}`}>{c.value}</p>
           </div>
+        ))}
+      </div>
 
-          <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl p-4 md:p-6 text-white shadow-lg">
-            <p className="text-xs md:text-sm opacity-90">Withdrawals</p>
-            <p className="text-2xl md:text-4xl font-bold">₹{(stats.financial.total_withdrawals * 100).toFixed(0)}</p>
-            <p className="text-xs md:text-sm mt-2">Pending: {stats.financial.pending_count}</p>
-          </div>
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-          <div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl p-4 md:p-6 text-white shadow-lg">
-            <p className="text-xs md:text-sm opacity-90">Tasks</p>
-            <p className="text-2xl md:text-4xl font-bold">{stats.tasks.total}</p>
-            <p className="text-xs md:text-sm mt-2">Completed: {stats.tasks.total_completed}</p>
+        {/* Recent Users */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h2 className="font-bold text-gray-800 mb-4">Recent Users</h2>
+          <div className="space-y-3 max-h-72 overflow-y-auto">
+            {activities?.recent_users?.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No users yet</p>}
+            {activities?.recent_users?.map((u) => (
+              <div key={u.id} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">{u.username}</p>
+                  <p className="text-xs text-gray-400">{new Date(u.created_at).toLocaleDateString()}</p>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {u.is_active ? 'Active' : 'Blocked'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Secondary Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <p className="text-sm md:text-base text-gray-600 mb-2">New Users Today</p>
-            <p className="text-3xl md:text-4xl font-bold text-blue-600">{stats.users.new_today}</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <p className="text-sm md:text-base text-gray-600 mb-2">Blocked Users</p>
-            <p className="text-3xl md:text-4xl font-bold text-red-600">{stats.users.blocked}</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <p className="text-sm md:text-base text-gray-600 mb-2">Fraud Alerts</p>
-            <p className="text-3xl md:text-4xl font-bold text-yellow-600">{stats.security.fraud_alerts}</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <p className="text-sm md:text-base text-gray-600 mb-2">Pending Withdrawals</p>
-            <p className="text-3xl md:text-4xl font-bold text-purple-600">₹{(stats.financial.pending_withdrawals * 100).toFixed(0)}</p>
+        {/* Recent Withdrawals */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h2 className="font-bold text-gray-800 mb-4">Recent Withdrawals</h2>
+          <div className="space-y-3 max-h-72 overflow-y-auto">
+            {activities?.recent_withdrawals?.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No withdrawals yet</p>}
+            {activities?.recent_withdrawals?.map((w) => (
+              <div key={w.id} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">{w.user__username}</p>
+                  <p className="text-xs text-gray-400">Rs {(w.amount * 100).toFixed(0)} · {w.payment_method}</p>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  w.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                  w.status === 'approved' ? 'bg-green-100 text-green-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {w.status}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Recent Activities */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Recent Users */}
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">Recent Users 👥</h2>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {activities?.recent_users?.map((user) => (
-                <div key={user.id} className="flex justify-between items-center border-b pb-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 text-sm md:text-base truncate">{user.username}</p>
-                    <p className="text-xs md:text-sm text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded text-xs ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {user.is_active ? 'Active' : 'Blocked'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Withdrawals */}
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">Recent Withdrawals 💸</h2>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {activities?.recent_withdrawals?.map((withdrawal) => (
-                <div key={withdrawal.id} className="flex justify-between items-center border-b pb-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 text-sm md:text-base truncate">{withdrawal.user__username}</p>
-                    <p className="text-xs md:text-sm text-gray-500">${withdrawal.amount} - {withdrawal.payment_method}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    withdrawal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    withdrawal.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {withdrawal.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Fraud Alerts */}
-          <div className="bg-white rounded-xl p-4 md:p-6 shadow-md">
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">Fraud Alerts 🚨</h2>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {activities?.recent_frauds?.map((fraud) => (
-                <div key={fraud.id} className="border-b pb-2">
-                  <div className="flex justify-between items-start mb-1">
-                    <p className="font-semibold text-gray-800 text-sm md:text-base">{fraud.user__username}</p>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      fraud.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                      fraud.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {fraud.severity}
-                    </span>
-                  </div>
-                  <p className="text-xs md:text-sm text-gray-600">{fraud.fraud_type.replace('_', ' ')}</p>
-                  <p className="text-xs text-gray-500 mt-1">{fraud.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
