@@ -55,12 +55,11 @@ const ManageWithdrawals = () => {
     rejected: 'bg-red-100 text-red-800'
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 md:py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-6 md:mb-8">Manage Withdrawals 💸</h1>
+    <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-gray-800">Manage Withdrawals 💸</h1>
 
         {message && (
           <div className={`${message.includes('✅') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded mb-6`}>
@@ -160,15 +159,6 @@ const ManageWithdrawals = () => {
               </tbody>
             </table>
           </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-blue-800">
-            💡 <strong>Tip:</strong> Use Django admin panel for bulk actions and advanced withdrawal management at{' '}
-            <a href="http://localhost:8000/admin/wallet/withdrawal/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">
-              Admin Panel
-            </a>
-          </p>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
-  const [editUser, setEditUser] = useState(null); // user being edited
+  const [editUser, setEditUser] = useState(null);
   const [editForm, setEditForm] = useState({ username: '', email: '', password: '', balance: '' });
   const [saving, setSaving] = useState(false);
 
@@ -16,7 +16,7 @@ const ManageUsers = () => {
     try {
       const response = await api.get('/admin/users/');
       setUsers(response.data);
-    } catch (error) {
+    } catch {
       setMessage('Failed to load users');
     } finally {
       setLoading(false);
@@ -42,7 +42,6 @@ const ManageUsers = () => {
         balance: parseFloat(editForm.balance) / 100,
       };
       if (editForm.password) payload.password = editForm.password;
-
       await api.post(`/admin/edit-user/${editUser.id}/`, payload);
       setMessage(`✅ ${editForm.username} updated successfully`);
       setEditUser(null);
@@ -89,86 +88,83 @@ const ManageUsers = () => {
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
     <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Users 👥</h1>
+      <h1 className="text-2xl font-bold text-gray-800">Manage Users 👥</h1>
 
-        {message && (
-          <div className={`px-4 py-3 rounded-lg mb-4 text-sm font-semibold border ${message.includes('✅') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>
-            {message}
-          </div>
-        )}
-
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-          <input
-            type="text"
-            placeholder="Search by username or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-          />
+      {message && (
+        <div className={`px-4 py-3 rounded-lg text-sm font-semibold border ${message.includes('✅') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>
+          {message}
         </div>
+      )}
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Balance</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <input
+          type="text"
+          placeholder="Search by username or email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+        />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[700px]">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Balance</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length === 0 ? (
+                <tr><td colSpan="5" className="px-4 py-8 text-center text-gray-400">No users found</td></tr>
+              ) : filteredUsers.map((user) => (
+                <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
+                    <p className="text-xs text-gray-400">Level {user.level}</p>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                  <td className="px-4 py-3 text-sm font-bold text-green-600">Rs {(user.balance * 100).toFixed(0)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {user.is_active ? 'Active' : 'Blocked'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2 flex-wrap">
+                      <button onClick={() => openEdit(user)}
+                        className="bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-orange-600 transition">
+                        Edit
+                      </button>
+                      {user.is_active ? (
+                        <button onClick={() => blockUser(user.id, user.username)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition">
+                          Block
+                        </button>
+                      ) : (
+                        <button onClick={() => unblockUser(user.id, user.username)}
+                          className="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-green-600 transition">
+                          Unblock
+                        </button>
+                      )}
+                      <button onClick={() => addBonus(user.id, user.username)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-blue-600 transition">
+                        Bonus
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length === 0 ? (
-                  <tr><td colSpan="5" className="px-4 py-8 text-center text-gray-400">No users found</td></tr>
-                ) : filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
-                      <p className="text-xs text-gray-400">Level {user.level}</p>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-green-600">Rs {(user.balance * 100).toFixed(0)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {user.is_active ? 'Active' : 'Blocked'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 flex-wrap">
-                        <button
-                          onClick={() => openEdit(user)}
-                          className="bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-orange-600 transition"
-                        >
-                          Edit
-                        </button>
-                        {user.is_active ? (
-                          <button onClick={() => blockUser(user.id, user.username)}
-                            className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition">
-                            Block
-                          </button>
-                        ) : (
-                          <button onClick={() => unblockUser(user.id, user.username)}
-                            className="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-green-600 transition">
-                            Unblock
-                          </button>
-                        )}
-                        <button onClick={() => addBonus(user.id, user.username)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-blue-600 transition">
-                          Bonus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -198,7 +194,9 @@ const ManageUsers = () => {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block font-semibold">New Password <span className="text-gray-400 font-normal">(leave blank to keep current)</span></label>
+                <label className="text-xs text-gray-500 mb-1 block font-semibold">
+                  New Password <span className="text-gray-400 font-normal">(leave blank to keep current)</span>
+                </label>
                 <input
                   type="password"
                   value={editForm.password}
