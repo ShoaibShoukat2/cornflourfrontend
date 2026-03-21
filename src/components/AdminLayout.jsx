@@ -1,6 +1,7 @@
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import api from '../api/axios';
 
 const navItems = [
   { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
@@ -9,11 +10,184 @@ const navItems = [
   { path: '/admin/packages',  icon: '📦', label: 'Packages' },
 ];
 
+// ── Pending Packages Slide Panel ───────────────────────────────────────────────
+const PendingPackagesPanel = ({ onClose }) => {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [preview, setPreview] = useState(null);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => { fetchPending(); }, []);
+
+  const fetchPending = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/admin/package-payments/?status=pending');
+      setPayments(res.data);
+    } catch { /* silent */ }
+    finally { setLoading(false); }
+  };
+
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 2500); };
+
+  const approve = async (id, username) => {
+    try {
+      await api.post(`/admin/approve-package/${id}/`);
+      flash(`✅ ${username} approved`);
+      fetchPending();
+    } catch { flash('Failed to approve'); }
+  };
+
+  const reject = async (id, username) => {
+    const reason = prompt('Rejection reason (optional):') || 'Rejected by admin';
+    try {
+      await api.post(`/admin/reject-package/${id}/`, { reason });
+      flash(`❌ ${username} rejected`);
+      fetchPending();
+    } catch { flash('Failed to reject'); }
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-50 bg-black bg-opacity-50"
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <div className="fixed top-0 right-0 h-full z-50 bg-white shadow-2xl flex flex-col"
+        style={{ width: '100%', maxWidth: 420 }}>
+
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4 flex items-center justify-between flex-shrink-0">
+          <div>
+            <p className="text-white font-black text-base">📦 Pending Packages</p>
+            <p className="text-orange-100 text-xs mt-0.5">{payments.length} awaiting review</p>
+          </div>
+          <button onClick={onClose}
+            className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-30 transition text-lg">
+            ×
+          </button>
+        </div>
+
+        {msg && (
+          <div className={`mx-4 mt-3 px-4 py-2 rounded-xl text-sm font-semibold ${msg.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {msg}
+          </div>
+        )}
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {loading && (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+
+          {!loading && payments.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-4xl mb-3">🎉</p>
+              <p className="text-gray-500 font-semibold">All caught up!</p>
+              <p className="text-gray-400 text-sm mt-1">No pending packages</p>
+            </div>
+          )}
+
+          {payments.map(p => (
+            <div key={p.id} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+              {/* User info */}
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="font-bold text-gray-800">{p.username}</p>
+                  <p className="text-xs text-gray-400">{p.email}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {new Date(p.submitted_at).toLocaleString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-black text-orange-500 text-lg">Rs {p.amount}</p>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+                    PENDING
+                  </span>
+                </div>
+              </div>
+
+              {/* Screenshot */}
+              {p.screenshot && (
+                <button
+                  onClick={() => setPreview(p.screenshot)}
+                  className="w-full mb-3 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-orange-400 transition"
+                >
+                  <img
+                    src={p.screenshot}
+                    alt="Payment proof"
+                    className="w-full object-cover"
+                    style={{ maxHeight: 160 }}
+                  />
+                  <p className="text-xs text-gray-400 py-1.5 text-center">Tap to enlarge</p>
+                </button>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => approve(p.id, p.username)}
+                  className="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition"
+                >
+                  ✅ Approve
+                </button>
+                <button
+                  onClick={() => reject(p.id, p.username)}
+                  className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-600 transition"
+                >
+                  ❌ Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Screenshot fullscreen modal */}
+      {preview && (
+        <div
+          className="fixed inset-0 z-[60] bg-black bg-opacity-80 flex items-center justify-center p-4"
+          onClick={() => setPreview(null)}
+        >
+          <div className="bg-white rounded-2xl p-3 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <img src={preview} alt="Payment screenshot" className="w-full rounded-xl object-contain max-h-[70vh]" />
+            <button onClick={() => setPreview(null)}
+              className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+// ── Admin Layout ───────────────────────────────────────────────────────────────
 const AdminLayout = ({ children }) => {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [packagesOpen, setPackagesOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchPendingCount = async () => {
+    try {
+      const res = await api.get('/admin/package-payments/?status=pending');
+      setPendingCount(res.data.length);
+    } catch { /* silent */ }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -23,7 +197,7 @@ const AdminLayout = ({ children }) => {
   const currentPage = navItems.find(n => n.path === location.pathname);
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-gray-900 text-white w-60">
+    <div className="flex flex-col bg-gray-900 text-white w-60" style={{ height: '100%' }}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-700 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -57,6 +231,20 @@ const AdminLayout = ({ children }) => {
             </Link>
           );
         })}
+
+        {/* Pending Packages Quick Action */}
+        <button
+          onClick={() => { setSidebarOpen(false); setPackagesOpen(true); }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-all mt-2"
+        >
+          <span className="text-base w-5 text-center">⏳</span>
+          <span className="flex-1 text-left">Pending Approvals</span>
+          {pendingCount > 0 && (
+            <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full min-w-[20px] text-center">
+              {pendingCount}
+            </span>
+          )}
+        </button>
       </nav>
 
       {/* User + Logout */}
@@ -81,28 +269,37 @@ const AdminLayout = ({ children }) => {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
 
-      {/* Desktop Sidebar — always visible */}
-      <div style={{ flexShrink: 0, display: 'flex' }} className="hidden md:flex">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex flex-shrink-0" style={{ height: '100vh' }}>
         <SidebarContent />
       </div>
 
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <SidebarContent />
-          <div className="flex-1 bg-black bg-opacity-60" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-50 md:hidden" style={{ display: 'flex' }}>
+          <div style={{ flexShrink: 0 }}>
+            <SidebarContent />
+          </div>
+          <div style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }} onClick={() => setSidebarOpen(false)} />
         </div>
+      )}
+
+      {/* Pending Packages Panel */}
+      {packagesOpen && (
+        <PendingPackagesPanel
+          onClose={() => { setPackagesOpen(false); fetchPendingCount(); }}
+        />
       )}
 
       {/* Main area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* Top bar */}
-        <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            {/* Hamburger — mobile only */}
+        <header className="bg-white border-b border-gray-200 flex-shrink-0"
+          style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
               onClick={() => setSidebarOpen(true)}
               className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
@@ -115,15 +312,72 @@ const AdminLayout = ({ children }) => {
               {currentPage?.icon} {currentPage?.label || 'Admin'}
             </p>
           </div>
-          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-            {user?.username?.charAt(0)?.toUpperCase() || 'A'}
+          <div className="flex items-center gap-3">
+            {/* Bell button — mobile quick access */}
+            <button
+              onClick={() => setPackagesOpen(true)}
+              className="relative p-2 rounded-lg hover:bg-gray-100 transition"
+            >
+              <span className="text-lg">🔔</span>
+              {pendingCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-black w-4 h-4 rounded-full flex items-center justify-center">
+                  {pendingCount}
+                </span>
+              )}
+            </button>
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+              {user?.username?.charAt(0)?.toUpperCase() || 'A'}
+            </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-          {children}
+        <main className="pb-20 md:pb-0" style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+          <div style={{ maxWidth: '100%' }}>
+            {children}
+          </div>
         </main>
+      </div>
+
+      {/* Mobile Bottom Nav */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-40"
+        style={{ display: 'flex' }}>
+        {navItems.map(item => {
+          const active = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 4px', textDecoration: 'none' }}
+              className={active ? 'text-orange-400' : 'text-gray-500'}
+            >
+              <span style={{ fontSize: 18 }}>{item.icon}</span>
+              <span style={{ fontSize: 9, marginTop: 2, fontWeight: 600 }}>{item.label}</span>
+            </Link>
+          );
+        })}
+        {/* Pending approvals in bottom nav */}
+        <button
+          onClick={() => setPackagesOpen(true)}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}
+          className="text-gray-500"
+        >
+          <span style={{ fontSize: 18 }}>⏳</span>
+          {pendingCount > 0 && (
+            <span style={{ position: 'absolute', top: 4, right: '50%', transform: 'translateX(8px)', backgroundColor: '#ef4444', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 999, padding: '0 4px', minWidth: 14, textAlign: 'center' }}>
+              {pendingCount}
+            </span>
+          )}
+          <span style={{ fontSize: 9, marginTop: 2, fontWeight: 600 }}>Approvals</span>
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+          className="text-gray-500"
+        >
+          <span style={{ fontSize: 18 }}>🚪</span>
+          <span style={{ fontSize: 9, marginTop: 2, fontWeight: 600 }}>Logout</span>
+        </button>
       </div>
     </div>
   );

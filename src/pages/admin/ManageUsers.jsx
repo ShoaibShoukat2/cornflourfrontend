@@ -300,7 +300,28 @@ const ManageUsers = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile card view */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {filteredUsers.length === 0 ? (
+            <p className="text-center text-gray-400 py-8">No users found</p>
+          ) : filteredUsers.map(user => (
+            <div key={user.id} className="p-4 flex items-center justify-between gap-3" onClick={() => setSelectedUserId(user.id)}>
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-800 text-sm truncate">{user.username}</p>
+                <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                <p className="text-xs font-bold text-green-600 mt-0.5">Rs {(user.balance * 100).toFixed(0)}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {user.is_active ? 'Active' : 'Blocked'}
+                </span>
+                <span className="text-gray-400 text-sm">›</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Desktop table view */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>

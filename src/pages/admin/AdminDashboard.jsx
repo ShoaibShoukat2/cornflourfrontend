@@ -49,25 +49,25 @@ const AdminDashboard = () => {
     <div className="space-y-6">
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         {statCards.map((s, i) => (
-          <div key={i} className={`bg-gradient-to-br ${s.color} rounded-2xl p-5 text-white shadow-sm`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm opacity-80">{s.label}</p>
-              <span className="text-2xl">{s.icon}</span>
+          <div key={i} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 text-white shadow-sm`}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs opacity-80">{s.label}</p>
+              <span className="text-xl">{s.icon}</span>
             </div>
-            <p className="text-2xl font-black">{s.value}</p>
+            <p className="text-xl font-black">{s.value}</p>
             <p className="text-xs opacity-70 mt-1">{s.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {infoCards.map((c, i) => (
-          <div key={i} className={`${c.bg} rounded-2xl p-5`}>
-            <p className="text-xs text-gray-500 mb-2">{c.label}</p>
-            <p className={`text-2xl font-black ${c.color}`}>{c.value}</p>
+          <div key={i} className={`${c.bg} rounded-2xl p-4`}>
+            <p className="text-xs text-gray-500 mb-1">{c.label}</p>
+            <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
           </div>
         ))}
       </div>
