@@ -16,18 +16,23 @@ const UserDetail = ({ userId, onBack }) => {
   const [subAmt, setSubAmt] = useState('');
   const [loginConfirm, setLoginConfirm] = useState(false);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [packagePayment, setPackagePayment] = useState(null);
+  const [screenshotPreview, setScreenshotPreview] = useState(null);
 
   useEffect(() => { load(); }, [userId]);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [detailRes, wRes] = await Promise.all([
+      const [detailRes, wRes, pkgRes] = await Promise.all([
         api.get(`/admin/user-detail/${userId}/`),
         api.get(`/admin/user-withdrawals/${userId}/`),
+        api.get(`/admin/package-payments/?status=all`),
       ]);
       setData(detailRes.data);
       setWithdrawals(wRes.data);
+      const userPkg = pkgRes.data.find(p => p.email === detailRes.data.email) || null;
+      setPackagePayment(userPkg);
       setForm({
         username: detailRes.data.username,
         email: detailRes.data.email,
@@ -76,6 +81,21 @@ const UserDetail = ({ userId, onBack }) => {
     const newBal = Math.max(0, data.wallet.main_balance - parseFloat(subAmt) / 100);
     await api.post(`/admin/edit-user/${userId}/`, { balance: newBal });
     flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); load();
+  };
+
+  const approvePkg = async (id) => {
+    try {
+      await api.post(`/admin/approve-package/${id}/`);
+      flash('✅ Package approved'); load();
+    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
+  };
+
+  const rejectPkg = async (id) => {
+    const reason = prompt('Rejection reason:') || 'Rejected by admin';
+    try {
+      await api.post(`/admin/reject-package/${id}/`, { reason });
+      flash('✅ Package rejected'); load();
+    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
   };
 
   const doLoginAsUser = async () => {
@@ -173,6 +193,46 @@ const UserDetail = ({ userId, onBack }) => {
         </span>
       </div>
 
+      {/* Package Payment Status */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📦 Package Payment</p>
+        {!packagePayment ? (
+          <p className="text-sm text-gray-400">No package payment submitted</p>
+        ) : (
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                packagePayment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                packagePayment.status === 'approved' ? 'bg-green-100 text-green-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {packagePayment.status.toUpperCase()}
+              </span>
+              <p className="text-xs text-gray-400 mt-1">{new Date(packagePayment.submitted_at).toLocaleString()}</p>
+              {packagePayment.admin_note && <p className="text-xs text-gray-500 italic mt-0.5">Note: {packagePayment.admin_note}</p>}
+            </div>
+            <div className="flex items-center gap-2">
+              {packagePayment.screenshot && (
+                <button onClick={() => setScreenshotPreview(packagePayment.screenshot)}
+                  className="text-xs text-blue-500 underline">View Screenshot</button>
+              )}
+              {packagePayment.status === 'pending' && (
+                <>
+                  <button onClick={() => approvePkg(packagePayment.id)}
+                    className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
+                    ✅ Approve
+                  </button>
+                  <button onClick={() => rejectPkg(packagePayment.id)}
+                    className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
+                    ❌ Reject
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Add / Deduct */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
@@ -262,6 +322,20 @@ const UserDetail = ({ userId, onBack }) => {
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+
+      {/* Screenshot Modal */}
+      {screenshotPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+          onClick={() => setScreenshotPreview(null)}>
+          <div className="bg-white rounded-2xl p-4 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <img src={screenshotPreview} alt="Payment screenshot" className="w-full rounded-xl object-contain max-h-96" />
+            <button onClick={() => setScreenshotPreview(null)}
+              className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Login as User confirm modal */}
       {loginConfirm && (
