@@ -185,21 +185,25 @@ const Wallet = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">📋 Your Money Requests</h2>
             <div className="space-y-3">
-              {withdrawals.slice(0, 5).map((withdrawal) => (
+              {withdrawals.slice(0, 10).map((withdrawal) => (
                 <div key={withdrawal.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
                   <div>
                     <p className="font-bold text-lg">Rs {(withdrawal.amount * 100).toFixed(0)}</p>
-                    <p className="text-sm text-gray-600">{new Date(withdrawal.created_at).toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-500 capitalize">{withdrawal.payment_method}</p>
+                    <p className="text-xs text-gray-400">{new Date(withdrawal.created_at).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-                      withdrawal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    <span className={`px-3 py-1.5 rounded-full text-sm font-bold block mb-1 ${
+                      withdrawal.status === 'pending'  ? 'bg-yellow-100 text-yellow-800' :
                       withdrawal.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
+                                                         'bg-red-100 text-red-800'
                     }`}>
-                      {withdrawal.status === 'pending' ? '⏳ WAITING' :
-                       withdrawal.status === 'approved' ? '✅ SENT' : '❌ REJECTED'}
+                      {withdrawal.status === 'pending'  ? '⏳ Waiting' :
+                       withdrawal.status === 'approved' ? '✅ Sent' : '❌ Rejected'}
                     </span>
+                    {withdrawal.admin_note && (
+                      <p className="text-xs text-gray-400">{withdrawal.admin_note}</p>
+                    )}
                   </div>
                 </div>
               ))}

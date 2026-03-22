@@ -10,21 +10,26 @@ const UserDetail = ({ userId, onBack }) => {
   const [form, setForm] = useState({});
   const [addBalanceAmt, setAddBalanceAmt] = useState('');
   const [subBalanceAmt, setSubBalanceAmt] = useState('');
+  const [withdrawals, setWithdrawals] = useState([]);
 
   useEffect(() => { fetchDetail(); }, [userId]);
 
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/admin/user-detail/${userId}/`);
-      setData(res.data);
+      const [detailRes, wRes] = await Promise.all([
+        api.get(`/admin/user-detail/${userId}/`),
+        api.get(`/admin/user-withdrawals/${userId}/`),
+      ]);
+      setData(detailRes.data);
+      setWithdrawals(wRes.data);
       setForm({
-        username: res.data.username,
-        email: res.data.email,
-        phone: res.data.phone || '',
-        level: res.data.level,
+        username: detailRes.data.username,
+        email: detailRes.data.email,
+        phone: detailRes.data.phone || '',
+        level: detailRes.data.level,
         password: '',
-        balance: (res.data.wallet.main_balance * 100).toFixed(0),
+        balance: (detailRes.data.wallet.main_balance * 100).toFixed(0),
       });
     } catch { setMsg('Failed to load user'); }
     finally { setLoading(false); }
@@ -76,6 +81,23 @@ const UserDetail = ({ userId, onBack }) => {
       await api.post(`/admin/edit-user/${userId}/`, { balance: newBal });
       flash(`✅ Rs ${subBalanceAmt} deducted`); setSubBalanceAmt(''); fetchDetail();
     } catch { flash('Failed to deduct'); }
+  };
+
+  const approveW = async (id) => {
+    const note = prompt('Approve note (optional):') ?? '';
+    try {
+      await api.post(`/admin/approve-withdrawal/${id}/`, { note });
+      flash('✅ Withdrawal approved'); fetchDetail();
+    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
+  };
+
+  const rejectW = async (id) => {
+    const reason = prompt('Rejection reason:');
+    if (!reason) return;
+    try {
+      await api.post(`/admin/reject-withdrawal/${id}/`, { reason });
+      flash('✅ Withdrawal rejected'); fetchDetail();
+    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
   };
 
   if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
@@ -176,6 +198,50 @@ const UserDetail = ({ userId, onBack }) => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Withdrawal History */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Withdrawal History</p>
+        {withdrawals.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No withdrawals yet</p>
+        ) : (
+          <div className="space-y-2">
+            {withdrawals.map(w => (
+              <div key={w.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-gray-800">Rs {(w.amount * 100).toFixed(0)}</span>
+                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-lg capitalize">{w.payment_method}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{w.payment_details}</p>
+                  <p className="text-xs text-gray-400">{new Date(w.created_at).toLocaleDateString()}</p>
+                  {w.admin_note && <p className="text-xs text-gray-400 italic">Note: {w.admin_note}</p>}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {w.status === 'pending' ? (
+                    <>
+                      <button onClick={() => approveW(w.id)}
+                        className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
+                        ✅ Approve
+                      </button>
+                      <button onClick={() => rejectW(w.id)}
+                        className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
+                        ❌ Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      w.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {w.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Edit Info Form */}

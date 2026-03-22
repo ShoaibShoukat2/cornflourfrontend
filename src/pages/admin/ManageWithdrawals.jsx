@@ -144,47 +144,49 @@ const ManageWithdrawals = () => {
             {filtered.map(w => {
               const sc = statusColors[w.status];
               return (
-                <div key={w.id} className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
-                  {/* Header */}
+                <div key={w.id} className="bg-white rounded-2xl shadow-sm p-3 space-y-2">
+                  {/* Header row — user + status + approve/reject */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-bold text-gray-800 text-sm truncate">{w.user.username}</p>
                       <p className="text-xs text-gray-400 truncate">{w.user.email}</p>
                     </div>
-                    <span className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${sc.bg} ${sc.text}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
-                      {w.status}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {w.status === 'pending' ? (
+                        <>
+                          <button onClick={() => handleApprove(w.id, w.user.username)}
+                            className="bg-green-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-green-600 transition">
+                            ✅
+                          </button>
+                          <button onClick={() => handleReject(w.id, w.user.username)}
+                            className="bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-red-600 transition">
+                            ❌
+                          </button>
+                        </>
+                      ) : (
+                        <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${sc.bg} ${sc.text}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
+                          {w.status}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Amount + method + date */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-black text-green-600 text-base">Rs {(w.amount * 100).toFixed(0)}</span>
-                    <span className="capitalize text-gray-500 text-xs bg-gray-100 px-2 py-1 rounded-lg">{w.payment_method}</span>
-                    <span className="text-gray-400 text-xs">{new Date(w.created_at).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-black text-green-600 text-sm">Rs {(w.amount * 100).toFixed(0)}</span>
+                    <span className="capitalize text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg">{w.payment_method}</span>
+                    <span className="text-gray-400 ml-auto">{new Date(w.created_at).toLocaleDateString()}</span>
                   </div>
 
                   {/* Account details */}
-                  <div className="bg-gray-50 rounded-xl px-3 py-2">
-                    <p className="text-xs text-gray-400 mb-0.5">Account / Details</p>
-                    <p className="text-sm text-gray-700 font-medium break-all">{w.payment_details}</p>
+                  <div className="bg-gray-50 rounded-xl px-3 py-1.5">
+                    <p className="text-xs text-gray-400">Account</p>
+                    <p className="text-xs text-gray-700 font-medium break-all">{w.payment_details}</p>
                   </div>
 
                   {w.admin_note && (
                     <p className="text-xs text-gray-400 italic">Note: {w.admin_note}</p>
-                  )}
-
-                  {w.status === 'pending' && (
-                    <div className="flex gap-2 pt-1">
-                      <button onClick={() => handleApprove(w.id, w.user.username)}
-                        className="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition">
-                        ✅ Approve
-                      </button>
-                      <button onClick={() => handleReject(w.id, w.user.username)}
-                        className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-600 transition">
-                        ❌ Reject
-                      </button>
-                    </div>
                   )}
                 </div>
               );
