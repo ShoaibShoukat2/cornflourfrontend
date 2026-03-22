@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -8,6 +8,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Pre-fill email if admin used "Login as User"
+  useEffect(() => {
+    const prefill = localStorage.getItem('prefill_email');
+    if (prefill) {
+      setFormData(f => ({ ...f, email: prefill }));
+      localStorage.removeItem('prefill_email');
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -1,8 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
+import { AuthContext } from '../../context/AuthContext';
 
 // ── Reusable User Detail (same as ManageUsers) ────────────────────────────────
 const UserDetail = ({ userId, onBack }) => {
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
@@ -10,6 +14,7 @@ const UserDetail = ({ userId, onBack }) => {
   const [form, setForm] = useState({});
   const [addAmt, setAddAmt] = useState('');
   const [subAmt, setSubAmt] = useState('');
+  const [loginConfirm, setLoginConfirm] = useState(false);
 
   useEffect(() => { load(); }, [userId]);
 
@@ -68,6 +73,13 @@ const UserDetail = ({ userId, onBack }) => {
     flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); load();
   };
 
+  const doLoginAsUser = async () => {
+    await logout();
+    // pre-fill email on login page
+    localStorage.setItem('prefill_email', data.email);
+    navigate('/login');
+  };
+
   if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
   if (!data) return <div className="text-center text-gray-400 py-10">User not found</div>;
 
@@ -110,6 +122,12 @@ const UserDetail = ({ userId, onBack }) => {
         ) : (
           <button onClick={doUnblock} className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">✅ Unblock</button>
         )}
+        <button
+          onClick={() => setLoginConfirm(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-600 transition"
+        >
+          � Login as User
+        </button>
         <span className={`px-3 py-2 rounded-xl text-xs font-semibold ${data.has_package ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
           📦 Package: {data.has_package ? 'Active' : 'None'}
         </span>
@@ -172,6 +190,40 @@ const UserDetail = ({ userId, onBack }) => {
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+
+      {/* Login as User confirm modal */}
+      {loginConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="text-center">
+              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl">👤</span>
+              </div>
+              <h3 className="font-bold text-gray-800 text-lg">Login as User?</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                You will be logged out as admin and redirected to the login page.
+              </p>
+              <p className="text-sm font-semibold text-blue-600 mt-2 bg-blue-50 px-3 py-2 rounded-xl">
+                {data.email}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setLoginConfirm(false)}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold text-sm hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={doLoginAsUser}
+                className="flex-1 bg-blue-500 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-600 transition"
+              >
+                Yes, Logout & Go
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
