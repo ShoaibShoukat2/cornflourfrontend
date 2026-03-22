@@ -32,9 +32,12 @@ const Wallet = () => {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     setMessage('');
-    
     try {
-      await api.post('/wallet/withdraw/', formData);
+      const payload = {
+        ...formData,
+        amount: parseFloat(formData.amount) / 100,  // convert Rs to decimal storage unit
+      };
+      await api.post('/wallet/withdraw/', payload);
       setMessage('✅ Money Request Sent! We will send money in 24 hours');
       setShowWithdrawForm(false);
       setFormData({ amount: '', payment_method: 'jazzcash', payment_details: '' });
