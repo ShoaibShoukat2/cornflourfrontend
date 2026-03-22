@@ -174,7 +174,7 @@ const UserDetail = ({ userId, onBack }) => {
           onClick={() => setLoginConfirm(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-600 transition"
         >
-          � Login as User
+          👤 Login as User
         </button>
         <span className={`px-3 py-2 rounded-xl text-xs font-semibold ${data.has_package ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
           📦 Package: {data.has_package ? 'Active' : 'None'}
