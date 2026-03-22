@@ -1,7 +1,91 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
+
+// ── Login As User Modal ────────────────────────────────────────────────────────
+const LoginAsUserModal = ({ onClose, onConfirm }) => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    api.get('/admin/users/').then(r => setAllUsers(r.data)).catch(() => {});
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return; }
+    const q = query.toLowerCase();
+    setResults(allUsers.filter(u =>
+      u.email?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q)
+    ).slice(0, 6));
+  }, [query, allUsers]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-white font-black text-base">👤 Login as User</p>
+            <p className="text-blue-100 text-xs mt-0.5">Search and select a user</p>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-30 transition text-lg">×</button>
+        </div>
+
+        <div className="p-4">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setSelected(null); }}
+            placeholder="Search by email or username..."
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400"
+          />
+
+          {results.length > 0 && !selected && (
+            <div className="mt-2 border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+              {results.map(u => (
+                <button key={u.id} onClick={() => { setSelected(u); setQuery(u.email); setResults([]); }}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-blue-50 transition text-left border-b border-gray-50 last:border-0">
+                  <div>
+                    <p className="font-semibold text-gray-800 text-sm">{u.username}</p>
+                    <p className="text-xs text-gray-400">{u.email}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {u.is_active ? 'Active' : 'Blocked'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {selected && (
+            <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="font-bold text-gray-800 text-sm">{selected.username}</p>
+                <p className="text-xs text-blue-600">{selected.email}</p>
+              </div>
+              <button onClick={() => { setSelected(null); setQuery(''); }}
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+            </div>
+          )}
+
+          <button
+            onClick={() => selected && onConfirm(selected)}
+            disabled={!selected}
+            className="mt-4 w-full bg-blue-500 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Login as {selected ? selected.username : 'User'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const navItems = [
   { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
@@ -175,6 +259,7 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [packagesOpen, setPackagesOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [loginAsUserOpen, setLoginAsUserOpen] = useState(false);
 
   useEffect(() => {
     fetchPendingCount();
@@ -191,6 +276,13 @@ const AdminLayout = ({ children }) => {
 
   const handleLogout = async () => {
     await logout();
+    navigate('/login');
+  };
+
+  const handleLoginAsUser = async (user) => {
+    setLoginAsUserOpen(false);
+    await logout();
+    localStorage.setItem('prefill_email', user.email);
     navigate('/login');
   };
 
@@ -245,6 +337,15 @@ const AdminLayout = ({ children }) => {
             </span>
           )}
         </button>
+
+        {/* Login as User */}
+        <button
+          onClick={() => { setSidebarOpen(false); setLoginAsUserOpen(true); }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:bg-blue-600 hover:text-white transition-all"
+        >
+          <span className="text-base w-5 text-center">👤</span>
+          <span className="flex-1 text-left">Login as User</span>
+        </button>
       </nav>
 
       {/* User + Logout */}
@@ -286,6 +387,14 @@ const AdminLayout = ({ children }) => {
         </div>
       )}
 
+      {/* Login as User Modal */}
+      {loginAsUserOpen && (
+        <LoginAsUserModal
+          onClose={() => setLoginAsUserOpen(false)}
+          onConfirm={handleLoginAsUser}
+        />
+      )}
+
       {/* Pending Packages Panel */}
       {packagesOpen && (
         <PendingPackagesPanel
@@ -313,6 +422,16 @@ const AdminLayout = ({ children }) => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Login as User - navbar icon */}
+            <button
+              onClick={() => setLoginAsUserOpen(true)}
+              title="Login as User"
+              className="p-2 rounded-lg hover:bg-blue-50 transition group"
+            >
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
             {/* Bell button — mobile quick access */}
             <button
               onClick={() => setPackagesOpen(true)}
@@ -369,6 +488,14 @@ const AdminLayout = ({ children }) => {
             </span>
           )}
           <span style={{ fontSize: 9, marginTop: 2, fontWeight: 600 }}>Approvals</span>
+        </button>
+        <button
+          onClick={() => setLoginAsUserOpen(true)}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+          className="text-gray-500"
+        >
+          <span style={{ fontSize: 18 }}>👤</span>
+          <span style={{ fontSize: 9, marginTop: 2, fontWeight: 600 }}>As User</span>
         </button>
         <button
           onClick={handleLogout}
