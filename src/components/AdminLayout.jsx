@@ -92,6 +92,7 @@ const navItems = [
   { path: '/admin/users',     icon: '👥', label: 'Users' },
   { path: '/admin/withdrawals', icon: '💸', label: 'Withdrawals' },
   { path: '/admin/packages',  icon: '📦', label: 'Packages' },
+  { path: '/admin/tasks',     icon: '🎯', label: 'Tasks' },
 ];
 
 // ── Pending Packages Slide Panel ───────────────────────────────────────────────

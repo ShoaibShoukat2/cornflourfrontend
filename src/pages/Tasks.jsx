@@ -1,149 +1,284 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 
-const Tasks = () => {
-  const [tasks, setTasks] = useState([]);
-  const [message, setMessage] = useState('');
-  const [promoCode, setPromoCode] = useState('');
+const ICONS = {
+  youtube: '▶️', website: '🌐', ad: '📢',
+  social: '📱', app: '📲', survey: '📋', offer: '🎁',
+};
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+// ── Single Task Card ───────────────────────────────────────────────────────────
+const TaskCard = ({ task, onDone }) => {
+  const [phase, setPhase] = useState('idle'); // idle | timer | verify | done | error
+  const [timeLeft, setTimeLeft] = useState(task.time_required);
+  const [verCode, setVerCode] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+  const [earning, setEarning] = useState(null);
+  const intervalRef = useRef(null);
 
-  const fetchTasks = async () => {
+  const startTask = async () => {
     try {
-      const response = await api.get('/tasks/');
-      setTasks(response.data);
-    } catch (error) {
-      if (error.response?.data?.error === 'package_required') {
-        setMessage('🔒 Buy the Corn Plan to access tasks');
-      } else {
-        console.error(error);
-      }
+      await api.post('/tasks/start/', { task_id: task.id });
+    } catch { /* already started is fine */ }
+
+    // open link
+    if (task.url) window.open(task.url, '_blank');
+
+    // start countdown
+    setPhase('timer');
+    setTimeLeft(task.time_required);
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current);
+          // if verification code required, ask for it; else go straight to complete
+          setPhase(task.verification_code ? 'verify' : 'ready');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const completeTask = async () => {
+    try {
+      const res = await api.post('/tasks/complete/', {
+        task_id: task.id,
+        verification_input: verCode,
+      });
+      setEarning((res.data.reward * 100).toFixed(0));
+      setPhase('done');
+      onDone();
+    } catch (e) {
+      setErrMsg(e.response?.data?.error || 'Failed');
+      setPhase('error');
     }
   };
 
-  const completeTask = async (taskId, verificationInput = '') => {
+  useEffect(() => () => clearInterval(intervalRef.current), []);
+
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{ICONS[task.task_type] || '🎯'}</span>
+          <div>
+            <p className="font-bold text-white text-sm leading-tight">{task.title}</p>
+            <p className="text-orange-100 text-xs">⏱ {Math.floor(task.time_required / 60)}m {task.time_required % 60}s</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-white text-xs opacity-80">Reward</p>
+          <p className="text-white font-black text-lg">Rs {(task.reward * 100).toFixed(0)}</p>
+        </div>
+      </div>
+
+      <div className="p-5">
+        <p className="text-gray-600 text-sm mb-4">{task.description}</p>
+
+        {/* IDLE */}
+        {phase === 'idle' && (
+          <button onClick={startTask}
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
+            🚀 Start Task
+          </button>
+        )}
+
+        {/* TIMER */}
+        {phase === 'timer' && (
+          <div className="space-y-3">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mb-1">Please wait...</p>
+              <p className="text-3xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2.5">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2.5 rounded-full transition-all duration-1000"
+                style={{ width: `${progress}%` }} />
+            </div>
+            <p className="text-xs text-gray-400 text-center">Complete the task in the opened tab</p>
+          </div>
+        )}
+
+        {/* READY (no verification needed) */}
+        {phase === 'ready' && (
+          <button onClick={completeTask}
+            className="w-full bg-green-500 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-green-600 transition">
+            ✅ I'm Done — Claim Reward
+          </button>
+        )}
+
+        {/* VERIFY */}
+        {phase === 'verify' && (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 font-semibold text-center">Enter the verification code</p>
+            <input value={verCode} onChange={e => setVerCode(e.target.value)}
+              placeholder="Verification code"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 text-center font-bold tracking-widest" />
+            <button onClick={completeTask}
+              className="w-full bg-green-500 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-green-600 transition">
+              ✅ Submit & Claim
+            </button>
+          </div>
+        )}
+
+        {/* DONE */}
+        {phase === 'done' && (
+          <div className="text-center py-2">
+            <p className="text-3xl mb-1">🎉</p>
+            <p className="font-black text-green-600 text-lg">+Rs {earning} Earned!</p>
+            <p className="text-xs text-gray-400 mt-1">Added to your balance</p>
+          </div>
+        )}
+
+        {/* ERROR */}
+        {phase === 'error' && (
+          <div className="text-center py-2 space-y-2">
+            <p className="text-red-500 text-sm font-semibold">{errMsg}</p>
+            <button onClick={() => { setPhase('idle'); setErrMsg(''); }}
+              className="text-xs text-gray-400 underline">Try again</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Main Tasks Page ────────────────────────────────────────────────────────────
+const Tasks = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [locked, setLocked] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoMsg, setPromoMsg] = useState('');
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => { fetchTasks(); }, [refresh]);
+
+  const fetchTasks = async () => {
+    setLoading(true);
     try {
-      const response = await api.post('/tasks/complete/', { task_id: taskId, verification_input: verificationInput });
-      setMessage(`✅ Task Complete! You earned Rs ${(response.data.amount * 100).toFixed(0)}`);
-      fetchTasks();
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'Task failed');
-    }
+      const res = await api.get('/tasks/');
+      setTasks(res.data);
+    } catch (e) {
+      if (e.response?.data?.error === 'package_required') setLocked(true);
+    } finally { setLoading(false); }
   };
 
   const redeemPromo = async () => {
+    if (!promoCode.trim()) return;
     try {
-      const response = await api.post('/tasks/promo-code/', { code: promoCode });
-      setMessage(`✅ Promo Code Success! You earned Rs ${(response.data.amount * 100).toFixed(0)}`);
+      const res = await api.post('/tasks/promo-code/', { code: promoCode });
+      setPromoMsg(`✅ Rs ${(res.data.amount * 100).toFixed(0)} added!`);
       setPromoCode('');
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'Invalid promo code');
+    } catch (e) {
+      setPromoMsg(e.response?.data?.error || 'Invalid code');
     }
+    setTimeout(() => setPromoMsg(''), 3000);
   };
 
+  const available = tasks.filter(t => !t.is_completed);
+  const completed = tasks.filter(t => t.is_completed);
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (locked) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-sm w-full">
+        <p className="text-5xl mb-4">🔒</p>
+        <h2 className="text-xl font-black text-gray-800 mb-2">Tasks Locked</h2>
+        <p className="text-gray-500 text-sm">Buy the Corn Plan to unlock all tasks and start earning.</p>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Simple Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">🎯 TASKS</h1>
-          <p className="text-lg text-gray-600">Complete Tasks • Earn Money</p>
+    <div className="min-h-screen bg-gray-50 py-6 px-4">
+      <div className="max-w-2xl mx-auto space-y-5">
+
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-2xl font-black text-gray-800">🎯 Tasks</h1>
+          <p className="text-gray-500 text-sm mt-1">Complete tasks and earn money instantly</p>
         </div>
 
-        {/* Success Message */}
-        {message && (
-          <div className="bg-green-100 border-2 border-green-400 text-green-800 px-6 py-4 rounded-2xl mb-6 text-center text-lg font-semibold shadow-lg">
-            {message}
+        {/* Stats bar */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
+            <p className="text-xl font-black text-orange-500">{available.length}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Available</p>
           </div>
-        )}
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
+            <p className="text-xl font-black text-green-500">{completed.length}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Completed</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
+            <p className="text-xl font-black text-blue-500">
+              Rs {tasks.filter(t => t.is_completed).reduce((s, t) => s + t.reward * 100, 0).toFixed(0)}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">Earned</p>
+          </div>
+        </div>
 
-        {/* Promo Code Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">🎫 Enter Promo Code</h2>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Type promo code here"
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg"
-            />
-            <button
-              onClick={redeemPromo}
-              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-bold hover:from-orange-600 hover:to-red-600 transition shadow-lg"
-            >
-              GET MONEY
+        {/* Promo Code */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">🎫 Promo Code</p>
+          <div className="flex gap-2">
+            <input value={promoCode} onChange={e => setPromoCode(e.target.value)}
+              placeholder="Enter promo code"
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+            <button onClick={redeemPromo}
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
+              Redeem
             </button>
           </div>
+          {promoMsg && (
+            <p className={`text-xs mt-2 font-semibold ${promoMsg.includes('✅') ? 'text-green-600' : 'text-red-500'}`}>
+              {promoMsg}
+            </p>
+          )}
         </div>
 
-        {/* Tasks Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tasks.map((task) => (
-            <div key={task.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              {/* Task Header */}
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-white text-center">
-                <div className="text-4xl mb-2">💰</div>
-                <h3 className="text-xl font-bold mb-1">{task.title}</h3>
-                <p className="text-2xl font-black">Rs {(task.reward * 100).toFixed(0)}</p>
-              </div>
-              
-              {/* Task Content */}
-              <div className="p-6">
-                <p className="text-gray-700 text-lg mb-4 text-center">{task.description}</p>
-                
-                <div className="text-center mb-4">
-                  <span className="bg-gray-100 px-4 py-2 rounded-full text-gray-600 font-semibold">
-                    ⏱️ {Math.floor(task.time_required / 60)} minutes
-                  </span>
-                </div>
-                
-                {/* Task Link */}
-                {task.url && (
-                  <a
-                    href={task.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full bg-blue-100 text-blue-600 py-3 rounded-xl text-center mb-4 hover:bg-blue-200 transition font-semibold text-lg"
-                  >
-                    🔗 OPEN TASK
-                  </a>
-                )}
-                
-                {/* Complete Button */}
-                {task.is_completed ? (
-                  <button
-                    disabled
-                    className="w-full bg-gray-300 text-gray-600 py-4 rounded-xl font-bold text-lg cursor-not-allowed"
-                  >
-                    ✅ COMPLETED
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      const verification = prompt('Enter verification code (if any):');
-                      completeTask(task.id, verification || '');
-                    }}
-                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition shadow-lg"
-                  >
-                    ✅ COMPLETE TASK
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* No Tasks Message */}
-        {tasks.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">😔</div>
-            <h3 className="text-2xl font-bold text-gray-600 mb-2">No Tasks Available</h3>
-            <p className="text-lg text-gray-500">Check back later for new tasks!</p>
+        {/* Available Tasks */}
+        {available.length === 0 ? (
+          <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
+            <p className="text-4xl mb-3">🎉</p>
+            <p className="font-bold text-gray-700">All tasks completed!</p>
+            <p className="text-gray-400 text-sm mt-1">Check back later for new tasks</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {available.map(task => (
+              <TaskCard key={task.id} task={task} onDone={() => setRefresh(r => r + 1)} />
+            ))}
           </div>
         )}
+
+        {/* Completed Tasks */}
+        {completed.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-3">✅ Completed Today</p>
+            <div className="space-y-2">
+              {completed.map(task => (
+                <div key={task.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span>{ICONS[task.task_type] || '🎯'}</span>
+                    <p className="text-sm text-gray-600">{task.title}</p>
+                  </div>
+                  <span className="text-xs font-bold text-green-600">+Rs {(task.reward * 100).toFixed(0)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
