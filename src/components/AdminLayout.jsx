@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
+import logo from '../assets/logo.jpeg';
 
 // ── Login As User Modal ────────────────────────────────────────────────────────
 const LoginAsUserModal = ({ onClose, onConfirm }) => {
@@ -294,9 +295,7 @@ const AdminLayout = ({ children }) => {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-700 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
-            🌽
-          </div>
+          <img src={logo} alt="Corn Flour" className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
           <div>
             <p className="font-black text-white text-sm leading-none">Corn Flour</p>
             <p className="text-gray-400 text-xs mt-0.5">Admin Panel</p>
