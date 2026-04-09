@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import logo from '../assets/logo.jpeg';
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -99,9 +100,7 @@ const Register = () => {
       <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-3xl">💰</span>
-          </div>
+          <img src={logo} alt="Corn Flour" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover shadow-lg" />
           <h1 className="text-2xl font-bold text-gray-800">Corn Flour</h1>
         </div>
 
