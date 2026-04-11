@@ -141,6 +141,8 @@ const Tasks = () => {
   const [refresh, setRefresh] = useState(0);
   const [userLevel, setUserLevel] = useState(0);
   const [showLevelChart, setShowLevelChart] = useState(false);
+  const [dailyLimit, setDailyLimit] = useState(0);
+  const [completedToday, setCompletedToday] = useState(0);
 
   useEffect(() => {
     fetchTasks();
@@ -151,7 +153,15 @@ const Tasks = () => {
     setLoading(true);
     try {
       const res = await api.get('/tasks/');
-      setTasks(res.data);
+      if (res.data.tasks) {
+        // New format with limits
+        setTasks(res.data.tasks);
+        setDailyLimit(res.data.daily_limit || 0);
+        setCompletedToday(res.data.completed_today || 0);
+      } else {
+        // Old format fallback
+        setTasks(res.data);
+      }
     } catch (e) {
       if (e.response?.data?.error === 'package_required') setLocked(true);
     } finally { setLoading(false); }
@@ -257,17 +267,21 @@ const Tasks = () => {
         )}
 
         {/* Stats bar */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
             <p className="text-xl font-black text-orange-500">{available.length}</p>
             <p className="text-xs text-gray-400 mt-0.5">Available</p>
           </div>
           <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-green-500">{completed.length}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Completed</p>
+            <p className="text-xl font-black text-green-500">{completedToday}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Done Today</p>
           </div>
           <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-blue-500">Rs {(completed.length * currentEarning).toFixed(0)}</p>
+            <p className="text-xl font-black text-blue-500">{dailyLimit}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Daily Limit</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
+            <p className="text-xl font-black text-purple-500">Rs {(completedToday * currentEarning).toFixed(0)}</p>
             <p className="text-xs text-gray-400 mt-0.5">Earned</p>
           </div>
         </div>
