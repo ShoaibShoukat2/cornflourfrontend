@@ -6,7 +6,7 @@ const PACKAGES = [
   {
     key: 'normal',
     name: 'Normal',
-    price: 800,
+    price: 700,
     color: 'from-gray-500 to-gray-600',
     badge: null,
     features: ['Daily Tasks', 'Referral Bonus', 'Withdraw via JazzCash / EasyPaisa'],
@@ -14,7 +14,7 @@ const PACKAGES = [
   {
     key: 'super',
     name: 'SUPER',
-    price: 1800,
+    price: 1400,
     color: 'from-orange-500 to-red-500',
     badge: '⭐ POPULAR',
     features: ['Daily Tasks', 'Referral Bonus Rs 50/friend', 'Withdraw via JazzCash / EasyPaisa', 'Daily Bonus'],
@@ -22,7 +22,7 @@ const PACKAGES = [
   {
     key: 'premium',
     name: 'Premium',
-    price: 3800,
+    price: 3200,
     color: 'from-purple-500 to-purple-700',
     badge: '💎 PREMIUM',
     features: ['Unlimited Tasks Daily', 'Higher Referral Bonus', 'Priority Withdrawals', 'Daily Bonus', 'Priority Support'],
@@ -30,7 +30,7 @@ const PACKAGES = [
   {
     key: 'high_octane',
     name: 'High Octane',
-    price: 6800,
+    price: 4500,
     color: 'from-yellow-500 to-orange-500',
     badge: '🚀 VIP',
     features: ['Unlimited Tasks Daily', 'Maximum Referral Bonus', 'Instant Withdrawals', 'Daily Bonus', 'VIP Support', 'Earn up to Rs 30,000/month'],
