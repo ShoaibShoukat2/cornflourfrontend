@@ -21,7 +21,7 @@ const LEVEL_EARNINGS = [
 ];
 
 // ── Single Task Card ───────────────────────────────────────────────────────────
-const TaskCard = ({ task, onDone }) => {
+const TaskCard = ({ task, index, onDone }) => {
   const [phase, setPhase] = useState('idle');
   const [timeLeft, setTimeLeft] = useState(task.time_required);
   const [verCode, setVerCode] = useState('');
@@ -65,70 +65,77 @@ const TaskCard = ({ task, onDone }) => {
   const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4">
-        {/* Logo centered */}
-        <div className="flex justify-center mb-3">
-          <img src={tasklogo} alt="logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-white border-opacity-50" />
+    <div className="flex flex-col items-center">
+      {/* Big Logo — clickable to start */}
+      <div className="relative cursor-pointer" onClick={phase === 'idle' ? startTask : undefined}>
+        <img
+          src={tasklogo}
+          alt={`Task ${index + 1}`}
+          className="w-36 h-36 rounded-3xl object-cover shadow-xl border-4 border-white"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+        />
+        {/* Reward badge */}
+        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-black px-2 py-1 rounded-full shadow">
+          Rs {(task.reward * 100).toFixed(0)}
         </div>
-        {/* Title + Reward */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-bold text-white text-sm leading-tight">{task.title}</p>
-            <p className="text-orange-100 text-xs">⏱ {Math.floor(task.time_required / 60)}m {task.time_required % 60}s</p>
-          </div>
-          <div className="text-right">
-            <p className="text-white text-xs opacity-80">Reward</p>
-            <p className="text-white font-black text-lg">Rs {(task.reward * 100).toFixed(0)}</p>
-          </div>
+        {/* Task number */}
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-3 py-0.5 rounded-full shadow">
+          Task {index + 1}
         </div>
       </div>
-      <div className="p-5">
-        <p className="text-gray-600 text-sm mb-4">{task.description}</p>
+
+      {/* Action area */}
+      <div className="mt-5 w-full max-w-xs">
         {phase === 'idle' && (
-          <button onClick={startTask} className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
+          <button onClick={startTask}
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:opacity-90 transition">
             🚀 Start Task
           </button>
         )}
         {phase === 'timer' && (
-          <div className="space-y-3">
-            <div className="text-center">
-              <p className="text-xs text-gray-500 mb-1">Please wait...</p>
-              <p className="text-3xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
+          <div className="space-y-2 text-center">
+            <p className="text-2xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-1000"
+                style={{ width: `${progress}%` }} />
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2.5">
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 text-center">Complete the task in the opened tab</p>
+            <p className="text-xs text-gray-400">Watching... please wait</p>
           </div>
         )}
         {phase === 'ready' && (
-          <button onClick={completeTask} className="w-full bg-green-500 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-green-600 transition">
-            ✅ I'm Done — Claim Reward
+          <button onClick={completeTask}
+            className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:bg-green-600 transition">
+            ✅ Done — Claim Rs {(task.reward * 100).toFixed(0)}
           </button>
         )}
         {phase === 'verify' && (
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600 font-semibold text-center">Enter the verification code</p>
-            <input value={verCode} onChange={e => setVerCode(e.target.value)} placeholder="Verification code"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 text-center font-bold tracking-widest" />
-            <button onClick={completeTask} className="w-full bg-green-500 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-green-600 transition">
+          <div className="space-y-2">
+            <input value={verCode} onChange={e => setVerCode(e.target.value)}
+              placeholder="Enter verification code"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 text-center font-bold" />
+            <button onClick={completeTask}
+              className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold text-sm hover:bg-green-600 transition">
               ✅ Submit & Claim
             </button>
           </div>
         )}
         {phase === 'done' && (
-          <div className="text-center py-2">
-            <p className="text-3xl mb-1">🎉</p>
-            <p className="font-black text-green-600 text-lg">+Rs {earning} Earned!</p>
-            <p className="text-xs text-gray-400 mt-1">Added to your balance</p>
+          <div className="text-center">
+            <p className="text-2xl mb-1">🎉</p>
+            <p className="font-black text-green-600">+Rs {earning} Earned!</p>
           </div>
         )}
         {phase === 'error' && (
-          <div className="text-center py-2 space-y-2">
+          <div className="text-center space-y-1">
             <p className="text-red-500 text-sm font-semibold">{errMsg}</p>
-            <button onClick={() => { setPhase('idle'); setErrMsg(''); }} className="text-xs text-gray-400 underline">Try again</button>
+            <button onClick={() => { setPhase('idle'); setErrMsg(''); }}
+              className="text-xs text-gray-400 underline">Try again</button>
           </div>
+        )}
+      </div>
+    </div>
+  );
+};
         )}
       </div>
     </div>
@@ -314,9 +321,9 @@ const Tasks = () => {
             <p className="text-gray-400 text-sm mt-1">Check back later for new tasks</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {available.map(task => (
-              <TaskCard key={task.id} task={task} onDone={() => setRefresh(r => r + 1)} />
+          <div className="flex flex-col items-center space-y-8">
+            {available.map((task, index) => (
+              <TaskCard key={task.id} task={task} index={index} onDone={() => setRefresh(r => r + 1)} />
             ))}
           </div>
         )}
