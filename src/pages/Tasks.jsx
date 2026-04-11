@@ -66,17 +66,21 @@ const TaskCard = ({ task, onDone }) => {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src={tasklogo} alt="logo" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4">
+        {/* Logo centered */}
+        <div className="flex justify-center mb-3">
+          <img src={tasklogo} alt="logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-white border-opacity-50" />
+        </div>
+        {/* Title + Reward */}
+        <div className="flex items-center justify-between">
           <div>
             <p className="font-bold text-white text-sm leading-tight">{task.title}</p>
             <p className="text-orange-100 text-xs">⏱ {Math.floor(task.time_required / 60)}m {task.time_required % 60}s</p>
           </div>
-        </div>
-        <div className="text-right">
-          <p className="text-white text-xs opacity-80">Reward</p>
-          <p className="text-white font-black text-lg">Rs {(task.reward * 100).toFixed(0)}</p>
+          <div className="text-right">
+            <p className="text-white text-xs opacity-80">Reward</p>
+            <p className="text-white font-black text-lg">Rs {(task.reward * 100).toFixed(0)}</p>
+          </div>
         </div>
       </div>
       <div className="p-5">
