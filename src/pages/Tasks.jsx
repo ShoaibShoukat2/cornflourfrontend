@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
+import tasklogo from '../assets/tasklogo.jpeg';
 
 const ICONS = {
   youtube: '▶️', website: '🌐', ad: '📢',
@@ -205,6 +206,7 @@ const Tasks = () => {
 
         {/* Header */}
         <div className="text-center">
+          <img src={tasklogo} alt="Tasks" className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover shadow-md" />
           <h1 className="text-2xl font-black text-gray-800">🎯 Tasks</h1>
           <p className="text-gray-500 text-sm mt-1">Complete tasks and earn money instantly</p>
         </div>
