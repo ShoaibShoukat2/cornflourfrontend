@@ -68,7 +68,7 @@ const TaskCard = ({ task, onDone }) => {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="bg-gradient-to-r from-orange-500 to-red-500 px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{ICONS[task.task_type] || '🎯'}</span>
+          <img src={tasklogo} alt="logo" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
           <div>
             <p className="font-bold text-white text-sm leading-tight">{task.title}</p>
             <p className="text-orange-100 text-xs">⏱ {Math.floor(task.time_required / 60)}m {task.time_required % 60}s</p>
