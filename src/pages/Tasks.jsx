@@ -304,7 +304,7 @@ const Tasks = () => {
             <p className="text-gray-400 text-sm mt-1">Check back later for new tasks</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-6 justify-items-center">
+          <div className="flex flex-col items-center space-y-6">
             {available.map((task, index) => (
               <TaskCard key={task.id} task={task} index={index} onDone={() => setRefresh(r => r + 1)} />
             ))}
