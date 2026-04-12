@@ -124,11 +124,6 @@ const TaskCard = ({ task, index, onDone }) => {
     </div>
   );
 };
-        )}
-      </div>
-    </div>
-  );
-};
 
 // ── Main Tasks Page ────────────────────────────────────────────────────────────
 const Tasks = () => {
