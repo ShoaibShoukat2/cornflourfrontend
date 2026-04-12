@@ -72,12 +72,8 @@ const TaskCard = ({ task, index, onDone }) => {
         <img
           src={tasklogo}
           alt={`Task ${index + 1}`}
-          className={`w-44 h-44 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
+          className={`w-56 h-56 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
         />
-        {/* Rs badge top-right */}
-        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-black px-2 py-0.5 rounded-full shadow">
-          Rs {(task.reward * 100).toFixed(0)}
-        </span>
         {/* Done overlay */}
         {phase === 'done' && (
           <div className="absolute inset-0 bg-green-500 bg-opacity-80 rounded-3xl flex items-center justify-center">
@@ -278,22 +274,6 @@ const Tasks = () => {
             <p className="text-xl font-black text-purple-500">Rs {(completedToday * currentEarning).toFixed(0)}</p>
             <p className="text-xs text-gray-400 mt-0.5">Earned</p>
           </div>
-        </div>
-
-        {/* Promo Code */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">🎫 Promo Code</p>
-          <div className="flex gap-2">
-            <input value={promoCode} onChange={e => setPromoCode(e.target.value)} placeholder="Enter promo code"
-              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
-            <button onClick={redeemPromo}
-              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
-              Redeem
-            </button>
-          </div>
-          {promoMsg && (
-            <p className={`text-xs mt-2 font-semibold ${promoMsg.includes('✅') ? 'text-green-600' : 'text-red-500'}`}>{promoMsg}</p>
-          )}
         </div>
 
         {/* Available Tasks */}
