@@ -199,55 +199,6 @@ const Tasks = () => {
           <p className="text-gray-500 text-sm mt-1">Complete tasks and earn money instantly</p>
         </div>
 
-        {/* Level + Earning Banner */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs opacity-80">Your Level</p>
-              <p className="text-3xl font-black">Level {userLevel}</p>
-              <p className="text-sm opacity-90 mt-0.5">Earning <span className="font-black">Rs {currentEarning}</span> per task</p>
-            </div>
-            <button onClick={() => setShowLevelChart(!showLevelChart)}
-              className="bg-white bg-opacity-20 hover:bg-opacity-30 transition px-4 py-2 rounded-xl text-sm font-bold">
-              {showLevelChart ? 'Hide' : '📊 All Levels'}
-            </button>
-          </div>
-
-          {/* Level progress bar */}
-          <div className="mt-3">
-            <div className="flex justify-between text-xs opacity-70 mb-1">
-              <span>Level {userLevel}</span>
-              <span>Level {Math.min(userLevel + 1, 9)}</span>
-            </div>
-            <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
-              <div className="bg-white h-2 rounded-full" style={{ width: `${(userLevel / 9) * 100}%` }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Level Chart */}
-        {showLevelChart && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-3">❤️ Daily Task Earnings by Level</p>
-            <div className="space-y-2">
-              {LEVEL_EARNINGS.map(({ level, earning }) => (
-                <div key={level} className={`flex items-center justify-between px-3 py-2 rounded-xl ${level === Math.min(userLevel, 9) ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50'}`}>
-                  <div className="flex items-center gap-2">
-                    {level === Math.min(userLevel, 9) && <span className="text-orange-500 text-xs font-black">▶</span>}
-                    <span className={`text-sm font-semibold ${level === Math.min(userLevel, 9) ? 'text-orange-600' : 'text-gray-600'}`}>
-                      Level {level}
-                    </span>
-                    {level === Math.min(userLevel, 9) && <span className="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full font-bold">YOU</span>}
-                  </div>
-                  <span className={`font-black text-sm ${level === Math.min(userLevel, 9) ? 'text-orange-600' : 'text-gray-700'}`}>
-                    Rs {earning} / task
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-3">
           <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
