@@ -19,6 +19,7 @@ import ManageWithdrawals from './pages/admin/ManageWithdrawals';
 import ManagePackages from './pages/admin/ManagePackages';
 import ManageTasks from './pages/admin/ManageTasks';
 import Package from './pages/Package';
+import Contact from './pages/Contact';
 
 const AppContent = () => {
   const location = useLocation();
@@ -50,6 +51,7 @@ const AppContent = () => {
         <Route path="/referrals" element={<PrivateRoute><Referrals /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </div>
   );
