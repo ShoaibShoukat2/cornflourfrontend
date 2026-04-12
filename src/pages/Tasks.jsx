@@ -65,74 +65,62 @@ const TaskCard = ({ task, index, onDone }) => {
   const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Big Logo — clickable to start */}
-      <div className="relative cursor-pointer" onClick={phase === 'idle' ? startTask : undefined}>
+    <div className="flex flex-col items-center gap-2">
+      {/* Just the logo — tap to start */}
+      <div className="relative" onClick={phase === 'idle' ? startTask : undefined}
+        style={{ cursor: phase === 'idle' ? 'pointer' : 'default' }}>
         <img
           src={tasklogo}
           alt={`Task ${index + 1}`}
-          className="w-36 h-36 rounded-3xl object-cover shadow-xl border-4 border-white"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+          className={`w-28 h-28 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
         />
-        {/* Reward badge */}
-        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-black px-2 py-1 rounded-full shadow">
+        {/* Rs badge top-right */}
+        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-black px-2 py-0.5 rounded-full shadow">
           Rs {(task.reward * 100).toFixed(0)}
-        </div>
-        {/* Task number */}
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-3 py-0.5 rounded-full shadow">
-          Task {index + 1}
-        </div>
+        </span>
+        {/* Done overlay */}
+        {phase === 'done' && (
+          <div className="absolute inset-0 bg-green-500 bg-opacity-80 rounded-3xl flex items-center justify-center">
+            <span className="text-white text-3xl">✅</span>
+          </div>
+        )}
       </div>
 
-      {/* Action area */}
-      <div className="mt-5 w-full max-w-xs">
-        {phase === 'idle' && (
-          <button onClick={startTask}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:opacity-90 transition">
-            🚀 Start Task
-          </button>
-        )}
-        {phase === 'timer' && (
-          <div className="space-y-2 text-center">
-            <p className="text-2xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-1000"
-                style={{ width: `${progress}%` }} />
-            </div>
-            <p className="text-xs text-gray-400">Watching... please wait</p>
+      {/* Timer / Claim — only shows when active */}
+      {phase === 'timer' && (
+        <div className="text-center">
+          <p className="text-xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
+          <div className="w-28 bg-gray-200 rounded-full h-1.5 mt-1">
+            <div className="bg-orange-500 h-1.5 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }} />
           </div>
-        )}
-        {phase === 'ready' && (
+        </div>
+      )}
+      {phase === 'ready' && (
+        <button onClick={completeTask}
+          className="bg-green-500 text-white px-5 py-2 rounded-2xl font-bold text-sm shadow hover:bg-green-600 transition">
+          ✅ Claim Rs {(task.reward * 100).toFixed(0)}
+        </button>
+      )}
+      {phase === 'verify' && (
+        <div className="flex flex-col items-center gap-2 w-40">
+          <input value={verCode} onChange={e => setVerCode(e.target.value)}
+            placeholder="Verify code"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm text-center focus:outline-none focus:border-orange-400" />
           <button onClick={completeTask}
-            className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:bg-green-600 transition">
-            ✅ Done — Claim Rs {(task.reward * 100).toFixed(0)}
+            className="w-full bg-green-500 text-white py-2 rounded-xl font-bold text-sm">
+            ✅ Submit
           </button>
-        )}
-        {phase === 'verify' && (
-          <div className="space-y-2">
-            <input value={verCode} onChange={e => setVerCode(e.target.value)}
-              placeholder="Enter verification code"
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 text-center font-bold" />
-            <button onClick={completeTask}
-              className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold text-sm hover:bg-green-600 transition">
-              ✅ Submit & Claim
-            </button>
-          </div>
-        )}
-        {phase === 'done' && (
-          <div className="text-center">
-            <p className="text-2xl mb-1">🎉</p>
-            <p className="font-black text-green-600">+Rs {earning} Earned!</p>
-          </div>
-        )}
-        {phase === 'error' && (
-          <div className="text-center space-y-1">
-            <p className="text-red-500 text-sm font-semibold">{errMsg}</p>
-            <button onClick={() => { setPhase('idle'); setErrMsg(''); }}
-              className="text-xs text-gray-400 underline">Try again</button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      {phase === 'done' && (
+        <p className="font-black text-green-600 text-sm">+Rs {earning} Earned!</p>
+      )}
+      {phase === 'error' && (
+        <div className="text-center">
+          <p className="text-red-500 text-xs">{errMsg}</p>
+          <button onClick={() => { setPhase('idle'); setErrMsg(''); }} className="text-xs text-gray-400 underline">Retry</button>
+        </div>
+      )}
     </div>
   );
 };
@@ -321,7 +309,7 @@ const Tasks = () => {
             <p className="text-gray-400 text-sm mt-1">Check back later for new tasks</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center space-y-8">
+          <div className="grid grid-cols-3 gap-6 justify-items-center">
             {available.map((task, index) => (
               <TaskCard key={task.id} task={task} index={index} onDone={() => setRefresh(r => r + 1)} />
             ))}
