@@ -83,14 +83,6 @@ const TaskCard = ({ task, index, onDone }) => {
       </div>
 
       {/* Timer / Claim — only shows when active */}
-      {phase === 'timer' && (
-        <div className="text-center">
-          <p className="text-xl font-black text-orange-500">{mins}:{secs.toString().padStart(2, '0')}</p>
-          <div className="w-28 bg-gray-200 rounded-full h-1.5 mt-1">
-            <div className="bg-orange-500 h-1.5 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-      )}
       {phase === 'ready' && (
         <button onClick={completeTask}
           className="bg-green-500 text-white px-5 py-2 rounded-2xl font-bold text-sm shadow hover:bg-green-600 transition">
