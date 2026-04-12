@@ -72,7 +72,7 @@ const TaskCard = ({ task, index, onDone }) => {
         <img
           src={tasklogo}
           alt={`Task ${index + 1}`}
-          className={`w-28 h-28 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
+          className={`w-44 h-44 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
         />
         {/* Rs badge top-right */}
         <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-black px-2 py-0.5 rounded-full shadow">
