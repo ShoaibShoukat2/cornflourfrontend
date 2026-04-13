@@ -70,7 +70,7 @@ const Dashboard = () => {
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 pt-8 pb-16">
         <div className="max-w-lg mx-auto text-center">
           <div className="w-14 h-14 bg-white rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg">
-            <span className="text-2xl">🌽</span>
+            <img src={tasklogo} alt="Corn Flour" className="w-14 h-14 rounded-full object-cover" />
           </div>
           <h1 className="text-xl font-bold">Corn Flour</h1>
           <p className="text-orange-100 text-sm mt-1">Hello, {user?.username}!</p>
