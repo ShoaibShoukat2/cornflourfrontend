@@ -209,18 +209,16 @@ const Register = () => {
             </div>
           </div>
           
-          {refCode && (
-            <div>
-              <label className="block text-gray-600 text-sm font-medium mb-2">Referral Code</label>
-              <input
-                type="text"
-                value={formData.referral_code}
-                onChange={(e) => setFormData({ ...formData, referral_code: e.target.value })}
-                placeholder="Referral code (optional)"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-gray-600 text-sm font-medium mb-2">Referral Code <span className="text-gray-400 font-normal">(optional)</span></label>
+            <input
+              type="text"
+              value={formData.referral_code}
+              onChange={(e) => setFormData({ ...formData, referral_code: e.target.value })}
+              placeholder="Enter referral code"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+            />
+          </div>
           
           <button
             type="submit"
