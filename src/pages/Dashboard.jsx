@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import tasklogo from '../assets/tasklogo.jpeg';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
