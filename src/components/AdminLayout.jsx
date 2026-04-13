@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
-import logo from '../assets/logo.jpeg';
+import logo from '../assets/tasklogo.jpeg';
 
 // ── Login As User Modal ────────────────────────────────────────────────────────
 const LoginAsUserModal = ({ onClose, onConfirm }) => {

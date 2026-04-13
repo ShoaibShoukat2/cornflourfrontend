@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import logo from '../assets/logo.jpeg';
+import logo from '../assets/tasklogo.jpeg';
 
 const PACKAGES = [
   {

@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import logo from '../assets/logo.jpeg';
+import logo from '../assets/tasklogo.jpeg';
 
 const Register = () => {
   const [searchParams] = useSearchParams();

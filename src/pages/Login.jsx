@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import logo from '../assets/logo.jpeg';
+import logo from '../assets/tasklogo.jpeg';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
