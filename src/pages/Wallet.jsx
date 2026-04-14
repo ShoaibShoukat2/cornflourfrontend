@@ -95,7 +95,7 @@ const Wallet = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">💸 GET YOUR MONEY</h2>
-            <p className="text-gray-600">Minimum: Rs 500 • Maximum: Rs 50,000</p>
+            <p className="text-gray-600">First Withdrawal: Rs 50 • After that: Rs 500 minimum</p>
           </div>
 
           {!showWithdrawForm ? (
@@ -113,10 +113,10 @@ const Wallet = () => {
                 <input
                   type="number"
                   step="1"
-                  min="500"
+                  min="50"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  placeholder="Enter amount (Rs 500 minimum)"
+                  placeholder="Enter amount (Rs 50 for first, Rs 500 after)"
                   className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg text-center"
                   required
                 />
