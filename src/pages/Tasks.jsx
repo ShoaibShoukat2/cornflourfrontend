@@ -51,7 +51,7 @@ const TaskCard = ({ task, index, onDone }) => {
       const res = await api.post('/tasks/complete/', { task_id: task.id, verification_input: verCode });
       setEarning((res.data.reward * 100).toFixed(0));
       setPhase('done');
-      onDone();
+      onDone(res.data.new_balance);
     } catch (e) {
       setErrMsg(e.response?.data?.error || 'Failed');
       setPhase('error');
@@ -125,11 +125,20 @@ const Tasks = () => {
   const [showLevelChart, setShowLevelChart] = useState(false);
   const [dailyLimit, setDailyLimit] = useState(0);
   const [completedToday, setCompletedToday] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(null);
 
   useEffect(() => {
     fetchTasks();
     fetchProfile();
+    fetchWallet();
   }, [refresh]);
+
+  const fetchWallet = async () => {
+    try {
+      const res = await api.get('/wallet/');
+      setWalletBalance(res.data.main_balance);
+    } catch {}
+  };
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -197,6 +206,12 @@ const Tasks = () => {
           <img src={tasklogo} alt="Tasks" className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover shadow-md" />
           <h1 className="text-2xl font-black text-gray-800">🎯 Tasks</h1>
           <p className="text-gray-500 text-sm mt-1">Complete tasks and earn money instantly</p>
+          {walletBalance !== null && (
+            <div className="mt-3 inline-block bg-green-50 border border-green-200 rounded-2xl px-5 py-2">
+              <p className="text-green-700 font-black text-lg">Rs {(walletBalance * 100).toFixed(0)}</p>
+              <p className="text-green-500 text-xs">Current Balance</p>
+            </div>
+          )}
         </div>
 
         {/* Stats bar */}
@@ -229,7 +244,15 @@ const Tasks = () => {
         ) : (
           <div className="flex flex-col items-center space-y-6">
             {available.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} onDone={() => setRefresh(r => r + 1)} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                index={index}
+                onDone={(newBalance) => {
+                  if (newBalance !== undefined) setWalletBalance(newBalance);
+                  setRefresh(r => r + 1);
+                }}
+              />
             ))}
           </div>
         )}
