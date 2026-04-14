@@ -30,7 +30,7 @@ const TaskCard = ({ task, index, onDone }) => {
   const intervalRef = useRef(null);
 
   const startTask = async () => {
-    try { await api.post('/tasks/start/', { task_id: task.id }); } catch {}
+    // Immediately start timer and open URL — don't wait for API
     if (task.url) window.open(task.url, '_blank');
     setPhase('timer');
     setTimeLeft(task.time_required);
@@ -44,6 +44,8 @@ const TaskCard = ({ task, index, onDone }) => {
         return prev - 1;
       });
     }, 1000);
+    // Fire API in background — don't block UI
+    api.post('/tasks/start/', { task_id: task.id }).catch(() => {});
   };
 
   const completeTask = async () => {
@@ -74,10 +76,28 @@ const TaskCard = ({ task, index, onDone }) => {
           alt={`Task ${index + 1}`}
           className={`w-56 h-56 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
         />
+        {/* Timer overlay */}
+        {phase === 'timer' && (
+          <div className="absolute inset-0 bg-black bg-opacity-60 rounded-3xl flex flex-col items-center justify-center">
+            <span className="text-white text-4xl font-black">{mins > 0 ? `${mins}:${secs.toString().padStart(2,'0')}` : secs}</span>
+            <span className="text-orange-300 text-xs mt-1 font-semibold">Wait...</span>
+            <div className="w-32 h-1.5 bg-gray-600 rounded-full mt-3 overflow-hidden">
+              <div className="h-full bg-orange-400 rounded-full transition-all" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        )}
         {/* Done overlay */}
         {phase === 'done' && (
           <div className="absolute inset-0 bg-green-500 bg-opacity-80 rounded-3xl flex items-center justify-center">
             <span className="text-white text-3xl">✅</span>
+          </div>
+        )}
+        {/* Idle tap hint */}
+        {phase === 'idle' && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center">
+            <span className="bg-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
+              👆 Tap to Start
+            </span>
           </div>
         )}
       </div>
