@@ -64,7 +64,7 @@ const Referrals = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">🔗 YOUR LINK</h2>
           <p className="text-center text-gray-600 mb-6 text-lg">
-            Share this link • Get Rs 50 for each friend who joins!
+            Share this link • Get 25% Refer Commission when they complete Registration!
           </p>
           
           {/* Link Display */}
