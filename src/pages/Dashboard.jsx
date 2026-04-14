@@ -172,7 +172,7 @@ const Dashboard = () => {
             className="bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col items-center justify-center py-6 hover:shadow-md transition">
             <span className="text-3xl mb-2">👥</span>
             <span className="font-bold text-gray-700 text-sm">Invite Friends</span>
-            <span className="text-xs text-gray-400 mt-1">Get Rs 50 each</span>
+            <span className="text-xs text-gray-400 mt-1">Earn More</span>
           </Link>
 
           {/* Daily Bonus — always available */}
