@@ -21,7 +21,7 @@ const LEVEL_EARNINGS = [
 ];
 
 // ── Single Task Card ───────────────────────────────────────────────────────────
-const TaskCard = ({ task, index, onDone }) => {
+const TaskCard = ({ task, index, onDone, currentEarning }) => {
   const [phase, setPhase] = useState('idle');
   const [timeLeft, setTimeLeft] = useState(task.time_required);
   const [verCode, setVerCode] = useState('');
@@ -106,7 +106,7 @@ const TaskCard = ({ task, index, onDone }) => {
       {phase === 'ready' && (
         <button onClick={completeTask}
           className="bg-green-500 text-white px-5 py-2 rounded-2xl font-bold text-sm shadow hover:bg-green-600 transition">
-          ✅ Claim Rs {(task.reward * 100).toFixed(0)}
+          ✅ Claim Rs {currentEarning}
         </button>
       )}
       {phase === 'verify' && (
@@ -268,6 +268,7 @@ const Tasks = () => {
                 key={task.id}
                 task={task}
                 index={index}
+                currentEarning={currentEarning}
                 onDone={(newBalance) => {
                   if (newBalance !== undefined) setWalletBalance(newBalance);
                   setRefresh(r => r + 1);
