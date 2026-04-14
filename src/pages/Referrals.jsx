@@ -108,7 +108,7 @@ const Referrals = () => {
                 <span className="text-3xl">👤</span>
               </div>
               <h3 className="text-lg font-bold mb-2">2. FRIEND JOINS</h3>
-              <p className="text-gray-600">When they register, you get Rs 50 bonus!</p>
+              <p className="text-gray-600">When they register, you will get 25%!</p>
             </div>
             
             <div className="text-center">
@@ -116,7 +116,7 @@ const Referrals = () => {
                 <span className="text-3xl">💰</span>
               </div>
               <h3 className="text-lg font-bold mb-2">3. EARN MORE</h3>
-              <p className="text-gray-600">Get 10% of whatever they earn forever!</p>
+              <p className="text-gray-600">Get 1% to 2% of whatever they earn forever!</p>
             </div>
           </div>
         </div>
