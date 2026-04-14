@@ -116,7 +116,7 @@ const Referrals = () => {
                 <span className="text-3xl">💰</span>
               </div>
               <h3 className="text-lg font-bold mb-2">3. EARN MORE</h3>
-              <p className="text-gray-600">Get 1% to 2% of whatever they earn forever!</p>
+              <p className="text-gray-600">When your Member invites a Member, you get 3%. When your Member's Member invites, you get 1%!</p>
             </div>
           </div>
         </div>
