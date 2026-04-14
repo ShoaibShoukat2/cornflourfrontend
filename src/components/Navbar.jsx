@@ -58,6 +58,9 @@ const Navbar = () => {
                   <Link to="/admin/packages" className="px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition text-sm lg:text-base font-medium">
                     📦 Packages
                   </Link>
+                  <Link to="/admin/contact" className="px-3 py-2 rounded-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition text-sm lg:text-base font-medium">
+                    📩 Contact Us
+                  </Link>
                   <div className="h-6 w-px bg-gray-300 mx-2"></div>
                   <div className="flex items-center space-x-2 px-3 py-2 bg-orange-50 rounded-lg">
                     <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -145,6 +148,9 @@ const Navbar = () => {
                     </Link>
                     <Link to="/admin/packages" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 font-medium transition">
                       📦 Manage Packages
+                    </Link>
+                    <Link to="/admin/contact" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 font-medium transition">
+                      📩 Contact Us
                     </Link>
                   </>
                 ) : (

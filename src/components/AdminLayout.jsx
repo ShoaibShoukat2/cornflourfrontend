@@ -94,6 +94,7 @@ const navItems = [
   { path: '/admin/withdrawals', icon: '💸', label: 'Withdrawals' },
   { path: '/admin/packages',  icon: '📦', label: 'Packages' },
   { path: '/admin/tasks',     icon: '🎯', label: 'Tasks' },
+  { path: '/admin/contact',   icon: '📩', label: 'Contact Us' },
 ];
 
 // ── Pending Packages Slide Panel ───────────────────────────────────────────────
@@ -207,6 +208,8 @@ const PendingPackagesPanel = ({ onClose }) => {
                   <img
                     src={p.screenshot}
                     alt="Payment proof"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full object-cover"
                     style={{ maxHeight: 160 }}
                   />
@@ -271,8 +274,8 @@ const AdminLayout = ({ children }) => {
 
   const fetchPendingCount = async () => {
     try {
-      const res = await api.get('/admin/package-payments/?status=pending');
-      setPendingCount(res.data.length);
+      const res = await api.get('/admin/package-payments/count/');
+      setPendingCount(res.data.count);
     } catch { /* silent */ }
   };
 

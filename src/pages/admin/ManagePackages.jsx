@@ -8,18 +8,25 @@ const ManagePackages = () => {
   const [filter, setFilter] = useState('pending');
   const [preview, setPreview] = useState(null);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => { fetchAll(); }, [filter]);
+  // Fetch account only once on mount
+  useEffect(() => {
+    api.get('/admin/payment-account/').then(res => {
+      if (res.data?.bank_name) setAccount(res.data);
+    }).catch(() => {});
+  }, []);
 
-  const fetchAll = async () => {
+  // Fetch payments when filter changes
+  useEffect(() => { fetchPayments(); }, [filter]);
+
+  const fetchPayments = async () => {
+    setLoading(true);
     try {
-      const [paymentsRes, accountRes] = await Promise.all([
-        api.get(`/admin/package-payments/?status=${filter}`),
-        api.get('/admin/payment-account/'),
-      ]);
-      setPayments(paymentsRes.data);
-      if (accountRes.data?.bank_name) setAccount(accountRes.data);
+      const res = await api.get(`/admin/package-payments/?status=${filter}`);
+      setPayments(res.data);
     } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
   const saveAccount = async () => {
@@ -34,7 +41,7 @@ const ManagePackages = () => {
     try {
       await api.post(`/admin/approve-package/${id}/`);
       setMessage('✅ Approved');
-      fetchAll();
+      fetchPayments();
     } catch (e) { console.error(e); }
   };
 
@@ -43,7 +50,7 @@ const ManagePackages = () => {
     try {
       await api.post(`/admin/reject-package/${id}/`, { reason });
       setMessage('✅ Rejected');
-      fetchAll();
+      fetchPayments();
     } catch (e) { console.error(e); }
   };
 
@@ -111,8 +118,14 @@ const ManagePackages = () => {
             </div>
           </div>
 
-          {payments.length === 0 && (
+          {payments.length === 0 && !loading && (
             <p className="text-center text-gray-400 py-8">No payments found</p>
+          )}
+
+          {loading && (
+            <div className="flex justify-center py-10">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            </div>
           )}
 
           <div className="space-y-4">

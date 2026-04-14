@@ -18,6 +18,7 @@ import ManageUsers from './pages/admin/ManageUsers';
 import ManageWithdrawals from './pages/admin/ManageWithdrawals';
 import ManagePackages from './pages/admin/ManagePackages';
 import ManageTasks from './pages/admin/ManageTasks';
+import AdminContact from './pages/admin/AdminContact';
 import Package from './pages/Package';
 import Contact from './pages/Contact';
 
@@ -33,6 +34,7 @@ const AppContent = () => {
         <Route path="/admin/withdrawals" element={<AdminRoute><AdminLayout><ManageWithdrawals /></AdminLayout></AdminRoute>} />
         <Route path="/admin/packages" element={<AdminRoute><AdminLayout><ManagePackages /></AdminLayout></AdminRoute>} />
         <Route path="/admin/tasks" element={<AdminRoute><AdminLayout><ManageTasks /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/contact" element={<AdminRoute><AdminLayout><AdminContact /></AdminLayout></AdminRoute>} />
       </Routes>
     );
   }
