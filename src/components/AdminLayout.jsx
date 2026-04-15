@@ -78,10 +78,12 @@ const LoginAsUserModal = ({ onClose, onConfirm }) => {
 // ── Nav Items ──────────────────────────────────────────────────────────────────
 const navItems = [
   { path: '/admin/dashboard',   icon: '📊', label: 'Dashboard',    desc: 'Overview & stats' },
+  { path: '/admin/reports',     icon: '📋', label: 'Reports',      desc: 'Users & requests' },
   { path: '/admin/users',       icon: '👥', label: 'Users',        desc: 'Manage members' },
   { path: '/admin/withdrawals', icon: '💸', label: 'Withdrawals',  desc: 'Payout requests' },
   { path: '/admin/packages',    icon: '📦', label: 'Packages',     desc: 'Deposits & plans' },
   { path: '/admin/tasks',       icon: '🎯', label: 'Tasks',        desc: 'Manage tasks' },
+  { path: '/admin/settings',    icon: '⚙️', label: 'Settings',     desc: 'Site configuration' },
   { path: '/admin/contact',     icon: '📩', label: 'Contact Us',   desc: 'Support links' },
 ];
 
