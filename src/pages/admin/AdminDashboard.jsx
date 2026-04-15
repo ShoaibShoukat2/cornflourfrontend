@@ -80,6 +80,8 @@ const UserDetail = ({ userId, onBack }) => {
     if (!subAmt || isNaN(subAmt)) return;
     const newBal = Math.max(0, data.wallet.main_balance - parseFloat(subAmt) / 100);
     await api.post(`/admin/edit-user/${userId}/`, { balance: newBal });
+    // Also log as transaction for tracking
+    await api.post(`/admin/add-bonus/${userId}/`, { amount: -(parseFloat(subAmt) / 100), description: 'Admin deduct' }).catch(() => {});
     flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); load();
   };
 
@@ -492,10 +494,12 @@ const AdminDashboard = () => {
   if (!stats) return <div className="text-center text-gray-400 py-20">No data available</div>;
 
   const statCards = [
-    { label: 'Total Users', value: stats.users.total, sub: `Active: ${stats.users.active}`, color: 'from-blue-500 to-blue-600', icon: '👥' },
-    { label: 'Total Earnings', value: `Rs ${(stats.financial.total_earnings * 100).toFixed(0)}`, sub: `Revenue: Rs ${(stats.financial.revenue * 100).toFixed(0)}`, color: 'from-green-500 to-green-600', icon: '💰' },
-    { label: 'Withdrawals', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-purple-500 to-purple-600', icon: '💸' },
-    { label: 'Tasks', value: stats.tasks.total, sub: `Completed: ${stats.tasks.total_completed}`, color: 'from-orange-500 to-red-500', icon: '🎯' },
+    { label: 'Total Users', value: stats.users.total, sub: `New Today: ${stats.users.new_today}`, color: 'from-blue-500 to-blue-600', icon: '👥' },
+    { label: 'Total Approved Users', value: stats.users.approved, sub: `Active: ${stats.users.active}`, color: 'from-green-500 to-green-600', icon: '✅' },
+    { label: 'Total Deposited', value: `Rs ${(stats.financial.total_deposited).toFixed(0)}`, sub: 'Approved packages', color: 'from-orange-500 to-red-500', icon: '📥' },
+    { label: 'Total Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'L1 + L2 + L3', color: 'from-purple-500 to-purple-600', icon: '🤝' },
+    { label: 'Today Withdrawals', value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-yellow-500 to-yellow-600', icon: '📤' },
+    { label: 'Total Withdrawn', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'from-red-500 to-red-600', icon: '💸' },
   ];
 
   const infoCards = [
@@ -505,6 +509,13 @@ const AdminDashboard = () => {
     { label: 'Pending Withdrawals', value: `Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
+  const breakdownCards = [
+    { label: '🎯 Total Task Earnings', value: `Rs ${(stats.earnings_breakdown.task_earnings * 100).toFixed(0)}`, color: 'text-green-700', bg: 'bg-green-50' },
+    { label: '➕ Manual Additions', value: `Rs ${(stats.earnings_breakdown.manual_additions * 100).toFixed(0)}`, color: 'text-blue-700', bg: 'bg-blue-50' },
+    { label: '➖ Manual Subtractions', value: `Rs ${(stats.earnings_breakdown.manual_subtractions * 100).toFixed(0)}`, color: 'text-red-700', bg: 'bg-red-50' },
+    { label: '⚖️ Net Manual Balance', value: `Rs ${(stats.earnings_breakdown.net_manual * 100).toFixed(0)}`, color: stats.earnings_breakdown.net_manual >= 0 ? 'text-green-700' : 'text-red-700', bg: 'bg-gray-50' },
+  ];
+
   return (
     <div className="space-y-5">
 
@@ -512,7 +523,7 @@ const AdminDashboard = () => {
       <UserSearch onSelect={setSelectedUserId} />
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {statCards.map((s, i) => (
           <div key={i} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 text-white shadow-sm`}>
             <div className="flex items-center justify-between mb-2">
@@ -533,6 +544,19 @@ const AdminDashboard = () => {
             <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Earnings Breakdown */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 className="font-bold text-gray-800 mb-4">📊 Earnings Breakdown</h2>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          {breakdownCards.map((c, i) => (
+            <div key={i} className={`${c.bg} rounded-2xl p-4`}>
+              <p className="text-xs text-gray-500 mb-1">{c.label}</p>
+              <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Recent Activity */}
