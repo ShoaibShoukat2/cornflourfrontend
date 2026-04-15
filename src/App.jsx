@@ -53,7 +53,7 @@ const AppContent = () => {
         <Route path="/referrals" element={<PrivateRoute><Referrals /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
       </Routes>
     </div>
   );
