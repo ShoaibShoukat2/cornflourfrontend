@@ -8,9 +8,12 @@ const UserDetail = ({ userId, onBack }) => {
   const [msg, setMsg] = useState('');
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({});
-  const [addBalanceAmt, setAddBalanceAmt] = useState('');
-  const [subBalanceAmt, setSubBalanceAmt] = useState('');
+  const [addAmt, setAddAmt] = useState('');
+  const [addRemarks, setAddRemarks] = useState('');
+  const [subAmt, setSubAmt] = useState('');
+  const [subRemarks, setSubRemarks] = useState('');
   const [withdrawals, setWithdrawals] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [packagePayment, setPackagePayment] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
 
@@ -19,14 +22,15 @@ const UserDetail = ({ userId, onBack }) => {
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const [detailRes, wRes, pkgRes] = await Promise.all([
+      const [detailRes, wRes, pkgRes, txRes] = await Promise.all([
         api.get(`/admin/user-detail/${userId}/`),
         api.get(`/admin/user-withdrawals/${userId}/`),
         api.get(`/admin/package-payments/?status=all`),
+        api.get(`/admin/user-transactions/${userId}/`).catch(() => ({ data: [] })),
       ]);
       setData(detailRes.data);
       setWithdrawals(wRes.data);
-      // find this user's latest package payment
+      setTransactions(txRes.data);
       const userPkg = pkgRes.data.find(p => p.email === detailRes.data.email) || null;
       setPackagePayment(userPkg);
       setForm({
@@ -74,18 +78,22 @@ const UserDetail = ({ userId, onBack }) => {
   };
 
   const doBonus = async () => {
-    if (!addBalanceAmt || isNaN(addBalanceAmt)) return;
-    await api.post(`/admin/add-bonus/${userId}/`, { amount: parseFloat(addBalanceAmt) / 100, description: 'Admin credit' });
-    flash(`✅ Rs ${addBalanceAmt} added`); setAddBalanceAmt(''); fetchDetail();
+    if (!addAmt || isNaN(addAmt)) return;
+    const desc = addRemarks.trim() ? `Admin bonus: ${addRemarks}` : 'Admin bonus: Manual Addition';
+    try {
+      await api.post(`/admin/add-bonus/${userId}/`, { amount: parseFloat(addAmt) / 100, description: desc });
+      flash(`✅ Rs ${addAmt} added`); setAddAmt(''); setAddRemarks(''); fetchDetail();
+    } catch { flash('Failed to add'); }
   };
 
   const doSubtract = async () => {
-    if (!subBalanceAmt || isNaN(subBalanceAmt)) return;
+    if (!subAmt || isNaN(subAmt)) return;
     try {
-      const wallet = data.wallet;
-      const newBal = Math.max(0, wallet.main_balance - parseFloat(subBalanceAmt) / 100);
+      const newBal = Math.max(0, data.wallet.main_balance - parseFloat(subAmt) / 100);
       await api.post(`/admin/edit-user/${userId}/`, { balance: newBal });
-      flash(`✅ Rs ${subBalanceAmt} deducted`); setSubBalanceAmt(''); fetchDetail();
+      const desc = subRemarks.trim() ? `Admin deduct: ${subRemarks}` : 'Admin deduct: Manual Subtraction';
+      await api.post(`/admin/add-bonus/${userId}/`, { amount: -(parseFloat(subAmt) / 100), description: desc }).catch(() => {});
+      flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); setSubRemarks(''); fetchDetail();
     } catch { flash('Failed to deduct'); }
   };
 
@@ -230,35 +238,66 @@ const UserDetail = ({ userId, onBack }) => {
       {/* Add / Subtract Balance */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Add Balance (Rs)</p>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              value={addBalanceAmt}
-              onChange={e => setAddBalanceAmt(e.target.value)}
-              placeholder="Amount in Rs"
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400"
-            />
-            <button onClick={doBonus} className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
-              Add
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➕ Add Balance (Rs)</p>
+          <div className="space-y-2">
+            <input type="number" value={addAmt} onChange={e => setAddAmt(e.target.value)} placeholder="Amount in Rs"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
+            <input type="text" value={addRemarks} onChange={e => setAddRemarks(e.target.value)} placeholder="Remarks (e.g. Bonus, Compensation...)"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
+            <button onClick={doBonus} className="w-full bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
+              Add Balance
             </button>
           </div>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Deduct Balance (Rs)</p>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              value={subBalanceAmt}
-              onChange={e => setSubBalanceAmt(e.target.value)}
-              placeholder="Amount in Rs"
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400"
-            />
-            <button onClick={doSubtract} className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition">
-              Deduct
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➖ Deduct Balance (Rs)</p>
+          <div className="space-y-2">
+            <input type="number" value={subAmt} onChange={e => setSubAmt(e.target.value)} placeholder="Amount in Rs"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
+            <input type="text" value={subRemarks} onChange={e => setSubRemarks(e.target.value)} placeholder="Remarks (e.g. Penalty, Correction...)"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
+            <button onClick={doSubtract} className="w-full bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition">
+              Deduct Balance
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Transaction History */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📜 Full Earning History</p>
+        {transactions.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No transactions yet</p>
+        ) : (
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {transactions.map(tx => {
+              const isPos = tx.amount >= 0;
+              const colors = {
+                task: 'bg-blue-100 text-blue-700',
+                referral: 'bg-purple-100 text-purple-700',
+                bonus: 'bg-green-100 text-green-700',
+                withdrawal: 'bg-red-100 text-red-700',
+                commission: 'bg-orange-100 text-orange-700',
+              };
+              return (
+                <div key={tx.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${colors[tx.transaction_type] || 'bg-gray-100 text-gray-600'}`}>
+                        {tx.transaction_type}
+                      </span>
+                      <p className="text-xs text-gray-500 truncate">{tx.description}</p>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">{new Date(tx.created_at).toLocaleString()}</p>
+                  </div>
+                  <p className={`font-black text-sm flex-shrink-0 ${isPos ? 'text-green-600' : 'text-red-600'}`}>
+                    {isPos ? '+' : ''}Rs {(tx.amount * 100).toFixed(0)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Withdrawal History */}
@@ -275,8 +314,11 @@ const UserDetail = ({ userId, onBack }) => {
                     <span className="font-black text-gray-800">Rs {(w.amount * 100).toFixed(0)}</span>
                     <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-lg capitalize">{w.payment_method}</span>
                   </div>
-                  <p className="text-xs text-gray-400 truncate mt-0.5">{w.payment_details}</p>
-                  <p className="text-xs text-gray-400">{new Date(w.created_at).toLocaleDateString()}</p>
+                  {/* Show Name + Number clearly */}
+                  <div className="mt-1 bg-white border border-gray-100 rounded-lg px-2 py-1.5">
+                    <p className="text-xs text-gray-700 whitespace-pre-wrap">{w.payment_details}</p>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{new Date(w.created_at).toLocaleDateString()}</p>
                   {w.admin_note && <p className="text-xs text-gray-400 italic">Note: {w.admin_note}</p>}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
