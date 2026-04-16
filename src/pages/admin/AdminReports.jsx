@@ -235,7 +235,10 @@ const WithdrawalRequests = () => {
                 <p className="font-bold text-gray-800">{w.username}</p>
                 <p className="text-xs text-gray-400">{w.email}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{new Date(w.created_at).toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1 bg-gray-50 px-2 py-1 rounded-lg">{w.payment_details}</p>
+                <div className="mt-1 bg-gray-50 px-3 py-2 rounded-xl">
+                  <p className="text-xs font-semibold text-gray-600">Account Details:</p>
+                  <p className="text-xs text-gray-700 mt-0.5 whitespace-pre-wrap">{w.payment_details}</p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="font-black text-gray-800 text-lg">Rs {(w.amount * 100).toFixed(0)}</p>

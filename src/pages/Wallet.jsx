@@ -8,6 +8,7 @@ const Wallet = () => {
   const [formData, setFormData] = useState({
     amount: '',
     payment_method: 'jazzcash',
+    account_name: '',
     payment_details: ''
   });
   const [message, setMessage] = useState('');
@@ -35,12 +36,15 @@ const Wallet = () => {
     try {
       const payload = {
         ...formData,
-        amount: parseFloat(formData.amount) / 100,  // convert Rs to decimal storage unit
+        amount: parseFloat(formData.amount) / 100,
+        payment_details: formData.account_name
+          ? `Name: ${formData.account_name}\nNumber: ${formData.payment_details}`
+          : formData.payment_details,
       };
       await api.post('/wallet/withdraw/', payload);
       setMessage('✅ Money Request Sent! We will send money in 24 hours');
       setShowWithdrawForm(false);
-      setFormData({ amount: '', payment_method: 'jazzcash', payment_details: '' });
+      setFormData({ amount: '', payment_method: 'jazzcash', account_name: '', payment_details: '' });
       fetchData();
     } catch (error) {
       if (error.response?.data?.error === 'package_required') {
@@ -140,22 +144,30 @@ const Wallet = () => {
               {/* Payment Details */}
               <div>
                 <label className="block text-gray-700 mb-3 text-lg font-semibold">
-                  {formData.payment_method === 'jazzcash' && '📞 JazzCash Number'}
-                  {formData.payment_method === 'easypaisa' && '📞 EasyPaisa Number'}
+                  {formData.payment_method === 'jazzcash' && '📞 JazzCash Details'}
+                  {formData.payment_method === 'easypaisa' && '📞 EasyPaisa Details'}
                   {formData.payment_method === 'bank' && '🏦 Bank Account Details'}
                   {formData.payment_method === 'paypal' && '📧 PayPal Email'}
                 </label>
+                <input
+                  type="text"
+                  value={formData.account_name}
+                  onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
+                  placeholder="Account Holder Name"
+                  className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg mb-3"
+                  required
+                />
                 <textarea
                   value={formData.payment_details}
                   onChange={(e) => setFormData({ ...formData, payment_details: e.target.value })}
                   placeholder={
-                    formData.payment_method === 'jazzcash' ? 'Enter your JazzCash number (03xxxxxxxxx)' :
-                    formData.payment_method === 'easypaisa' ? 'Enter your EasyPaisa number (03xxxxxxxxx)' :
-                    formData.payment_method === 'bank' ? 'Enter bank name and account number' :
-                    'Enter your PayPal email address'
+                    formData.payment_method === 'jazzcash' ? 'JazzCash Number (03xxxxxxxxx)' :
+                    formData.payment_method === 'easypaisa' ? 'EasyPaisa Number (03xxxxxxxxx)' :
+                    formData.payment_method === 'bank' ? 'Bank name and account number' :
+                    'PayPal email address'
                   }
                   className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg"
-                  rows="3"
+                  rows="2"
                   required
                 />
               </div>
