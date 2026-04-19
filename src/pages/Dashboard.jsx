@@ -8,7 +8,7 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [wallet, setWallet] = useState(null);
   const [referralStats, setReferralStats] = useState(null);
-  const [userTasks, setUserTasks] = useState([]);
+  const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [packageStatus, setPackageStatus] = useState('none'); // none | pending | approved | rejected
   const [message, setMessage] = useState('');
   const [msgType, setMsgType] = useState('success');
@@ -25,7 +25,13 @@ const Dashboard = () => {
       ]);
       setWallet(walletRes.data);
       setReferralStats(refRes.data);
-      setUserTasks(tasksRes.data);
+      // Handle both old array format and new object format
+      const tasksData = tasksRes.data;
+      if (tasksData?.total_completed !== undefined) {
+        setCompletedTasksCount(tasksData.total_completed);
+      } else if (Array.isArray(tasksData)) {
+        setCompletedTasksCount(tasksData.filter(t => t.status === 'verified').length);
+      }
       setPackageStatus(pkgRes.data.status || 'none');
     } catch (error) {
       console.error(error);
@@ -53,7 +59,7 @@ const Dashboard = () => {
 
   const hasPackage = packageStatus === 'approved' || user?.has_package;
   const isPending = packageStatus === 'pending';
-  const completedTasks = userTasks.filter(t => t.status === 'verified').length;
+  const completedTasks = completedTasksCount;
 
   // Locked feature overlay
   const LockedOverlay = () => (
@@ -147,7 +153,7 @@ const Dashboard = () => {
           </div>
           <div className="bg-white rounded-2xl shadow-sm p-4 text-center border border-gray-100">
             <p className="text-xl font-black text-purple-500">{referralStats?.total_referrals || 0}</p>
-            <p className="text-xs text-gray-400 mt-1">Friends</p>
+            <p className="text-xs text-gray-400 mt-1">Active Team</p>
           </div>
         </div>
 

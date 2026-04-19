@@ -49,14 +49,16 @@ const Referrals = () => {
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white text-center">
             <div className="text-3xl mb-2">👥</div>
-            <h3 className="text-lg font-bold mb-1">Total Friends</h3>
+            <h3 className="text-lg font-bold mb-1">Active Team</h3>
             <p className="text-3xl font-black">{stats.total_referrals}</p>
+            <p className="text-xs opacity-70 mt-1">Package activated</p>
           </div>
           
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white text-center">
             <div className="text-3xl mb-2">💰</div>
             <h3 className="text-lg font-bold mb-1">Money Earned</h3>
             <p className="text-3xl font-black">Rs {(stats.total_earnings * 100).toFixed(0)}</p>
+            <p className="text-xs opacity-70 mt-1">Total commission</p>
           </div>
         </div>
 
@@ -124,35 +126,49 @@ const Referrals = () => {
         {/* Friends List */}
         {referrals.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">👥 YOUR FRIENDS ({referrals.length})</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">👥 MY TEAM ({referrals.length})</h2>
+            <p className="text-center text-gray-400 text-sm mb-6">Only members who have activated their package</p>
             <div className="space-y-4">
-              {referrals.slice(0, 10).map((ref) => (
-                <div key={ref.id} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex justify-between items-center">
+              {referrals.map((ref) => (
+                <div key={ref.id} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
-                      <p className="font-bold text-lg text-gray-800">{ref.username}</p>
-                      <p className="text-sm text-gray-600">Joined: {new Date(ref.created_at).toLocaleDateString()}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                          {ref.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-800">{ref.username}</p>
+                          <p className="text-xs text-gray-400">Joined: {new Date(ref.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">You Earned:</p>
-                      <p className="text-xl font-bold text-green-600">Rs {(ref.commission_earned * 100).toFixed(0)}</p>
+                      <p className="text-xs text-gray-500">You Earned</p>
+                      <p className="text-lg font-black text-green-600">Rs {(ref.commission_earned * 100).toFixed(0)}</p>
                     </div>
                   </div>
-                  
-                  <div className="mt-3 grid grid-cols-3 gap-3">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500">Status</p>
-                      <p className={`font-semibold ${ref.is_active ? 'text-green-600' : 'text-gray-500'}`}>
-                        {ref.is_active ? '🟢 Active' : '⚪ Inactive'}
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="bg-white rounded-xl p-2 text-center border border-gray-100">
+                      <p className="text-xs text-gray-400">Package</p>
+                      <p className="font-bold text-orange-600 text-xs capitalize">{ref.package_name || '-'}</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-2 text-center border border-gray-100">
+                      <p className="text-xs text-gray-400">Status</p>
+                      <p className={`font-bold text-xs ${ref.is_active ? 'text-green-600' : 'text-red-500'}`}>
+                        {ref.is_active ? '🟢 Active' : '🔴 Blocked'}
                       </p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500">Their Balance</p>
-                      <p className="font-semibold text-blue-600">Rs {(ref.main_balance * 100).toFixed(0)}</p>
+                    <div className="bg-white rounded-xl p-2 text-center border border-gray-100">
+                      <p className="text-xs text-gray-400">Level</p>
+                      <p className="font-bold text-blue-600 text-sm">L{ref.level}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500">Total Earned</p>
-                      <p className="font-semibold text-purple-600">Rs {(ref.total_earned * 100).toFixed(0)}</p>
+                    <div className="bg-white rounded-xl p-2 text-center border border-gray-100">
+                      <p className="text-xs text-gray-400">Approved</p>
+                      <p className="font-bold text-gray-600 text-xs">
+                        {ref.approved_at ? new Date(ref.approved_at).toLocaleDateString() : '-'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -164,9 +180,9 @@ const Referrals = () => {
         {/* No Friends Message */}
         {referrals.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">😔</div>
-            <h3 className="text-2xl font-bold text-gray-600 mb-2">No Friends Yet</h3>
-            <p className="text-lg text-gray-500">Start sharing your link to earn money!</p>
+            <div className="text-6xl mb-4">👥</div>
+            <h3 className="text-2xl font-bold text-gray-600 mb-2">No Active Team Members</h3>
+            <p className="text-gray-500">Members will appear here once they activate their package.</p>
           </div>
         )}
       </div>

@@ -55,7 +55,8 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
       setPhase('done');
       onDone(res.data.new_balance);
     } catch (e) {
-      setErrMsg(e.response?.data?.error || 'Failed');
+      const errText = e.response?.data?.error || e.response?.data?.message || 'Failed to complete task';
+      setErrMsg(errText);
       setPhase('error');
     }
   };
