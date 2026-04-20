@@ -442,18 +442,22 @@ const ManageUsers = () => {
 
   useEffect(() => { fetchUsers(); }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchUsers(); }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const fetchUsers = async () => {
     try {
-      const res = await api.get('/admin/users/');
+      const search = searchTerm.trim();
+      const url = search ? `/admin/users/?search=${encodeURIComponent(search)}` : '/admin/users/';
+      const res = await api.get(url);
       setUsers(res.data);
     } catch { setMessage('Failed to load users'); }
     finally { setLoading(false); }
   };
 
-  const filteredUsers = users.filter(u =>
-    u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users;
 
   if (selectedUserId) {
     return <UserDetail userId={selectedUserId} onBack={() => { setSelectedUserId(null); fetchUsers(); }} />;

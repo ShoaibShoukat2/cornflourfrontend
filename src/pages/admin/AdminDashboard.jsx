@@ -428,23 +428,20 @@ const UserSearch = ({ onSelect }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [allUsers, setAllUsers] = useState([]);
   const ref = useRef(null);
 
   useEffect(() => {
-    api.get('/admin/users/').then(r => setAllUsers(r.data)).catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (!query.trim()) { setResults([]); return; }
-    setSearching(true);
-    const q = query.toLowerCase();
-    const filtered = allUsers.filter(u =>
-      u.email?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q)
-    ).slice(0, 6);
-    setResults(filtered);
-    setSearching(false);
-  }, [query, allUsers]);
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await api.get(`/admin/users/?search=${encodeURIComponent(query.trim())}`);
+        setResults(res.data.slice(0, 8));
+      } catch { }
+      finally { setSearching(false); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   // Close on outside click
   useEffect(() => {

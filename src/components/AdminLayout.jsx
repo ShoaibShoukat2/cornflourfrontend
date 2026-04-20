@@ -13,17 +13,15 @@ const LoginAsUserModal = ({ onClose, onConfirm }) => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    api.get('/admin/users/').then(r => setAllUsers(r.data)).catch(() => {});
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
-
-  useEffect(() => {
     if (!query.trim()) { setResults([]); return; }
-    const q = query.toLowerCase();
-    setResults(allUsers.filter(u =>
-      u.email?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q)
-    ).slice(0, 6));
-  }, [query, allUsers]);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get(`/admin/users/?search=${encodeURIComponent(query.trim())}`);
+        setResults(res.data.slice(0, 6));
+      } catch { }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4" onClick={onClose}>
