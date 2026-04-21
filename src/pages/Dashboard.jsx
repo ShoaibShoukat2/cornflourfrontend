@@ -5,15 +5,18 @@ import api from '../api/axios';
 import tasklogo from '../assets/tasklogo.jpeg';
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user, fetchUser } = useContext(AuthContext);
   const [wallet, setWallet] = useState(null);
   const [referralStats, setReferralStats] = useState(null);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
-  const [packageStatus, setPackageStatus] = useState('none'); // none | pending | approved | rejected
+  const [packageStatus, setPackageStatus] = useState('none');
   const [message, setMessage] = useState('');
   const [msgType, setMsgType] = useState('success');
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    fetchUser(); // refresh level/profile from server
+  }, []);
 
   const fetchData = async () => {
     try {
