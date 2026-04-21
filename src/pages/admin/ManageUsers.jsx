@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import api from '../../api/axios';
+
 // -- Users List -----------------------------------------------------------------
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -78,7 +81,7 @@ const ManageUsers = () => {
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {user.is_active ? 'Active' : 'Blocked'}
                   </span>
-                  <span className="text-gray-400">›</span>
+                  <span className="text-gray-400">ï¿½</span>
                 </div>
               </div>
             ))}
