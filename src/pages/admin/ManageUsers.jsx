@@ -1,473 +1,50 @@
-import { useState, useEffect } from 'react';
-import api from '../../api/axios';
-
-// ── User Detail Panel ──────────────────────────────────────────────────────────
-const UserDetail = ({ userId, onBack }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({});
-  const [addAmt, setAddAmt] = useState('');
-  const [addRemarks, setAddRemarks] = useState('');
-  const [subAmt, setSubAmt] = useState('');
-  const [subRemarks, setSubRemarks] = useState('');
-  const [withdrawals, setWithdrawals] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [packagePayment, setPackagePayment] = useState(null);
-  const [screenshotPreview, setScreenshotPreview] = useState(null);
-
-  useEffect(() => { fetchDetail(); }, [userId]);
-
-  const fetchDetail = async () => {
-    setLoading(true);
-    try {
-      const [detailRes, wRes, pkgRes, txRes] = await Promise.all([
-        api.get(`/admin/user-detail/${userId}/`),
-        api.get(`/admin/user-withdrawals/${userId}/`),
-        api.get(`/admin/package-payments/?status=all`),
-        api.get(`/admin/user-transactions/${userId}/`).catch(() => ({ data: [] })),
-      ]);
-      setData(detailRes.data);
-      setWithdrawals(wRes.data);
-      setTransactions(txRes.data);
-      const userPkg = pkgRes.data.find(p => p.email === detailRes.data.email) || null;
-      setPackagePayment(userPkg);
-      setForm({
-        username: detailRes.data.username,
-        email: detailRes.data.email,
-        phone: detailRes.data.phone || '',
-        level: detailRes.data.level,
-        password: '',
-        balance: (detailRes.data.wallet.main_balance * 100).toFixed(0),
-      });
-    } catch { setMsg('Failed to load user'); }
-    finally { setLoading(false); }
-  };
-
-  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
-
-  const saveInfo = async () => {
-    setSaving(true);
-    try {
-      const payload = {
-        username: form.username,
-        email: form.email,
-        phone: form.phone,
-        level: form.level,
-        balance: parseFloat(form.balance) / 100,
-      };
-      if (form.password) payload.password = form.password;
-      await api.post(`/admin/edit-user/${userId}/`, payload);
-      flash('✅ User updated');
-      fetchDetail();
-    } catch (e) { flash(e.response?.data?.error || 'Failed to update'); }
-    finally { setSaving(false); }
-  };
-
-  const doBlock = async () => {
-    const reason = prompt('Block reason:');
-    if (!reason) return;
-    await api.post(`/admin/block-user/${userId}/`, { reason });
-    flash('✅ User blocked'); fetchDetail();
-  };
-
-  const doUnblock = async () => {
-    await api.post(`/admin/unblock-user/${userId}/`);
-    flash('✅ User unblocked'); fetchDetail();
-  };
-
-  const doBonus = async () => {
-    if (!addAmt || isNaN(addAmt)) return;
-    const desc = addRemarks.trim() ? `Admin bonus: ${addRemarks}` : 'Admin bonus: Manual Addition';
-    try {
-      await api.post(`/admin/add-bonus/${userId}/`, { amount: parseFloat(addAmt) / 100, description: desc });
-      flash(`✅ Rs ${addAmt} added`); setAddAmt(''); setAddRemarks(''); fetchDetail();
-    } catch { flash('Failed to add'); }
-  };
-
-  const doSubtract = async () => {
-    if (!subAmt || isNaN(subAmt)) return;
-    try {
-      const newBal = Math.max(0, data.wallet.main_balance - parseFloat(subAmt) / 100);
-      await api.post(`/admin/edit-user/${userId}/`, { balance: newBal });
-      const desc = subRemarks.trim() ? `Admin deduct: ${subRemarks}` : 'Admin deduct: Manual Subtraction';
-      await api.post(`/admin/add-bonus/${userId}/`, { amount: -(parseFloat(subAmt) / 100), description: desc }).catch(() => {});
-      flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); setSubRemarks(''); fetchDetail();
-    } catch { flash('Failed to deduct'); }
-  };
-
-  const approvePkg = async (id) => {
-    try {
-      await api.post(`/admin/approve-package/${id}/`);
-      flash('✅ Package approved'); fetchDetail();
-    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
-  };
-
-  const rejectPkg = async (id) => {
-    const reason = prompt('Rejection reason:') || 'Rejected by admin';
-    try {
-      await api.post(`/admin/reject-package/${id}/`, { reason });
-      flash('✅ Package rejected'); fetchDetail();
-    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
-  };
-
-  const approveW = async (id) => {
-    const note = prompt('Approve note (optional):') ?? '';
-    try {
-      await api.post(`/admin/approve-withdrawal/${id}/`, { note });
-      flash('✅ Withdrawal approved'); fetchDetail();
-    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
-  };
-
-  const rejectW = async (id) => {
-    const reason = prompt('Rejection reason:');
-    if (!reason) return;
-    try {
-      await api.post(`/admin/reject-withdrawal/${id}/`, { reason });
-      flash('✅ Withdrawal rejected'); fetchDetail();
-    } catch (e) { flash(e.response?.data?.error || 'Failed'); }
-  };
-
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
-  if (!data) return <div className="text-center text-gray-400 py-20">User not found</div>;
-
-  const w = data.wallet;
-
-  return (
-    <div className="space-y-4">
-      {/* Back + Title */}
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition text-gray-600">
-          ← Back
-        </button>
-        <h1 className="text-xl font-bold text-gray-800">User Detail — {data.username}</h1>
-      </div>
-
-      {msg && (
-        <div className={`px-4 py-3 rounded-xl text-sm font-semibold border ${msg.includes('✅') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>
-          {msg}
-        </div>
-      )}
-
-      {/* Balance Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-4 text-white">
-          <p className="text-xs opacity-80 mb-1">💰 Balance</p>
-          <p className="text-xl font-black">Rs {(w.main_balance * 100).toFixed(0)}</p>
-        </div>
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
-          <p className="text-xs opacity-80 mb-1">📥 Total Earned</p>
-          <p className="text-xl font-black">Rs {(w.total_earned * 100).toFixed(0)}</p>
-        </div>
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
-          <p className="text-xs opacity-80 mb-1">💸 Withdrawn</p>
-          <p className="text-xl font-black">Rs {(w.total_withdrawn * 100).toFixed(0)}</p>
-        </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 text-white">
-          <p className="text-xs opacity-80 mb-1">🔄 Transactions</p>
-          <p className="text-xl font-black">{data.transaction_count}</p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Quick Actions</p>
-        <div className="flex flex-wrap gap-2">
-          {data.is_active ? (
-            <button onClick={doBlock} className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition">
-              🚫 Block User
-            </button>
-          ) : (
-            <button onClick={doUnblock} className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
-              ✅ Unblock User
-            </button>
-          )}
-          <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${data.has_package ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-            📦 Package: {data.has_package ? 'Active' : 'None'}
-          </span>
-          <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${data.is_email_verified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-            📧 Email: {data.is_email_verified ? 'Verified' : 'Unverified'}
-          </span>
-          <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${data.two_factor_enabled ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
-            🔐 2FA: {data.two_factor_enabled ? 'On' : 'Off'}
-          </span>
-        </div>
-      </div>
-
-      {/* Package Payment Status */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📦 Package Payment</p>
-        {!packagePayment ? (
-          <p className="text-sm text-gray-400">No package payment submitted</p>
-        ) : (
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                packagePayment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                packagePayment.status === 'approved' ? 'bg-green-100 text-green-700' :
-                'bg-red-100 text-red-700'
-              }`}>
-                {packagePayment.status.toUpperCase()}
-              </span>
-              <p className="text-xs text-gray-400 mt-1">{new Date(packagePayment.submitted_at).toLocaleString()}</p>
-              {packagePayment.admin_note && <p className="text-xs text-gray-500 italic mt-0.5">Note: {packagePayment.admin_note}</p>}
-            </div>
-            <div className="flex items-center gap-2">
-              {packagePayment.screenshot && (
-                <button onClick={() => setScreenshotPreview(packagePayment.screenshot)}
-                  className="text-xs text-blue-500 underline">View Screenshot</button>
-              )}
-              {packagePayment.status === 'pending' && (
-                <>
-                  <button onClick={() => approvePkg(packagePayment.id)}
-                    className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
-                    ✅ Approve
-                  </button>
-                  <button onClick={() => rejectPkg(packagePayment.id)}
-                    className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
-                    ❌ Reject
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Add / Subtract Balance */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➕ Add Balance (Rs)</p>
-          <div className="space-y-2">
-            <input type="number" value={addAmt} onChange={e => setAddAmt(e.target.value)} placeholder="Amount in Rs"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
-            <input type="text" value={addRemarks} onChange={e => setAddRemarks(e.target.value)} placeholder="Remarks (e.g. Bonus, Compensation...)"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
-            <button onClick={doBonus} className="w-full bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
-              Add Balance
-            </button>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➖ Deduct Balance (Rs)</p>
-          <div className="space-y-2">
-            <input type="number" value={subAmt} onChange={e => setSubAmt(e.target.value)} placeholder="Amount in Rs"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
-            <input type="text" value={subRemarks} onChange={e => setSubRemarks(e.target.value)} placeholder="Remarks (e.g. Penalty, Correction...)"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
-            <button onClick={doSubtract} className="w-full bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition">
-              Deduct Balance
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Transaction History */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📜 Full Earning History</p>
-        {transactions.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">No transactions yet</p>
-        ) : (
-          <div className="space-y-2 max-h-80 overflow-y-auto">
-            {transactions.map(tx => {
-              const isPos = tx.amount >= 0;
-              const colors = {
-                task: 'bg-blue-100 text-blue-700',
-                referral: 'bg-purple-100 text-purple-700',
-                bonus: 'bg-green-100 text-green-700',
-                withdrawal: 'bg-red-100 text-red-700',
-                commission: 'bg-orange-100 text-orange-700',
-              };
-              return (
-                <div key={tx.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${colors[tx.transaction_type] || 'bg-gray-100 text-gray-600'}`}>
-                        {tx.transaction_type}
-                      </span>
-                      <p className="text-xs text-gray-500 truncate">{tx.description}</p>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{new Date(tx.created_at).toLocaleString()}</p>
-                  </div>
-                  <p className={`font-black text-sm flex-shrink-0 ${isPos ? 'text-green-600' : 'text-red-600'}`}>
-                    {isPos ? '+' : ''}Rs {(tx.amount * 100).toFixed(0)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Withdrawal History */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Withdrawal History</p>
-        {withdrawals.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">No withdrawals yet</p>
-        ) : (
-          <div className="space-y-2">
-            {withdrawals.map(w => (
-              <div key={w.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-gray-800">Rs {(w.amount * 100).toFixed(0)}</span>
-                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-lg capitalize">{w.payment_method}</span>
-                  </div>
-                  {/* Show Name + Number clearly */}
-                  <div className="mt-1 bg-white border border-gray-100 rounded-lg px-2 py-1.5">
-                    <p className="text-xs text-gray-700 whitespace-pre-wrap">{w.payment_details}</p>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">{new Date(w.created_at).toLocaleDateString()}</p>
-                  {w.admin_note && <p className="text-xs text-gray-400 italic">Note: {w.admin_note}</p>}
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {w.status === 'pending' ? (
-                    <>
-                      <button onClick={() => approveW(w.id)}
-                        className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600 transition">
-                        ✅ Approve
-                      </button>
-                      <button onClick={() => rejectW(w.id)}
-                        className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600 transition">
-                        ❌ Reject
-                      </button>
-                    </>
-                  ) : (
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      w.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {w.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Edit Info Form */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">        <p className="text-xs font-semibold text-gray-500 uppercase mb-4">User Information</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">Username</label>
-            <input value={form.username || ''} onChange={e => setForm({ ...form, username: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">Email</label>
-            <input type="email" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">Phone</label>
-            <input value={form.phone || ''} onChange={e => setForm({ ...form, phone: e.target.value })}
-              placeholder="+92 3001234567"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">Level</label>
-            <input type="number" value={form.level || 1} onChange={e => setForm({ ...form, level: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">Main Balance (Rs)</label>
-            <input type="number" value={form.balance || ''} onChange={e => setForm({ ...form, balance: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block font-semibold">
-              New Password <span className="text-gray-400 font-normal">(leave blank to keep)</span>
-            </label>
-            <input type="password" value={form.password || ''} onChange={e => setForm({ ...form, password: e.target.value })}
-              placeholder="Enter new password"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
-          </div>
-        </div>
-
-        {/* Read-only info */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-100">
-          <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-xs text-gray-400">Referral Code</p>
-            <p className="font-bold text-gray-700 text-sm mt-1">{data.referral_code}</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-xs text-gray-400">Total Team</p>
-            <p className="font-bold text-gray-700 text-sm mt-1">{data.total_team}</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-xs text-gray-400">Points</p>
-            <p className="font-bold text-gray-700 text-sm mt-1">{data.points}</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <p className="text-xs text-gray-400">Joined</p>
-            <p className="font-bold text-gray-700 text-sm mt-1">{new Date(data.created_at).toLocaleDateString()}</p>
-          </div>
-        </div>
-
-        <button
-          onClick={saveInfo}
-          disabled={saving}
-          className="mt-4 w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-bold text-sm hover:opacity-90 transition disabled:opacity-60"
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
-
-      {/* Screenshot Modal */}
-      {screenshotPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-          onClick={() => setScreenshotPreview(null)}>
-          <div className="bg-white rounded-2xl p-4 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <img src={screenshotPreview} alt="Payment screenshot" className="w-full rounded-xl object-contain max-h-96" />
-            <button onClick={() => setScreenshotPreview(null)}
-              className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ── Users List ─────────────────────────────────────────────────────────────────
+// -- Users List -----------------------------------------------------------------
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { setPage(1); }, [searchTerm]);
 
   useEffect(() => {
     const timer = setTimeout(() => { fetchUsers(); }, 400);
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, page]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const search = searchTerm.trim();
-      const url = search ? `/admin/users/?search=${encodeURIComponent(search)}` : '/admin/users/';
+      const url = `/admin/users/?page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
       const res = await api.get(url);
-      setUsers(res.data);
+      if (res.data.users) {
+        setUsers(res.data.users);
+        setTotalPages(res.data.total_pages || 1);
+        setTotal(res.data.total || 0);
+      } else {
+        setUsers(Array.isArray(res.data) ? res.data : []);
+        setTotalPages(1);
+        setTotal(Array.isArray(res.data) ? res.data.length : 0);
+      }
     } catch { setMessage('Failed to load users'); }
     finally { setLoading(false); }
   };
-
-  const filteredUsers = users;
 
   if (selectedUserId) {
     return <UserDetail userId={selectedUserId} onBack={() => { setSelectedUserId(null); fetchUsers(); }} />;
   }
 
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
-
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-800">Manage Users 👥</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-800">Manage Users ??</h1>
+        <span className="text-sm text-gray-400">{total} total</span>
+      </div>
 
       {message && (
         <div className="px-4 py-3 rounded-xl text-sm font-semibold border bg-red-50 border-red-300 text-red-700">
@@ -476,78 +53,90 @@ const ManageUsers = () => {
       )}
 
       <div className="bg-white rounded-xl p-4 shadow-sm">
-        <input
-          type="text"
-          placeholder="Search by username or email..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-        />
+        <input type="text" placeholder="?? Search by username or email..."
+          value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {/* Mobile card view */}
-        <div className="md:hidden divide-y divide-gray-100">
-          {filteredUsers.length === 0 ? (
-            <p className="text-center text-gray-400 py-8">No users found</p>
-          ) : filteredUsers.map(user => (
-            <div key={user.id} className="p-4 flex items-center justify-between gap-3" onClick={() => setSelectedUserId(user.id)}>
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-800 text-sm truncate">{user.username}</p>
-                <p className="text-xs text-gray-400 truncate">{user.email}</p>
-                <p className="text-xs font-bold text-green-600 mt-0.5">Rs {(user.balance * 100).toFixed(0)}</p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {user.is_active ? 'Active' : 'Blocked'}
-                </span>
-                <span className="text-gray-400 text-sm">›</span>
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        {/* Desktop table view */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full min-w-[600px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Balance</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length === 0 ? (
-                <tr><td colSpan="5" className="px-4 py-8 text-center text-gray-400">No users found</td></tr>
-              ) : filteredUsers.map(user => (
-                <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedUserId(user.id)}>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
-                    <p className="text-xs text-gray-400">Level {user.level}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                  <td className="px-4 py-3 text-sm font-bold text-green-600">Rs {(user.balance * 100).toFixed(0)}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {user.is_active ? 'Active' : 'Blocked'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={e => { e.stopPropagation(); setSelectedUserId(user.id); }}
-                      className="bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-orange-600 transition"
-                    >
-                      View Detail
-                    </button>
-                  </td>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="md:hidden divide-y divide-gray-100">
+            {users.length === 0 ? (
+              <p className="text-center text-gray-400 py-8">No users found</p>
+            ) : users.map(user => (
+              <div key={user.id} className="p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50" onClick={() => setSelectedUserId(user.id)}>
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{user.username}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                  <p className="text-xs font-bold text-green-600 mt-0.5">Rs {(user.balance * 100).toFixed(0)}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {user.is_active ? 'Active' : 'Blocked'}
+                  </span>
+                  <span className="text-gray-400">�</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Balance</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.length === 0 ? (
+                  <tr><td colSpan="5" className="px-4 py-8 text-center text-gray-400">No users found</td></tr>
+                ) : users.map(user => (
+                  <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedUserId(user.id)}>
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
+                      <p className="text-xs text-gray-400">Level {user.level}</p>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-green-600">Rs {(user.balance * 100).toFixed(0)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {user.is_active ? 'Active' : 'Blocked'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button onClick={e => { e.stopPropagation(); setSelectedUserId(user.id); }}
+                        className="bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-orange-600 transition">
+                        View Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            ? Previous
+          </button>
+          <span className="text-sm text-gray-600 font-semibold">Page {page} of {totalPages}</span>
+          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            Next ?
+          </button>
+        </div>
+      )}
     </div>
   );
 };
