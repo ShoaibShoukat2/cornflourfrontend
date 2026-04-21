@@ -188,12 +188,10 @@ const AdminLayout = ({ children }) => {
   const [packagesOpen, setPackagesOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [loginAsUserOpen, setLoginAsUserOpen] = useState(false);
-  const [quickStats, setQuickStats] = useState(null);
 
   useEffect(() => {
     fetchPendingCount();
-    fetchQuickStats();
-    const interval = setInterval(fetchPendingCount, 30000);
+    const interval = setInterval(fetchPendingCount, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -201,13 +199,6 @@ const AdminLayout = ({ children }) => {
     try {
       const res = await api.get('/admin/package-payments/count/');
       setPendingCount(res.data.count);
-    } catch { }
-  };
-
-  const fetchQuickStats = async () => {
-    try {
-      const res = await api.get('/admin/dashboard-stats/');
-      setQuickStats(res.data);
     } catch { }
   };
 
@@ -241,39 +232,6 @@ const AdminLayout = ({ children }) => {
           )}
         </div>
       </div>
-
-      {/* Quick Stats in Sidebar */}
-      {quickStats && (
-        <div className="px-4 py-3 border-b border-slate-700/50 flex-shrink-0">
-          <p className="text-slate-500 text-xs font-semibold uppercase mb-2">Quick Stats</p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Total Users</p>
-              <p className="text-white font-black text-base">{quickStats.users.total}</p>
-            </div>
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Approved</p>
-              <p className="text-green-400 font-black text-base">{quickStats.users.approved}</p>
-            </div>
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Deposited</p>
-              <p className="text-orange-400 font-black text-sm">Rs {Number(quickStats.financial.total_deposited).toFixed(0)}</p>
-            </div>
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Withdrawn</p>
-              <p className="text-red-400 font-black text-sm">Rs {(quickStats.financial.total_withdrawals * 100).toFixed(0)}</p>
-            </div>
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Today W/D</p>
-              <p className="text-yellow-400 font-black text-sm">Rs {(quickStats.financial.today_withdrawals * 100).toFixed(0)}</p>
-            </div>
-            <div className="bg-slate-800/60 rounded-xl px-3 py-2">
-              <p className="text-slate-400 text-xs">Referral Com.</p>
-              <p className="text-purple-400 font-black text-sm">Rs {(quickStats.financial.total_referral_commission * 100).toFixed(0)}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">

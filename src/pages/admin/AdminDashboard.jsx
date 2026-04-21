@@ -507,7 +507,6 @@ const UserSearch = ({ onSelect }) => {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
-  const [activities, setActivities] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedUserId, setSelectedUserId] = useState(null);
 
@@ -515,12 +514,8 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [statsRes, activitiesRes] = await Promise.all([
-        api.get('/admin/dashboard-stats/'),
-        api.get('/admin/recent-activities/'),
-      ]);
+      const statsRes = await api.get('/admin/dashboard-stats/');
       setStats(statsRes.data);
-      setActivities(activitiesRes.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -603,53 +598,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Recent Users */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h2 className="font-bold text-gray-800 mb-4">Recent Users</h2>
-          <div className="space-y-2 max-h-72 overflow-y-auto">
-            {activities?.recent_users?.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No users yet</p>}
-            {activities?.recent_users?.map(u => (
-              <button key={u.id} onClick={() => setSelectedUserId(u.id)}
-                className="w-full flex justify-between items-center py-2 px-2 rounded-xl hover:bg-orange-50 transition border-b border-gray-50 last:border-0 text-left">
-                <div>
-                  <p className="font-semibold text-gray-800 text-sm">{u.username}</p>
-                  <p className="text-xs text-gray-400">{new Date(u.created_at).toLocaleDateString()}</p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {u.is_active ? 'Active' : 'Blocked'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Withdrawals */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          <h2 className="font-bold text-gray-800 mb-4">Recent Withdrawals</h2>
-          <div className="space-y-2 max-h-72 overflow-y-auto">
-            {activities?.recent_withdrawals?.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No withdrawals yet</p>}
-            {activities?.recent_withdrawals?.map(w => (
-              <div key={w.id} className="flex justify-between items-center py-2 px-2 border-b border-gray-50 last:border-0">
-                <div>
-                  <p className="font-semibold text-gray-800 text-sm">{w.user__username}</p>
-                  <p className="text-xs text-gray-400">Rs {(w.amount * 100).toFixed(0)} · {w.payment_method}</p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  w.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                  w.status === 'approved' ? 'bg-green-100 text-green-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {w.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
     </div>
   );
 };
