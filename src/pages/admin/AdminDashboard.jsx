@@ -27,17 +27,17 @@ const UserDetail = ({ userId, onBack }) => {
   const load = async () => {
     setLoading(true);
     try {
-      const [detailRes, wRes, pkgRes, txRes] = await Promise.all([
+      const [detailRes, wRes, txRes] = await Promise.all([
         api.get(`/admin/user-detail/${userId}/`),
         api.get(`/admin/user-withdrawals/${userId}/`),
-        api.get(`/admin/package-payments/?status=all`),
         api.get(`/admin/user-transactions/${userId}/`).catch(() => ({ data: [] })),
       ]);
       setData(detailRes.data);
       setWithdrawals(wRes.data);
       setTransactions(txRes.data);
-      const userPkg = pkgRes.data.find(p => p.email === detailRes.data.email) || null;
-      setPackagePayment(userPkg);
+      const pkgRes = await api.get(`/admin/package-payments/?status=all&user=${userId}`).catch(() => ({ data: [] }));
+      const pkgList = Array.isArray(pkgRes.data) ? pkgRes.data : [];
+      setPackagePayment(pkgList.find(p => p.email === detailRes.data.email) || null);
       setForm({
         username: detailRes.data.username,
         email: detailRes.data.email,
