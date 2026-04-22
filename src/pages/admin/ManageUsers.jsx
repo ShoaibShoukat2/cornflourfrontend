@@ -26,25 +26,19 @@ const UserDetail = ({ userId, onBack }) => {
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const [detailRes, wRes, txRes] = await Promise.all([
-        api.get(`/admin/user-detail/${userId}/`),
-        api.get(`/admin/user-withdrawals/${userId}/`),
-        api.get(`/admin/user-transactions/${userId}/`).catch(() => ({ data: [] })),
-      ]);
-      setData(detailRes.data);
-      setWithdrawals(wRes.data);
-      setTransactions(txRes.data);
-      // Get user package separately using user-specific filter
-      const pkgRes = await api.get(`/admin/package-payments/?status=all&user=${userId}`).catch(() => ({ data: [] }));
-      const pkgList = Array.isArray(pkgRes.data) ? pkgRes.data : [];
-      setPackagePayment(pkgList.find(p => p.email === detailRes.data.email) || null);
+      const res = await api.get(`/admin/user-full/${userId}/`);
+      const { detail, withdrawals: wds, transactions: txs, package_payment } = res.data;
+      setData(detail);
+      setWithdrawals(wds);
+      setTransactions(txs);
+      setPackagePayment(package_payment);
       setForm({
-        username: detailRes.data.username,
-        email: detailRes.data.email,
-        phone: detailRes.data.phone || '',
-        level: detailRes.data.level,
+        username: detail.username,
+        email: detail.email,
+        phone: detail.phone || '',
+        level: detail.level,
         password: '',
-        balance: (detailRes.data.wallet.main_balance * 100).toFixed(0),
+        balance: (detail.wallet.main_balance * 100).toFixed(0),
       });
     } catch { setMsg('Failed to load user'); }
     finally { setLoading(false); }
