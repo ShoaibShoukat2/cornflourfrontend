@@ -196,6 +196,26 @@ const UserDetail = ({ userId, onBack }) => {
         </span>
       </div>
 
+      {/* Upliner Info */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">🔗 Upliner (Referred By)</p>
+        {data.referred_by ? (
+          <div className="flex items-center gap-3 bg-blue-50 rounded-xl px-4 py-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+              {data.referred_by.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-gray-800 text-sm">{data.referred_by.username}</p>
+              <p className="text-xs text-gray-500">{data.referred_by.email}</p>
+              <p className="text-xs text-blue-500 mt-0.5">Code: {data.referred_by.referral_code}</p>
+            </div>
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-semibold">Upliner</span>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 bg-gray-50 rounded-xl px-4 py-3">No upliner — Direct registration</p>
+        )}
+      </div>
+
       {/* Package Payment Status */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📦 Package Payment</p>

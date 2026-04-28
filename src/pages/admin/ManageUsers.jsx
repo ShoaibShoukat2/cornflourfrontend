@@ -113,6 +113,26 @@ const UserDetail = ({ userId, onBack }) => {
         <span className="px-3 py-2 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600">📅 {new Date(data.created_at).toLocaleDateString()}</span>
       </div>
 
+      {/* Upliner / Referrer Info */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">🔗 Upliner (Referred By)</p>
+        {data.referred_by ? (
+          <div className="flex items-center gap-3 bg-blue-50 rounded-xl px-4 py-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+              {data.referred_by.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-gray-800 text-sm">{data.referred_by.username}</p>
+              <p className="text-xs text-gray-500">{data.referred_by.email}</p>
+              <p className="text-xs text-blue-500 mt-0.5">Code: {data.referred_by.referral_code}</p>
+            </div>
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-semibold">Upliner</span>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 bg-gray-50 rounded-xl px-4 py-3">No upliner — Direct registration</p>
+        )}
+      </div>
+
       {packagePayment && (
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📦 Package Payment</p>
@@ -152,9 +172,11 @@ const UserDetail = ({ userId, onBack }) => {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📜 Full Earning History</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase">📜 Full Earning History ({transactions.length})</p>
+        </div>
         {transactions.length === 0 ? <p className="text-sm text-gray-400 text-center py-4">No transactions yet</p> : (
-          <div className="space-y-2 max-h-80 overflow-y-auto">
+          <div className="space-y-2 max-h-96 overflow-y-auto">
             {transactions.map(tx => {
               const isPos = tx.amount >= 0;
               const colors = { task:'bg-blue-100 text-blue-700', referral:'bg-purple-100 text-purple-700', bonus:'bg-green-100 text-green-700', withdrawal:'bg-red-100 text-red-700' };
@@ -176,25 +198,27 @@ const UserDetail = ({ userId, onBack }) => {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Withdrawal History</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">💸 Withdrawal History ({withdrawals.length})</p>
         {withdrawals.length === 0 ? <p className="text-sm text-gray-400 text-center py-4">No withdrawals yet</p> : (
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-96 overflow-y-auto">
             {withdrawals.map(wd => (
               <div key={wd.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-black text-gray-800">Rs {(wd.amount*100).toFixed(0)}</span>
                     <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-lg capitalize">{wd.payment_method}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${wd.status==='approved'?'bg-green-100 text-green-700':wd.status==='pending'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}`}>{wd.status}</span>
                   </div>
                   <p className="text-xs text-gray-700 mt-1 whitespace-pre-wrap">{wd.payment_details}</p>
-                  <p className="text-xs text-gray-400">{new Date(wd.created_at).toLocaleDateString()}</p>
-                  {wd.admin_note && <p className="text-xs text-gray-400 italic">Note: {wd.admin_note}</p>}
+                  <p className="text-xs text-gray-400">Requested: {new Date(wd.created_at).toLocaleString()}</p>
+                  {wd.processed_at && <p className="text-xs text-gray-400">Processed: {new Date(wd.processed_at).toLocaleString()}</p>}
+                  {wd.admin_note && <p className="text-xs text-blue-500 italic">Note: {wd.admin_note}</p>}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {wd.status === 'pending' ? <>
                     <button onClick={() => approveW(wd.id)} className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600">✅</button>
                     <button onClick={() => rejectW(wd.id)} className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600">❌</button>
-                  </> : <span className={`px-2 py-1 rounded-full text-xs font-semibold ${wd.status==='approved'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}`}>{wd.status==='approved'?'✅ Approved':'❌ Rejected'}</span>}
+                  </> : null}
                 </div>
               </div>
             ))}
