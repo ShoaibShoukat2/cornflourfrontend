@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -548,12 +548,12 @@ const AdminDashboard = () => {
   if (!stats) return <div className="text-center text-gray-400 py-20">No data available</div>;
 
   const statCards = [
-    { label: 'Total Users', value: stats.users.total, sub: `Today Approved: ${stats.users.today_approved || 0}`, color: 'from-blue-500 to-blue-600', icon: '👥' },
-    { label: 'Total Approved Users', value: stats.users.approved, sub: `Today Received: Rs ${Number(stats.users.today_deposited || 0).toFixed(0)}`, color: 'from-green-500 to-green-600', icon: '✅' },
-    { label: 'Total Deposited', value: `Rs ${(stats.financial.total_deposited).toFixed(0)}`, sub: 'Approved packages', color: 'from-orange-500 to-red-500', icon: '📥' },
-    { label: 'Total Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'L1 + L2 + L3', color: 'from-purple-500 to-purple-600', icon: '🤝' },
-    { label: 'Today Withdrawals', value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-yellow-500 to-yellow-600', icon: '📤' },
-    { label: 'Total Withdrawn', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'from-red-500 to-red-600', icon: '💸' },
+    { label: 'Total Users', value: stats.users.total, sub: `Today Approved: ${stats.users.today_approved || 0}`, color: 'from-blue-500 to-blue-600', icon: '👥', link: '/admin/users' },
+    { label: 'Total Approved Users', value: stats.users.approved, sub: `Today Received: Rs ${Number(stats.users.today_deposited || 0).toFixed(0)}`, color: 'from-green-500 to-green-600', icon: '✅', link: '/admin/reports' },
+    { label: 'Total Deposited', value: `Rs ${(stats.financial.total_deposited).toFixed(0)}`, sub: 'Approved packages', color: 'from-orange-500 to-red-500', icon: '📥', link: '/admin/packages' },
+    { label: 'Total Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'L1 + L2 + L3', color: 'from-purple-500 to-purple-600', icon: '🤝', link: '/admin/reports' },
+    { label: 'Today Withdrawals', value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-yellow-500 to-yellow-600', icon: '📤', link: '/admin/withdrawals' },
+    { label: 'Total Withdrawn', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'from-red-500 to-red-600', icon: '💸', link: '/admin/withdrawals' },
   ];
 
   const infoCards = [
