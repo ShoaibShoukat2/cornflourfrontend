@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import UserLayout from './components/UserLayout';
 import AdminLayout from './components/AdminLayout';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -44,7 +45,7 @@ const AppContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <UserLayout>
       <Navbar />
       <Routes>
         <Route path="/" element={<Login />} />
@@ -59,7 +60,7 @@ const AppContent = () => {
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
         <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
       </Routes>
-    </div>
+    </UserLayout>
   );
 };
 

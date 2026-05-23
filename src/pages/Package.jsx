@@ -9,7 +9,7 @@ const PACKAGES = [
     price: 700,
     emoji: '🌱',
     color: '#6B7280',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    gradient: 'linear-gradient(135deg, #833ab4 0%, #c13584 50%, #f77737 100%)',
     features: ['Daily Tasks', 'Referral Bonus', 'JazzCash / EasyPaisa'],
   },
   {
@@ -18,7 +18,7 @@ const PACKAGES = [
     price: 1400,
     emoji: '⭐',
     color: '#F97316',
-    gradient: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
+    gradient: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #f77737 100%)',
     badge: 'POPULAR',
     features: ['Daily Tasks', 'Rs 50 Referral Bonus', 'Daily Bonus', 'Withdrawals'],
   },
@@ -28,7 +28,7 @@ const PACKAGES = [
     price: 3200,
     emoji: '💎',
     color: '#8B5CF6',
-    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+    gradient: 'linear-gradient(135deg, #405de6 0%, #833ab4 50%, #c13584 100%)',
     badge: 'PREMIUM',
     features: ['Unlimited Tasks', 'High Referral Bonus', 'Priority Withdrawals', 'Daily Bonus'],
   },
@@ -38,7 +38,7 @@ const PACKAGES = [
     price: 4500,
     emoji: '🚀',
     color: '#F59E0B',
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
+    gradient: 'linear-gradient(135deg, #c13584 0%, #f77737 50%, #fcaf45 100%)',
     badge: 'VIP',
     features: ['Unlimited Tasks', 'Max Referral Bonus', 'Instant Withdrawals', 'VIP Support'],
   },
@@ -91,29 +91,29 @@ const Package = () => {
 
   // ── ACTIVE ──
   if (step === 'active') return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full shadow-2xl">
+    <div className="flex items-center justify-center p-4 min-h-[70vh]">
+      <div className="neon-card p-8 text-center max-w-sm w-full">
         <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-2xl font-black text-gray-800 mb-2">Package Active!</h2>
-        <p className="text-gray-500">Your package is active. Start earning now!</p>
+        <h2 className="text-2xl font-black neon-gradient-text mb-2">Package Active!</h2>
+        <p className="neon-subtitle">Your package is active. Start earning now!</p>
       </div>
     </div>
   );
 
   // ── SUBMITTED ──
   if (step === 'submitted') return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)' }}>
-      <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full shadow-2xl">
+    <div className="flex items-center justify-center p-4 min-h-[70vh]">
+      <div className="neon-card p-8 text-center max-w-sm w-full">
         <div className="text-6xl mb-4">⏳</div>
-        <h2 className="text-2xl font-black text-orange-500 mb-2">Under Review</h2>
-        <p className="text-gray-600 text-sm">Your payment is being verified. Account will be activated within <span className="font-bold text-orange-500">24 hours</span>.</p>
+        <h2 className="text-2xl font-black neon-gradient-text mb-2">Under Review</h2>
+        <p className="neon-subtitle text-sm">Your payment is being verified. Account will be activated within <span className="font-bold text-orange-500">24 hours</span>.</p>
       </div>
     </div>
   );
 
   // ── PAYMENT ──
   if (step === 'payment' && account && selectedPkg) return (
-    <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+    <div className="py-8 px-4">
       <div className="max-w-sm mx-auto space-y-4">
         {/* Header */}
         <div className="text-center text-white mb-6">
@@ -172,13 +172,13 @@ const Package = () => {
 
   // ── INFO ──
   return (
-    <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+    <div className="py-8 px-4">
       <div className="max-w-sm mx-auto">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <img src={logo} alt="Corn Flour" className="w-20 h-20 rounded-3xl mx-auto mb-3 object-cover shadow-2xl border-2 border-white border-opacity-20" />
-          <h1 className="text-2xl font-black text-white">Choose Your Plan</h1>
+          <img src={logo} alt="Corn Flour" className="w-20 h-20 rounded-3xl mx-auto mb-3 object-cover neon-task-logo border-2 border-purple-500/30" />
+          <h1 className="text-2xl font-black neon-title">Choose Your Plan</h1>
           <p className="text-white text-opacity-60 text-sm mt-1 opacity-60">One time investment • Earn daily</p>
         </div>
 
@@ -187,7 +187,7 @@ const Package = () => {
         {/* Package Cards */}
         <div className="space-y-4">
           {PACKAGES.map(pkg => (
-            <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-2xl"
+            <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-2xl neon-card-glow animate-fadeIn"
               style={{ background: pkg.gradient }}>
               {pkg.badge && (
                 <div className="absolute top-3 right-3 bg-white bg-opacity-25 text-white text-xs font-black px-3 py-1 rounded-full">

@@ -75,7 +75,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
         <img
           src={tasklogo}
           alt={`Task ${index + 1}`}
-          className={`w-56 h-56 rounded-3xl object-cover shadow-xl ${phase === 'idle' ? 'active:scale-95 transition-transform' : ''}`}
+          className={`w-56 h-56 rounded-3xl object-cover neon-task-logo ${phase === 'idle' ? 'active:scale-95 transition-transform cursor-pointer' : ''}`}
         />
         {/* Timer overlay */}
         {phase === 'timer' && (
@@ -96,7 +96,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
         {/* Idle tap hint */}
         {phase === 'idle' && (
           <div className="absolute bottom-3 left-0 right-0 flex justify-center">
-            <span className="bg-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
+            <span className="neon-btn text-xs font-bold px-4 py-1.5 shadow" style={{ borderRadius: '9999px' }}>
               👆 Tap to Start
             </span>
           </div>
@@ -105,8 +105,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 
       {/* Timer / Claim — only shows when active */}
       {phase === 'ready' && (
-        <button onClick={completeTask}
-          className="bg-green-500 text-white px-5 py-2 rounded-2xl font-bold text-sm shadow hover:bg-green-600 transition">
+        <button onClick={completeTask} className="neon-btn text-sm py-2 px-5">
           ✅ Claim Rs {currentEarning}
         </button>
       )}
@@ -114,9 +113,8 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
         <div className="flex flex-col items-center gap-2 w-40">
           <input value={verCode} onChange={e => setVerCode(e.target.value)}
             placeholder="Verify code"
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm text-center focus:outline-none focus:border-orange-400" />
-          <button onClick={completeTask}
-            className="w-full bg-green-500 text-white py-2 rounded-xl font-bold text-sm">
+            className="w-full neon-input text-sm text-center" />
+          <button onClick={completeTask} className="w-full neon-btn text-sm py-2">
             ✅ Submit
           </button>
         </div>
@@ -203,64 +201,64 @@ const Tasks = () => {
   const currentEarning = LEVEL_EARNINGS.find(l => l.level === Math.min(userLevel, 9))?.earning || 7;
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    <div className="neon-loading">
+      <div className="neon-spinner"></div>
     </div>
   );
 
   if (locked) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-sm w-full">
+    <div className="neon-loading p-4">
+      <div className="neon-card p-8 text-center max-w-sm w-full">
         <p className="text-5xl mb-4">🔒</p>
-        <h2 className="text-xl font-black text-gray-800 mb-2">Tasks Locked</h2>
+        <h2 className="text-xl font-black text-white mb-2">Tasks Locked</h2>
         <p className="text-gray-500 text-sm">Buy a package to unlock all tasks and start earning.</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
+    <div className="py-6 px-4">
       <div className="max-w-2xl mx-auto space-y-5">
 
         {/* Header */}
         <div className="text-center">
-          <img src={tasklogo} alt="Tasks" className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover shadow-md" />
-          <h1 className="text-2xl font-black text-gray-800">🎯 Tasks</h1>
-          <p className="text-gray-500 text-sm mt-1">Complete tasks and earn money instantly</p>
+          <img src={tasklogo} alt="Tasks" className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover neon-task-logo" />
+          <h1 className="text-2xl font-black neon-title">🎯 Tasks</h1>
+          <p className="neon-subtitle text-sm mt-1">Complete tasks and earn money instantly</p>
           {walletBalance !== null && (
-            <div className="mt-3 inline-block bg-green-50 border border-green-200 rounded-2xl px-5 py-2">
-              <p className="text-green-700 font-black text-lg">Rs {(walletBalance * 100).toFixed(0)}</p>
-              <p className="text-green-500 text-xs">Current Balance</p>
+            <div className="mt-3 inline-block neon-stat px-5 py-2">
+              <p className="neon-stat-value text-lg">Rs {(walletBalance * 100).toFixed(0)}</p>
+              <p className="neon-stat-label">Current Balance</p>
             </div>
           )}
         </div>
 
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-3">
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-orange-500">{available.length}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Available</p>
+          <div className="neon-stat p-3">
+            <p className="neon-stat-value text-xl">{available.length}</p>
+            <p className="neon-stat-label mt-0.5">Available</p>
           </div>
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-green-500">{completedToday}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Done Today</p>
+          <div className="neon-stat p-3">
+            <p className="neon-stat-value text-xl">{completedToday}</p>
+            <p className="neon-stat-label mt-0.5">Done Today</p>
           </div>
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-blue-500">{dailyLimit}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Daily Limit</p>
+          <div className="neon-stat p-3">
+            <p className="neon-stat-value text-xl">{dailyLimit}</p>
+            <p className="neon-stat-label mt-0.5">Daily Limit</p>
           </div>
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <p className="text-xl font-black text-purple-500">Rs {(completedToday * currentEarning).toFixed(0)}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Earned</p>
+          <div className="neon-stat p-3">
+            <p className="neon-stat-value text-xl">Rs {(completedToday * currentEarning).toFixed(0)}</p>
+            <p className="neon-stat-label mt-0.5">Earned</p>
           </div>
         </div>
 
         {/* Available Tasks */}
         {available.length === 0 ? (
-          <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
+          <div className="neon-card p-10 text-center">
             <p className="text-4xl mb-3">🎉</p>
-            <p className="font-bold text-gray-700">All tasks completed!</p>
-            <p className="text-gray-400 text-sm mt-1">Check back later for new tasks</p>
+            <p className="font-bold text-white">All tasks completed!</p>
+            <p className="neon-subtitle text-sm mt-1">Check back later for new tasks</p>
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-6">
@@ -281,16 +279,16 @@ const Tasks = () => {
 
         {/* Completed Tasks */}
         {completed.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-3">✅ Completed</p>
+          <div className="neon-card p-4">
+            <p className="text-xs font-semibold neon-subtitle uppercase mb-3">✅ Completed</p>
             <div className="space-y-2">
               {completed.map(task => (
-                <div key={task.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <div key={task.id} className="flex items-center justify-between py-2 border-b border-purple-500/10 last:border-0">
                   <div className="flex items-center gap-2">
                     <span>{ICONS[task.task_type] || '🎯'}</span>
-                    <p className="text-sm text-gray-600">{task.title}</p>
+                    <p className="text-sm text-white/70">{task.title}</p>
                   </div>
-                  <span className="text-xs font-bold text-green-600">+Rs {currentEarning}</span>
+                  <span className="text-xs font-bold neon-gradient-text">+Rs {currentEarning}</span>
                 </div>
               ))}
             </div>

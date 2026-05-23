@@ -21,116 +21,96 @@ const Settings = () => {
     }
   };
 
+  const EyeIcon = ({ show }) => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {show ? (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+      ) : (
+        <>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </>
+      )}
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">⚙️ SETTINGS</h1>
-          <p className="text-lg text-gray-600">Your Account • Profile Settings</p>
-        </div>
+    <section className="py-6">
+      <section className="max-w-4xl mx-auto px-4">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold neon-title mb-2">⚙️ SETTINGS</h1>
+          <p className="text-lg neon-subtitle">Your Account • Profile Settings</p>
+        </header>
 
         {message && (
-          <div className="bg-green-100 border-2 border-green-400 text-green-800 px-6 py-4 rounded-2xl mb-6 text-center text-lg font-semibold shadow-lg">
+          <section className={`neon-alert mb-6 text-lg ${message.includes('✅') ? 'neon-alert-success' : 'neon-alert-error'}`}>
             {message}
-          </div>
+          </section>
         )}
 
-        {/* Profile Information */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">👤 YOUR PROFILE</h2>
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-gray-600 font-semibold">Username:</span>
-              <span className="font-bold text-lg">{user?.username}</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-gray-600 font-semibold">Email:</span>
-              <span className="font-bold text-lg">{user?.email}</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-gray-600 font-semibold">Level:</span>
-              <span className="font-bold text-lg text-blue-600">Level {user?.level}</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="text-gray-600 font-semibold">Points:</span>
-              <span className="font-bold text-lg text-purple-600">{user?.points} points</span>
-            </div>
-          </div>
-        </div>
+        <section className="neon-card p-6 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">👤 YOUR PROFILE</h2>
+          <section className="space-y-4">
+            {[
+              { label: 'Username', value: user?.username },
+              { label: 'Email', value: user?.email },
+              { label: 'Level', value: `Level ${user?.level}`, highlight: true },
+              { label: 'Points', value: `${user?.points} points`, highlight: true },
+            ].map((row) => (
+              <section key={row.label} className="rounded-xl p-4 flex justify-between items-center border border-purple-500/20 bg-black/30">
+                <span className="neon-subtitle font-semibold">{row.label}:</span>
+                <span className={`font-bold text-lg ${row.highlight ? 'neon-gradient-text' : 'text-white'}`}>{row.value}</span>
+              </section>
+            ))}
+          </section>
+        </section>
 
-        {/* Change Password */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">🔒 CHANGE PASSWORD</h2>
+        <section className="neon-card p-6 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">🔒 CHANGE PASSWORD</h2>
           <form onSubmit={handleChangePassword} className="space-y-6">
-            <div>
-              <label className="block text-gray-700 mb-3 text-lg font-semibold">Current Password</label>
-              <div className="relative">
-                <input
-                  type={showOldPassword ? "text" : "password"}
-                  value={passwordData.old_password}
-                  onChange={(e) => setPasswordData({ ...passwordData, old_password: e.target.value })}
-                  placeholder="Enter your current password"
-                  className="w-full px-4 py-4 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg"
-                  required
-                />
-                <button type="button" onClick={() => setShowOldPassword(!showOldPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {showOldPassword
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                      : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
-                    }
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-3 text-lg font-semibold">New Password</label>
-              <div className="relative">
-                <input
-                  type={showNewPassword ? "text" : "password"}
-                  value={passwordData.new_password}
-                  onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                  placeholder="Enter your new password"
-                  className="w-full px-4 py-4 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 text-lg"
-                  required
-                />
-                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {showNewPassword
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                      : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
-                    }
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <button type="submit"
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-green-700 transition shadow-lg">
-              🔒 CHANGE PASSWORD
-            </button>
+            {[
+              { key: 'old_password', label: 'Current Password', show: showOldPassword, toggle: () => setShowOldPassword(!showOldPassword), placeholder: 'Enter your current password' },
+              { key: 'new_password', label: 'New Password', show: showNewPassword, toggle: () => setShowNewPassword(!showNewPassword), placeholder: 'Enter your new password' },
+            ].map((field) => (
+              <section key={field.key}>
+                <label className="neon-label text-lg">{field.label}</label>
+                <section className="relative">
+                  <input
+                    type={field.show ? 'text' : 'password'}
+                    value={passwordData[field.key]}
+                    onChange={(e) => setPasswordData({ ...passwordData, [field.key]: e.target.value })}
+                    placeholder={field.placeholder}
+                    className="neon-input text-lg pr-12"
+                    required
+                  />
+                  <button type="button" onClick={field.toggle}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70">
+                    <EyeIcon show={field.show} />
+                  </button>
+                </section>
+              </section>
+            ))}
+            <button type="submit" className="neon-btn neon-btn-block text-lg py-4">🔒 CHANGE PASSWORD</button>
           </form>
-        </div>
+        </section>
 
-        {/* Account Info */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">📊 ACCOUNT INFO</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-blue-50 rounded-xl p-6 text-center">
-              <div className="text-3xl mb-2">📅</div>
-              <p className="text-gray-600 font-semibold mb-1">Member Since</p>
-              <p className="text-xl font-bold text-blue-600">{new Date(user?.created_at).toLocaleDateString()}</p>
-            </div>
-            <div className="bg-purple-50 rounded-xl p-6 text-center">
-              <div className="text-3xl mb-2">🔗</div>
-              <p className="text-gray-600 font-semibold mb-1">Referral Code</p>
-              <p className="text-xl font-bold text-purple-600">{user?.referral_code}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <section className="neon-card p-6">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">📊 ACCOUNT INFO</h2>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section className="neon-stat p-6">
+              <span className="text-3xl block mb-2">📅</span>
+              <p className="neon-subtitle font-semibold mb-1">Member Since</p>
+              <p className="text-xl font-bold neon-gradient-text">{new Date(user?.created_at).toLocaleDateString()}</p>
+            </section>
+            <section className="neon-stat p-6">
+              <span className="text-3xl block mb-2">🔗</span>
+              <p className="neon-subtitle font-semibold mb-1">Referral Code</p>
+              <p className="text-xl font-bold neon-gradient-text">{user?.referral_code}</p>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
   );
 };
 

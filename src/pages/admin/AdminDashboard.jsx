@@ -585,7 +585,15 @@ const AdminDashboard = () => {
               <span className="text-xl">{s.icon}</span>
             </div>
             <p className="text-xl font-black">{s.value}</p>
-            <p className="text-xs opacity-70 mt-1">{s.sub}</p>
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-xs opacity-70">{s.sub}</p>
+              {s.link && (
+                <Link to={s.link}
+                  className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold px-2 py-1 rounded-lg transition flex items-center gap-1">
+                  View All →
+                </Link>
+              )}
+            </div>
           </div>
         ))}
       </div>
