@@ -177,7 +177,7 @@ const Package = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <img src={logo} alt="Corn Flour" className="w-20 h-20 rounded-3xl mx-auto mb-3 object-cover neon-task-logo border-2 border-purple-500/30" />
+          <img src={logo} alt="INSTOVA" className="w-20 h-20 rounded-3xl mx-auto mb-3 object-cover neon-task-logo border-2 border-purple-500/30" />
           <h1 className="text-2xl font-black neon-title">Choose Your Plan</h1>
           <p className="text-white text-opacity-60 text-sm mt-1 opacity-60">One time investment • Earn daily</p>
         </div>

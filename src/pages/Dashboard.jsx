@@ -75,9 +75,9 @@ const Dashboard = () => {
       <header className="neon-hero text-white px-4 pt-8 pb-16 relative z-10">
         <section className="max-w-lg mx-auto text-center">
           <section className="neon-logo-ring w-16 h-16 mx-auto mb-3">
-            <img src={tasklogo} alt="Corn Flour" className="w-full h-full" />
+            <img src={tasklogo} alt="INSTOVA" className="w-full h-full" />
           </section>
-          <h1 className="text-xl font-bold text-white drop-shadow-lg">Corn Flour</h1>
+          <h1 className="text-xl font-bold text-white drop-shadow-lg">INSTOVA</h1>
           <p className="text-white/80 text-sm mt-1">Hello, {user?.username}!</p>
         </section>
       </header>
@@ -102,7 +102,7 @@ const Dashboard = () => {
 
         {!hasPackage && !isPending && (
           <Link to="/package" className="block neon-banner mb-4 hover:opacity-95 transition">
-            <p className="font-black text-white text-base">📦 Buy Corn Plan — Rs 1800</p>
+            <p className="font-black text-white text-base">📦 Buy INSTOVA Plan — Rs 1800</p>
             <p className="text-white/80 text-xs mt-1">Unlock tasks, withdrawals & full earning features</p>
           </Link>
         )}
@@ -116,7 +116,7 @@ const Dashboard = () => {
 
         {hasPackage && (
           <section className="neon-alert neon-alert-success mb-4">
-            <p className="font-bold text-sm">✅ Corn Plan Active — Full Access</p>
+            <p className="font-bold text-sm">✅ INSTOVA Plan Active — Full Access</p>
           </section>
         )}
 

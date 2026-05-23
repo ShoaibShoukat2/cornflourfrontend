@@ -6,7 +6,7 @@ const Contact = () => {
       <section className="neon-card neon-card-glow p-8 w-full max-w-sm text-center">
         <section className="neon-card-inner p-8">
           <section className="neon-logo-ring w-20 h-20 mx-auto mb-4">
-            <img src={logo} alt="Corn Flour" className="w-full h-full" />
+            <img src={logo} alt="INSTOVA" className="w-full h-full" />
           </section>
           <h1 className="text-2xl font-black text-white mb-1">Contact Us</h1>
           <p className="neon-subtitle text-sm mb-8">Join our official WhatsApp groups for support and updates</p>
@@ -38,7 +38,7 @@ const Contact = () => {
             </a>
           </section>
 
-          <p className="text-xs text-white/30 mt-6">Corn Flour — Support & Updates</p>
+          <p className="text-xs text-white/30 mt-6">INSTOVA — Support & Updates</p>
         </section>
       </section>
     </section>

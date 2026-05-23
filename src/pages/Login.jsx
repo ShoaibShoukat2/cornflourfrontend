@@ -36,9 +36,9 @@ const Login = () => {
         <section className="neon-card-inner p-8">
           <header className="text-center mb-8">
             <section className="neon-logo-ring w-20 h-20 mx-auto mb-4">
-              <img src={logo} alt="Corn Flour" className="w-full h-full" />
+              <img src={logo} alt="INSTOVA" className="w-full h-full" />
             </section>
-            <h1 className="text-2xl font-bold neon-gradient-text">Corn Flour</h1>
+            <h1 className="text-2xl font-bold neon-gradient-text">INSTOVA</h1>
           </header>
 
           <h2 className="text-xl font-semibold text-center mb-6 text-white/90">Login To Your Account</h2>

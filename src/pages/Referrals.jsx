@@ -28,7 +28,7 @@ const Referrals = () => {
   };
 
   const shareWhatsApp = () => {
-    const message = `Join Corn Flour and earn money daily! Use my link: ${stats.referral_link}`;
+    const message = `Join INSTOVA and earn money daily! Use my link: ${stats.referral_link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 

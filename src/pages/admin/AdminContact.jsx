@@ -5,7 +5,7 @@ const AdminContact = () => {
     <div className="flex items-center justify-center p-4 min-h-[60vh]">
       <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm text-center">
 
-        <img src={logo} alt="Corn Flour" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover shadow-lg" />
+        <img src={logo} alt="INSTOVA" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover shadow-lg" />
         <h1 className="text-2xl font-black text-gray-800 mb-1">Contact Us</h1>
         <p className="text-gray-500 text-sm mb-8">Join our official WhatsApp groups for support and updates</p>
 
@@ -35,7 +35,7 @@ const AdminContact = () => {
           </a>
         </div>
 
-        <p className="text-xs text-gray-400 mt-6">Corn Flour — Support & Updates</p>
+        <p className="text-xs text-gray-400 mt-6">INSTOVA — Support & Updates</p>
       </div>
     </div>
   );

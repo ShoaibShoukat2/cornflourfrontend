@@ -222,9 +222,9 @@ const AdminLayout = ({ children }) => {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-slate-700/50 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Corn Flour" className="w-10 h-10 rounded-xl object-cover shadow-lg flex-shrink-0" />
+          <img src={logo} alt="INSTOVA" className="w-10 h-10 rounded-xl object-cover shadow-lg flex-shrink-0" />
           <div>
-            <p className="font-black text-white text-sm leading-tight">Corn Flour</p>
+            <p className="font-black text-white text-sm leading-tight">INSTOVA</p>
             <p className="text-slate-400 text-xs mt-0.5">Admin Panel</p>
           </div>
           {onClose && (
@@ -347,7 +347,7 @@ const AdminLayout = ({ children }) => {
               <p className="font-bold text-gray-800 text-base leading-tight">
                 {currentPage?.icon} {currentPage?.label || 'Admin Panel'}
               </p>
-              <p className="text-gray-400 text-xs leading-tight hidden sm:block">{currentPage?.desc || 'Corn Flour Administration'}</p>
+              <p className="text-gray-400 text-xs leading-tight hidden sm:block">{currentPage?.desc || 'INSTOVA Administration'}</p>
             </div>
           </div>
 

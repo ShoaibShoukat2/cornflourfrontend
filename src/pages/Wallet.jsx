@@ -46,7 +46,7 @@ const Wallet = () => {
       fetchData();
     } catch (error) {
       if (error.response?.data?.error === 'package_required') {
-        setMessage('🔒 Buy the Corn Plan to withdraw money');
+        setMessage('🔒 Buy the INSTOVA Plan to withdraw money');
       } else {
         setMessage(error.response?.data?.error || 'Request failed');
       }

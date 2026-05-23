@@ -188,7 +188,7 @@ const ManageTasks = () => {
                   Verification Code <span className="text-gray-400 font-normal">(leave blank = no verification)</span>
                 </label>
                 <input value={form.verification_code} onChange={e => setForm({ ...form, verification_code: e.target.value })}
-                  placeholder="e.g. CORN123"
+                  placeholder="e.g. INSTOVA123"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
               </div>
 

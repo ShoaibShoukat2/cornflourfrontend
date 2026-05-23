@@ -10,6 +10,7 @@ const Home = () => {
           <div className="text-8xl md:text-9xl mb-6">💰</div>
           
           {/* Simple Heading */}
+          <p className="text-lg md:text-xl font-bold tracking-widest uppercase mb-4 opacity-90">INSTOVA</p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6">
             Ghar Baithe Paise Kamao
           </h1>
@@ -194,7 +195,7 @@ const Home = () => {
 
       {/* Footer - Simple */}
       <div className="bg-gray-900 text-white py-6 text-center">
-        <p className="text-lg">© 2026 Corn Flour</p>
+        <p className="text-lg">© 2026 INSTOVA</p>
       </div>
     </div>
   );

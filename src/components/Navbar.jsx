@@ -26,9 +26,9 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="neon-logo-ring w-10 h-10">
-              <img src={logo} alt="Corn Flour" className="w-full h-full" />
+              <img src={logo} alt="INSTOVA" className="w-full h-full" />
             </div>
-            <span className="text-xl font-bold neon-gradient-text">Corn Flour</span>
+            <span className="text-xl font-bold neon-gradient-text">INSTOVA</span>
           </Link>
 
           <button
