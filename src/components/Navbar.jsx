@@ -21,7 +21,7 @@ const Navbar = () => {
     `neon-nav-link ${isActive(path) ? 'neon-nav-link-active' : ''}`;
 
   return (
-    <nav className="neon-nav sticky top-0 z-50">
+    <nav className={`neon-nav sticky top-0 z-50${user && !user.is_staff ? ' neon-nav-app-mobile' : ''}`}>
       <section className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 group">

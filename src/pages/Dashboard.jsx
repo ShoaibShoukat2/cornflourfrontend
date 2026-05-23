@@ -4,14 +4,55 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import tasklogo from '../assets/tasklogo.jpeg';
 
+const GridIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+  </svg>
+);
+
+const StatsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M4 19V5M4 19h16M8 19V11M12 19V7M16 19V14" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const OfferIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.8 5.7 21l2.3-7-6-4.6h7.6L12 2z" strokeLinejoin="round" />
+  </svg>
+);
+
+const HIGHLIGHTS = [
+  { to: '/tasks', emoji: '🎯', label: 'Tasks' },
+  { to: '/wallet', emoji: '💰', label: 'Wallet' },
+  { to: '/referrals', emoji: '👥', label: 'Team' },
+  { to: '/package', emoji: '📦', label: 'Package' },
+  { to: '/contact', emoji: '📩', label: 'Contact' },
+  { to: '/settings', emoji: '⚙️', label: 'Settings' },
+];
+
+const GRID_ITEMS = [
+  { to: '/tasks', icon: '🎯', label: 'Tasks', needsPackage: true },
+  { to: '/wallet', icon: '💸', label: 'Withdraw', needsPackage: true },
+  { to: '/referrals', icon: '👥', label: 'Referrals', needsPackage: false },
+  { to: '/package', icon: '📦', label: 'Package', needsPackage: false },
+  { to: '/contact', icon: '📩', label: 'Contact', needsPackage: false },
+  { to: '/settings', icon: '⚙️', label: 'Settings', needsPackage: false },
+  { to: '/wallet', icon: '💵', label: 'Balance', needsPackage: false },
+  { to: '/tasks', icon: '✅', label: 'Earn', needsPackage: true },
+  { to: '/referrals', icon: '🔗', label: 'Invite', needsPackage: false },
+];
+
 const Dashboard = () => {
   const { user, fetchUser } = useContext(AuthContext);
   const [wallet, setWallet] = useState(null);
   const [referralStats, setReferralStats] = useState(null);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [packageStatus, setPackageStatus] = useState('none');
-  const [message, setMessage] = useState('');
-  const [msgType, setMsgType] = useState('success');
+  const [activeTab, setActiveTab] = useState('grid');
 
   useEffect(() => {
     fetchData();
@@ -40,133 +81,193 @@ const Dashboard = () => {
     }
   };
 
-  const claimDailyBonus = async () => {
-    try {
-      const response = await api.post('/tasks/daily-bonus/');
-      setMsgType('success');
-      setMessage(`Daily Bonus Claimed! Rs ${(response.data.amount * 100).toFixed(0)} added to your wallet`);
-      fetchData();
-    } catch (error) {
-      setMsgType('error');
-      setMessage(error.response?.data?.error || 'Could not claim bonus, try again later');
-    }
-  };
-
-  if (!wallet) return (
-    <section className="neon-loading">
-      <div className="neon-spinner" />
-      <p className="neon-loading-text">Loading...</p>
-    </section>
-  );
+  if (!wallet) {
+    return (
+      <section className="neon-loading">
+        <span className="neon-spinner" />
+        <p className="neon-loading-text">Loading...</p>
+      </section>
+    );
+  }
 
   const hasPackage = packageStatus === 'approved' || user?.has_package;
   const isPending = packageStatus === 'pending';
-  const completedTasks = completedTasksCount;
-
-  const LockedOverlay = () => (
-    <Link to="/package" className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center z-10 backdrop-blur-sm border border-purple-500/30">
-      <span className="text-2xl">🔒</span>
-      <span className="text-white text-xs font-bold mt-1 neon-gradient-text">Buy Package</span>
-    </Link>
-  );
+  const balance = (wallet.main_balance * 100).toFixed(0);
+  const totalEarned = (wallet.total_earned * 100).toFixed(0);
+  const teamCount = referralStats?.total_referrals || 0;
 
   return (
-    <section className="pb-8">
-      <header className="neon-hero text-white px-4 pt-8 pb-16 relative z-10">
-        <section className="max-w-lg mx-auto text-center">
-          <section className="neon-logo-ring w-16 h-16 mx-auto mb-3">
-            <img src={tasklogo} alt="INSTOVA" className="w-full h-full" />
-          </section>
-          <h1 className="text-xl font-bold text-white drop-shadow-lg">INSTOVA</h1>
-          <p className="text-white/80 text-sm mt-1">Hello, {user?.username}!</p>
-        </section>
+    <section className="ig-profile">
+      {/* IG-style username header */}
+      <header className="ig-profile-header">
+        <span className="ig-profile-header-lock" aria-hidden="true">🔒</span>
+        <h1 className="ig-profile-header-title">{user?.username}</h1>
+        <Link to="/settings" className="ig-profile-header-menu" aria-label="Menu">☰</Link>
       </header>
 
-      <section className="max-w-lg mx-auto px-4 -mt-10 pb-8 relative z-10">
-        <section className="neon-balance-card p-6 mb-4 text-center">
-          <p className="neon-subtitle text-sm mb-1">Your Balance</p>
-          <p className="neon-balance-amount mb-1">
-            Rs {(wallet.main_balance * 100).toFixed(0)}
-          </p>
-          <p className="neon-subtitle text-xs mb-4">Available to withdraw</p>
-          {hasPackage ? (
-            <Link to="/wallet" className="neon-btn inline-block">
-              Withdraw Money
-            </Link>
-          ) : (
-            <Link to="/package" className="neon-btn-outline neon-btn inline-block opacity-60">
-              🔒 Withdraw (Buy Package)
-            </Link>
-          )}
+      {/* Avatar + stats row (posts / followers / following layout) */}
+      <section className="ig-profile-top">
+        <section className="ig-profile-avatar-wrap">
+          <img src={tasklogo} alt={user?.username} />
         </section>
-
-        {!hasPackage && !isPending && (
-          <Link to="/package" className="block neon-banner mb-4 hover:opacity-95 transition">
-            <p className="font-black text-white text-base">📦 Buy INSTOVA Plan — Rs 1800</p>
-            <p className="text-white/80 text-xs mt-1">Unlock tasks, withdrawals & full earning features</p>
-          </Link>
-        )}
-
-        {isPending && (
-          <section className="neon-alert neon-alert-warning mb-4">
-            <p className="font-bold text-sm">⏳ Package Under Review</p>
-            <p className="text-xs mt-1 opacity-80">Your payment is being verified. Features will unlock within 24 hours.</p>
+        <section className="ig-profile-stats">
+          <section>
+            <span className="ig-profile-stat-value">Rs {balance}</span>
+            <span className="ig-profile-stat-label">Balance</span>
           </section>
-        )}
-
-        {hasPackage && (
-          <section className="neon-alert neon-alert-success mb-4">
-            <p className="font-bold text-sm">✅ INSTOVA Plan Active — Full Access</p>
+          <section>
+            <span className="ig-profile-stat-value">{completedTasksCount}</span>
+            <span className="ig-profile-stat-label">Tasks</span>
           </section>
-        )}
-
-        {message && (
-          <section className={`neon-alert mb-4 ${msgType === 'success' ? 'neon-alert-success' : 'neon-alert-error'}`}>
-            {message}
+          <section>
+            <span className="ig-profile-stat-value">{teamCount}</span>
+            <span className="ig-profile-stat-label">Team</span>
           </section>
-        )}
-
-        <section className="grid grid-cols-3 gap-3 mb-4">
-          <section className="neon-stat neon-delay-1">
-            <p className="neon-stat-value">Rs {(wallet.total_earned * 100).toFixed(0)}</p>
-            <p className="neon-stat-label">Total Earned</p>
-          </section>
-          <section className="neon-stat neon-delay-2">
-            <p className="neon-stat-value">{completedTasks}</p>
-            <p className="neon-stat-label">Tasks Done</p>
-          </section>
-          <section className="neon-stat neon-delay-3">
-            <p className="neon-stat-value">{referralStats?.total_referrals || 0}</p>
-            <p className="neon-stat-label">Active Team</p>
-          </section>
-        </section>
-
-        <section className="grid grid-cols-2 gap-3 mb-4">
-          <section className="relative">
-            <section className={`neon-action flex flex-col items-center justify-center py-6 ${hasPackage ? '' : 'opacity-60'}`}>
-              <span className="text-3xl mb-2">🎯</span>
-              <span className="font-bold text-white text-sm">Do Tasks</span>
-              <span className="text-xs text-white/50 mt-1">Earn money</span>
-            </section>
-            {hasPackage ? <Link to="/tasks" className="absolute inset-0 rounded-2xl" /> : <LockedOverlay />}
-          </section>
-
-          <section className="relative">
-            <section className={`neon-action neon-action-green flex flex-col items-center justify-center py-6 ${!hasPackage ? 'opacity-60' : ''}`}>
-              <span className="text-3xl mb-2">💸</span>
-              <span className="font-bold text-white text-sm">Withdraw</span>
-              <span className="text-xs text-white/70 mt-1">Get your money</span>
-            </section>
-            {hasPackage ? <Link to="/wallet" className="absolute inset-0 rounded-2xl" /> : <LockedOverlay />}
-          </section>
-        </section>
-
-        <section className="neon-banner">
-          <p className="text-sm font-bold text-white">
-            🎉 Invite 50 friends and earn Rs 5,000 bonus!
-          </p>
         </section>
       </section>
+
+      {/* Bio */}
+      <section className="ig-profile-bio">
+        <p className="ig-profile-bio-name">{user?.username}</p>
+        <p className="ig-profile-bio-text">
+          Level {user?.level ?? 0} · INSTOVA Member
+          <br />
+          Rs {balance} available to withdraw
+        </p>
+        {referralStats?.referral_link && (
+          <p className="ig-profile-bio-link mt-1 truncate">{referralStats.referral_link}</p>
+        )}
+      </section>
+
+      {/* Action buttons */}
+      <section className="ig-profile-actions">
+        {hasPackage ? (
+          <Link to="/wallet" className="ig-profile-btn">Withdraw</Link>
+        ) : (
+          <Link to="/package" className="ig-profile-btn">Buy Plan</Link>
+        )}
+        {hasPackage ? (
+          <Link to="/tasks" className="ig-profile-btn ig-profile-btn-primary">Do Tasks</Link>
+        ) : (
+          <Link to="/package" className="ig-profile-btn ig-profile-btn-primary">Unlock Tasks</Link>
+        )}
+      </section>
+
+      {/* Story highlights */}
+      <section className="ig-highlights">
+        {HIGHLIGHTS.map((h) => (
+          <Link key={h.label} to={h.to} className="ig-highlight">
+            <span className="ig-highlight-ring">{h.emoji}</span>
+            <span className="ig-highlight-label">{h.label}</span>
+          </Link>
+        ))}
+      </section>
+
+      {/* Alerts */}
+      {!hasPackage && !isPending && (
+        <Link to="/package" className="block neon-banner mb-3 text-center text-sm py-3">
+          📦 Buy INSTOVA Plan — Rs 1800
+        </Link>
+      )}
+      {isPending && (
+        <section className="neon-alert neon-alert-warning mb-3 text-sm">⏳ Package under review (24h)</section>
+      )}
+      {hasPackage && (
+        <section className="neon-alert neon-alert-success mb-3 text-sm">✅ INSTOVA Plan Active</section>
+      )}
+
+      {/* Tab bar */}
+      <section className="ig-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'grid'}
+          className={`ig-tab${activeTab === 'grid' ? ' ig-tab-active' : ''}`}
+          onClick={() => setActiveTab('grid')}
+        >
+          <GridIcon />
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'stats'}
+          className={`ig-tab${activeTab === 'stats' ? ' ig-tab-active' : ''}`}
+          onClick={() => setActiveTab('stats')}
+        >
+          <StatsIcon />
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'offers'}
+          className={`ig-tab${activeTab === 'offers' ? ' ig-tab-active' : ''}`}
+          onClick={() => setActiveTab('offers')}
+        >
+          <OfferIcon />
+        </button>
+      </section>
+
+      {/* Tab panels */}
+      {activeTab === 'grid' && (
+        <section className="ig-grid" role="tabpanel">
+          {GRID_ITEMS.map((item, i) => {
+            const locked = item.needsPackage && !hasPackage;
+            const content = (
+              <>
+                <span className="ig-grid-item-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </>
+            );
+            if (locked) {
+              return (
+                <Link key={`${item.label}-${i}`} to="/package" className="ig-grid-item ig-grid-item-locked">
+                  {content}
+                </Link>
+              );
+            }
+            return (
+              <Link key={`${item.label}-${i}`} to={item.to} className="ig-grid-item">
+                {content}
+              </Link>
+            );
+          })}
+        </section>
+      )}
+
+      {activeTab === 'stats' && (
+        <section className="ig-stats-list" role="tabpanel">
+          {[
+            { label: 'Available Balance', value: `Rs ${balance}` },
+            { label: 'Total Earned', value: `Rs ${totalEarned}` },
+            { label: 'Bonus Balance', value: `Rs ${(wallet.bonus_balance * 100).toFixed(0)}` },
+            { label: 'Pending Balance', value: `Rs ${(wallet.pending_balance * 100).toFixed(0)}` },
+            { label: 'Tasks Completed', value: completedTasksCount },
+            { label: 'Active Team', value: teamCount },
+            { label: 'Referral Earnings', value: `Rs ${((referralStats?.total_earnings || 0) * 100).toFixed(0)}` },
+            { label: 'Account Level', value: `Level ${user?.level ?? 0}` },
+          ].map((row) => (
+            <section key={row.label} className="ig-stats-row">
+              <span className="ig-stats-row-label">{row.label}</span>
+              <span className="ig-stats-row-value">{row.value}</span>
+            </section>
+          ))}
+        </section>
+      )}
+
+      {activeTab === 'offers' && (
+        <section className="ig-offers-panel" role="tabpanel">
+          <section className="neon-banner mb-4 text-center py-4">
+            <p className="font-bold text-white text-sm">🎉 Invite 50 friends</p>
+            <p className="text-white/80 text-xs mt-1">Earn Rs 5,000 bonus!</p>
+          </section>
+          <Link to="/referrals" className="ig-profile-btn ig-profile-btn-primary block text-center mb-3">
+            Share Referral Link
+          </Link>
+          <Link to="/package" className="ig-profile-btn block text-center">
+            View Plans
+          </Link>
+        </section>
+      )}
     </section>
   );
 };

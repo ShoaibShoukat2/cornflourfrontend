@@ -24,6 +24,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminReports from './pages/admin/AdminReports';
 import Package from './pages/Package';
 import Contact from './pages/Contact';
+import MobileBottomNav from './components/MobileBottomNav';
 
 const AppContent = () => {
   const location = useLocation();
@@ -60,6 +61,7 @@ const AppContent = () => {
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
         <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
       </Routes>
+      <MobileBottomNav />
     </UserLayout>
   );
 };
