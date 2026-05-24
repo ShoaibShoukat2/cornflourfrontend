@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
+import ProfileAvatar from '../components/ProfileAvatar';
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -47,6 +48,14 @@ const Settings = () => {
             {message}
           </section>
         )}
+
+        <section className="neon-card p-6 mb-8 text-center">
+          <h2 className="text-2xl font-bold text-white mb-2">📷 Profile Photo</h2>
+          <p className="neon-subtitle text-sm mb-6">Tap your photo to upload (max 2MB)</p>
+          <section className="flex justify-center">
+            <ProfileAvatar size="xl" editable ring onUploadDone={(msg) => setMessage(`✅ ${msg}`)} />
+          </section>
+        </section>
 
         <section className="neon-card p-6 mb-8">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">👤 YOUR PROFILE</h2>

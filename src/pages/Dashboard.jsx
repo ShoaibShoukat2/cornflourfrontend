@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
-import tasklogo from '../assets/tasklogo.jpeg';
+import ProfileAvatar from '../components/ProfileAvatar';
 
 const GridIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -108,7 +108,7 @@ const Dashboard = () => {
       {/* Avatar + stats row (posts / followers / following layout) */}
       <section className="ig-profile-top">
         <section className="ig-profile-avatar-wrap">
-          <img src={tasklogo} alt={user?.username} />
+          <ProfileAvatar size="lg" editable ring />
         </section>
         <section className="ig-profile-stats">
           <section>

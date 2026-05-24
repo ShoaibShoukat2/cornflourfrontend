@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import logo from '../assets/tasklogo.jpeg';
+import ProfileAvatar from './ProfileAvatar';
 
 const tabs = [
   { path: '/dashboard', icon: '🏠', label: 'Home' },
@@ -27,7 +27,7 @@ const MobileBottomNav = () => {
           <Link key={tab.path} to={tab.path} className={cls} aria-label={tab.label}>
             {tab.isProfile ? (
               <span className="ig-bottom-nav-avatar">
-                <img src={logo} alt="" />
+                <ProfileAvatar size="sm" ring={false} />
               </span>
             ) : (
               <span className="ig-bottom-nav-icon">{tab.icon}</span>

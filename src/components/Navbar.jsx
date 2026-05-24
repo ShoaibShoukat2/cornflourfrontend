@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import logo from '../assets/tasklogo.jpeg';
+import ProfileAvatar from './ProfileAvatar';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -20,14 +21,21 @@ const Navbar = () => {
   const linkClass = (path) =>
     `neon-nav-link ${isActive(path) ? 'neon-nav-link-active' : ''}`;
 
+  const UserChip = () => (
+    <section className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-purple-500/30 bg-purple-500/10">
+      <ProfileAvatar size="md" ring={false} />
+      <span className="text-sm font-semibold text-white/90">{user.username}</span>
+    </section>
+  );
+
   return (
     <nav className={`neon-nav sticky top-0 z-50${user && !user.is_staff ? ' neon-nav-app-mobile' : ''}`}>
       <section className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <section className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="neon-logo-ring w-10 h-10">
+            <section className="neon-logo-ring w-10 h-10">
               <img src={logo} alt="INSTOVA" className="w-full h-full" />
-            </div>
+            </section>
             <span className="text-xl font-bold neon-gradient-text">INSTOVA</span>
           </Link>
 
@@ -45,7 +53,7 @@ const Navbar = () => {
           </button>
 
           {user ? (
-            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
+            <section className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {user.is_staff ? (
                 <>
                   <Link to="/admin/dashboard" className={linkClass('/admin/dashboard')}>📊 Dashboard</Link>
@@ -53,13 +61,8 @@ const Navbar = () => {
                   <Link to="/admin/withdrawals" className={linkClass('/admin/withdrawals')}>💸 Withdrawals</Link>
                   <Link to="/admin/packages" className={linkClass('/admin/packages')}>📦 Packages</Link>
                   <Link to="/admin/contact" className={linkClass('/admin/contact')}>📩 Contact Us</Link>
-                  <div className="h-6 w-px bg-white/20 mx-2" />
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-purple-500/30 bg-purple-500/10">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm neon-btn" style={{ padding: 0, borderRadius: '9999px', width: '2rem', height: '2rem' }}>
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-sm font-semibold text-white/90">{user.username}</span>
-                  </div>
+                  <section className="h-6 w-px bg-white/20 mx-2" />
+                  <UserChip />
                 </>
               ) : (
                 <>
@@ -70,40 +73,33 @@ const Navbar = () => {
                   <Link to="/package" className={linkClass('/package')}>📦 Package</Link>
                   <Link to="/settings" className={linkClass('/settings')}>⚙️ Settings</Link>
                   <Link to="/contact" className={linkClass('/contact')}>📩 Contact</Link>
-                  <div className="h-6 w-px bg-white/20 mx-2" />
-                  <div className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-purple-500/30 bg-purple-500/10">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'var(--neon-gradient-btn)' }}>
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-sm font-semibold text-white/90">{user.username}</span>
-                  </div>
+                  <section className="h-6 w-px bg-white/20 mx-2" />
+                  <UserChip />
                 </>
               )}
               <button onClick={handleLogout} className="ml-2 px-4 py-2 rounded-lg font-medium text-sm text-white bg-red-500/80 hover:bg-red-500 transition border border-red-400/30">
                 Logout
               </button>
-            </div>
+            </section>
           ) : (
-            <div className="hidden md:flex items-center space-x-3">
+            <section className="hidden md:flex items-center space-x-3">
               <Link to="/login" className="neon-nav-link">Login</Link>
               <Link to="/register" className="neon-btn text-sm" style={{ padding: '0.5rem 1.25rem' }}>Get Started</Link>
-            </div>
+            </section>
           )}
-        </div>
+        </section>
 
         {isOpen && (
           <section className="md:hidden pb-4 border-t border-purple-500/20 mt-2 pt-4">
             {user ? (
-              <div className="flex flex-col space-y-2">
-                <div className="flex items-center space-x-3 px-4 py-3 neon-card mb-2">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ background: 'var(--neon-gradient-btn)' }}>
-                    {user.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
+              <section className="flex flex-col space-y-2">
+                <section className="flex items-center space-x-3 px-4 py-3 neon-card mb-2">
+                  <ProfileAvatar size="md" ring={false} />
+                  <section>
                     <p className="font-semibold text-white">{user.username}</p>
                     <p className="text-xs text-white/50">{user.is_staff ? 'Admin' : 'User'}</p>
-                  </div>
-                </div>
+                  </section>
+                </section>
 
                 {user.is_staff ? (
                   <>
@@ -127,7 +123,7 @@ const Navbar = () => {
                 <button onClick={handleLogout} className="mt-2 px-4 py-3 bg-red-500/80 text-white rounded-lg font-medium">
                   Logout
                 </button>
-              </div>
+              </section>
             ) : (
               <section className="flex flex-col space-y-3">
                 <Link to="/login" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3 text-center">Login</Link>
