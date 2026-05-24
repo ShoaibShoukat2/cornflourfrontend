@@ -1,5 +1,29 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import {
+  MagnifyingGlassIcon,
+  ArrowPathIcon,
+  UsersIcon,
+  UserGroupIcon,
+  BanknotesIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  ClipboardDocumentListIcon,
+  CubeIcon,
+  FlagIcon,
+  Cog6ToothIcon,
+  EnvelopeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  ShieldExclamationIcon,
+  SparklesIcon,
+  ChevronRightIcon,
+  UserPlusIcon,
+  BoltIcon,
+} from '@heroicons/react/24/outline';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -438,6 +462,94 @@ const UserDetail = ({ userId, onBack }) => {
   );
 };
 
+// ── Dashboard UI helpers ───────────────────────────────────────────────────────
+const StatCard = ({ to, icon: Icon, label, value, sub, accent }) => (
+  <Link
+    to={to}
+    className={`group block bg-gradient-to-br ${accent} rounded-2xl p-4 text-white shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.99] transition-all duration-200`}
+  >
+    <div className="flex items-start justify-between gap-2 mb-3">
+      <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition">
+        <Icon className="w-6 h-6" />
+      </div>
+      <span className="flex items-center gap-0.5 text-xs font-semibold bg-white/20 group-hover:bg-white/30 px-2.5 py-1 rounded-lg transition">
+        View all
+        <ChevronRightIcon className="w-3.5 h-3.5" />
+      </span>
+    </div>
+    <p className="text-xs opacity-90 font-medium">{label}</p>
+    <p className="text-2xl font-black mt-0.5">{value}</p>
+    {sub && <p className="text-xs opacity-75 mt-2">{sub}</p>}
+  </Link>
+);
+
+const InfoCard = ({ to, icon: Icon, label, value, color, bg, badge }) => (
+  <Link
+    to={to}
+    className={`${bg} rounded-2xl p-4 border border-transparent hover:border-gray-200 hover:shadow-md transition-all group block`}
+  >
+    <div className="flex items-center justify-between mb-2">
+      <div className={`w-9 h-9 rounded-xl ${color} bg-white/80 flex items-center justify-center shadow-sm`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      {badge != null && badge > 0 && (
+        <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full animate-pulse">
+          {badge}
+        </span>
+      )}
+      <ChevronRightIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition" />
+    </div>
+    <p className="text-xs text-gray-500 font-medium">{label}</p>
+    <p className={`text-xl font-black mt-0.5 ${color}`}>{value}</p>
+  </Link>
+);
+
+const QuickAction = ({ to, icon: Icon, label, desc, color }) => (
+  <Link
+    to={to}
+    className="flex flex-col items-center justify-center gap-2 bg-white rounded-2xl border border-gray-100 p-4 hover:border-orange-300 hover:shadow-md hover:bg-orange-50/50 transition-all group text-center min-h-[100px]"
+  >
+    <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+      <Icon className="w-6 h-6 text-white" />
+    </div>
+    <div>
+      <p className="text-sm font-bold text-gray-800">{label}</p>
+      <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+    </div>
+  </Link>
+);
+
+const AlertChip = ({ to, icon: Icon, label, count, urgent }) => (
+  <Link
+    to={to}
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all hover:shadow-sm ${
+      urgent && count > 0
+        ? 'bg-red-50 border-red-200 hover:bg-red-100'
+        : count > 0
+          ? 'bg-amber-50 border-amber-200 hover:bg-amber-100'
+          : 'bg-green-50 border-green-200 hover:bg-green-100'
+    }`}
+  >
+    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+      urgent && count > 0 ? 'bg-red-500' : count > 0 ? 'bg-amber-500' : 'bg-green-500'
+    }`}>
+      <Icon className="w-5 h-5 text-white" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-bold text-gray-800">{label}</p>
+      <p className="text-xs text-gray-500">
+        {count > 0 ? `${count} needs action` : 'All clear'}
+      </p>
+    </div>
+    <div className="flex items-center gap-1 flex-shrink-0">
+      <span className={`text-lg font-black ${count > 0 ? (urgent ? 'text-red-600' : 'text-amber-600') : 'text-green-600'}`}>
+        {count}
+      </span>
+      <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+    </div>
+  </Link>
+);
+
 // ── User Search Widget ────────────────────────────────────────────────────────
 const UserSearch = ({ onSelect }) => {
   const [query, setQuery] = useState('');
@@ -467,8 +579,8 @@ const UserSearch = ({ onSelect }) => {
 
   return (
     <div ref={ref} className="relative">
-      <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-200 px-4 py-3 shadow-sm">
-        <span className="text-gray-400 text-lg">🔍</span>
+      <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-200 px-4 py-3 shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition">
+        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
         <input
           type="text"
           value={query}
@@ -522,17 +634,31 @@ const UserSearch = ({ onSelect }) => {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [recent, setRecent] = useState(null);
+  const [pendingPackages, setPendingPackages] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => { fetchData(); }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     try {
-      const statsRes = await api.get('/admin/dashboard-stats/');
+      const [statsRes, recentRes, pkgRes] = await Promise.all([
+        api.get('/admin/dashboard-stats/'),
+        api.get('/admin/recent-activities/'),
+        api.get('/admin/package-payments/count/'),
+      ]);
       setStats(statsRes.data);
+      setRecent(recentRes.data);
+      setPendingPackages(pkgRes.data.count || 0);
     } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
   if (selectedUserId) {
@@ -540,86 +666,246 @@ const AdminDashboard = () => {
   }
 
   if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    <div className="flex flex-col justify-center items-center h-64 gap-3">
+      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm text-gray-400">Loading dashboard...</p>
     </div>
   );
 
   if (!stats) return <div className="text-center text-gray-400 py-20">No data available</div>;
 
   const statCards = [
-    { label: 'Total Users', value: stats.users.total, sub: `Today Approved: ${stats.users.today_approved || 0}`, color: 'from-blue-500 to-blue-600', icon: '👥', link: '/admin/users' },
-    { label: 'Total Approved Users', value: stats.users.approved, sub: `Today Received: Rs ${Number(stats.users.today_deposited || 0).toFixed(0)}`, color: 'from-green-500 to-green-600', icon: '✅', link: '/admin/reports' },
-    { label: 'Total Deposited', value: `Rs ${(stats.financial.total_deposited).toFixed(0)}`, sub: 'Approved packages', color: 'from-orange-500 to-red-500', icon: '📥', link: '/admin/packages' },
-    { label: 'Total Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'L1 + L2 + L3', color: 'from-purple-500 to-purple-600', icon: '🤝', link: '/admin/reports' },
-    { label: 'Today Withdrawals', value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `Pending: ${stats.financial.pending_count}`, color: 'from-yellow-500 to-yellow-600', icon: '📤', link: '/admin/withdrawals' },
-    { label: 'Total Withdrawn', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'from-red-500 to-red-600', icon: '💸', link: '/admin/withdrawals' },
+    { label: 'Total Users', value: stats.users.total, sub: `+${stats.users.new_today || 0} new today · ${stats.users.today_approved || 0} approved today`, accent: 'from-blue-500 to-blue-600', icon: UsersIcon, to: '/admin/users' },
+    { label: 'Approved Members', value: stats.users.approved, sub: `Today deposited: Rs ${Number(stats.users.today_deposited || 0).toFixed(0)}`, accent: 'from-green-500 to-green-600', icon: CheckCircleIcon, to: '/admin/reports' },
+    { label: 'Total Deposited', value: `Rs ${Number(stats.financial.total_deposited).toFixed(0)}`, sub: 'All approved packages', accent: 'from-orange-500 to-red-500', icon: ArrowDownTrayIcon, to: '/admin/packages' },
+    { label: 'Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'Level 1 + 2 + 3', accent: 'from-purple-500 to-purple-600', icon: UserGroupIcon, to: '/admin/reports' },
+    { label: "Today's Withdrawals", value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `${stats.financial.pending_count} pending requests`, accent: 'from-yellow-500 to-amber-600', icon: ArrowUpTrayIcon, to: '/admin/withdrawals' },
+    { label: 'Total Withdrawn', value: `Rs ${(stats.financial.total_withdrawals * 100).toFixed(0)}`, sub: `Pending: Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, accent: 'from-red-500 to-red-600', icon: CurrencyDollarIcon, to: '/admin/withdrawals' },
   ];
 
-  const infoCards = [
-    { label: 'New Users Today', value: stats.users.new_today, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Blocked Users', value: stats.users.blocked, color: 'text-red-600', bg: 'bg-red-50' },
-    { label: 'Fraud Alerts', value: stats.security.fraud_alerts, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    { label: 'Pending Withdrawals', value: `Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`, color: 'text-purple-600', bg: 'bg-purple-50' },
+  const quickActions = [
+    { label: 'Users', desc: 'Manage all', to: '/admin/users', icon: UsersIcon, color: 'bg-blue-500' },
+    { label: 'Withdrawals', desc: 'Approve payouts', to: '/admin/withdrawals', icon: BanknotesIcon, color: 'bg-red-500' },
+    { label: 'Packages', desc: 'Deposits', to: '/admin/packages', icon: CubeIcon, color: 'bg-orange-500' },
+    { label: 'Reports', desc: 'Requests', to: '/admin/reports', icon: ClipboardDocumentListIcon, color: 'bg-green-500' },
+    { label: 'Tasks', desc: 'Manage tasks', to: '/admin/tasks', icon: FlagIcon, color: 'bg-purple-500' },
+    { label: 'Settings', desc: 'Site config', to: '/admin/settings', icon: Cog6ToothIcon, color: 'bg-slate-600' },
+    { label: 'Contact', desc: 'Support links', to: '/admin/contact', icon: EnvelopeIcon, color: 'bg-teal-500' },
+    { label: 'Analytics', desc: 'Full reports', to: '/admin/reports', icon: ChartBarIcon, color: 'bg-indigo-500' },
   ];
 
-  const breakdownCards = [
-    { label: '🎯 Total Task Earnings', value: `Rs ${(stats.earnings_breakdown.task_earnings * 100).toFixed(0)}`, color: 'text-green-700', bg: 'bg-green-50' },
-    { label: '➕ Manual Additions', value: `Rs ${(stats.earnings_breakdown.manual_additions * 100).toFixed(0)}`, color: 'text-blue-700', bg: 'bg-blue-50' },
-    { label: '➖ Manual Subtractions', value: `Rs ${(stats.earnings_breakdown.manual_subtractions * 100).toFixed(0)}`, color: 'text-red-700', bg: 'bg-red-50' },
-    { label: '⚖️ Net Manual Balance', value: `Rs ${(stats.earnings_breakdown.net_manual * 100).toFixed(0)}`, color: stats.earnings_breakdown.net_manual >= 0 ? 'text-green-700' : 'text-red-700', bg: 'bg-gray-50' },
-  ];
+  const todayLabel = new Date().toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div className="space-y-5">
 
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <SparklesIcon className="w-6 h-6 text-orange-500" />
+            <h1 className="text-xl font-black text-gray-800">Admin Overview</h1>
+          </div>
+          <p className="text-sm text-gray-500 mt-0.5">{todayLabel}</p>
+        </div>
+        <button
+          onClick={() => fetchData(true)}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-orange-300 transition disabled:opacity-60"
+        >
+          <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
       {/* User Search */}
-      <UserSearch onSelect={setSelectedUserId} />
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-        {statCards.map((s, i) => (
-          <div key={i} className={`bg-gradient-to-br ${s.color} rounded-2xl p-4 text-white shadow-sm`}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs opacity-80">{s.label}</p>
-              <span className="text-xl">{s.icon}</span>
-            </div>
-            <p className="text-xl font-black">{s.value}</p>
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-xs opacity-70">{s.sub}</p>
-              {s.link && (
-                <Link to={s.link}
-                  className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold px-2 py-1 rounded-lg transition flex items-center gap-1">
-                  View All →
-                </Link>
-              )}
-            </div>
-          </div>
-        ))}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center gap-1">
+          <MagnifyingGlassIcon className="w-3.5 h-3.5" />
+          Quick user lookup
+        </p>
+        <UserSearch onSelect={setSelectedUserId} />
       </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        {infoCards.map((c, i) => (
-          <div key={i} className={`${c.bg} rounded-2xl p-4`}>
-            <p className="text-xs text-gray-500 mb-1">{c.label}</p>
-            <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
-          </div>
-        ))}
+      {/* Needs attention */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2 flex items-center gap-1">
+          <BoltIcon className="w-3.5 h-3.5 text-amber-500" />
+          Needs your attention — tap to open
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <AlertChip to="/admin/withdrawals" icon={ClockIcon} label="Pending Withdrawals" count={stats.financial.pending_count} urgent />
+          <AlertChip to="/admin/packages" icon={CubeIcon} label="Pending Packages" count={pendingPackages} urgent />
+          <AlertChip to="/admin/users" icon={XCircleIcon} label="Blocked Users" count={stats.users.blocked} urgent={false} />
+          <AlertChip to="/admin/reports" icon={ShieldExclamationIcon} label="Fraud Alerts" count={stats.security.fraud_alerts} urgent />
+        </div>
       </div>
 
-      {/* Earnings Breakdown */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <h2 className="font-bold text-gray-800 mb-4">📊 Earnings Breakdown</h2>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {breakdownCards.map((c, i) => (
-            <div key={i} className={`${c.bg} rounded-2xl p-4`}>
-              <p className="text-xs text-gray-500 mb-1">{c.label}</p>
-              <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
-            </div>
+      {/* Quick actions */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Quick actions — one tap</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          {quickActions.map((a) => (
+            <QuickAction key={a.label} {...a} />
           ))}
         </div>
       </div>
+
+      {/* Stat Cards — full card clickable */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Key metrics — tap any card</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {statCards.map((s) => (
+            <StatCard key={s.label} {...s} />
+          ))}
+        </div>
+      </div>
+
+      {/* Info + Task row */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        <InfoCard to="/admin/users" icon={UserPlusIcon} label="New Users Today" value={stats.users.new_today} color="text-blue-600" bg="bg-blue-50" badge={stats.users.new_today} />
+        <InfoCard to="/admin/users" icon={XCircleIcon} label="Blocked Users" value={stats.users.blocked} color="text-red-600" bg="bg-red-50" badge={stats.users.blocked} />
+        <InfoCard to="/admin/reports" icon={ShieldExclamationIcon} label="Fraud Alerts" value={stats.security.fraud_alerts} color="text-amber-600" bg="bg-amber-50" badge={stats.security.fraud_alerts} />
+        <InfoCard to="/admin/withdrawals" icon={BanknotesIcon} label="Pending Amount" value={`Rs ${(stats.financial.pending_withdrawals * 100).toFixed(0)}`} color="text-purple-600" bg="bg-purple-50" badge={stats.financial.pending_count} />
+      </div>
+
+      {/* Tasks summary */}
+      {stats.tasks && (
+        <Link to="/admin/tasks" className="block bg-white rounded-2xl border border-gray-100 p-4 hover:border-orange-300 hover:shadow-md transition group">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <FlagIcon className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-800 text-sm">Tasks Overview</p>
+                <p className="text-xs text-gray-500">{stats.tasks.active} active · {stats.tasks.completed_today} done today</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs text-gray-500">Total completed</p>
+                <p className="font-black text-purple-600">{stats.tasks.total_completed}</p>
+              </div>
+              <span className="flex items-center gap-1 text-xs font-semibold text-orange-500 group-hover:gap-2 transition-all">
+                Manage tasks <ChevronRightIcon className="w-4 h-4" />
+              </span>
+            </div>
+          </div>
+        </Link>
+      )}
+
+      {/* Earnings Breakdown */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-gray-800 flex items-center gap-2">
+            <ChartBarIcon className="w-5 h-5 text-orange-500" />
+            Earnings Breakdown
+          </h2>
+          <Link to="/admin/reports" className="text-xs font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1">
+            Full reports <ChevronRightIcon className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          {[
+            { label: 'Task Earnings', value: `Rs ${(stats.earnings_breakdown.task_earnings * 100).toFixed(0)}`, color: 'text-green-700', bg: 'bg-green-50', to: '/admin/tasks' },
+            { label: 'Manual Additions', value: `Rs ${(stats.earnings_breakdown.manual_additions * 100).toFixed(0)}`, color: 'text-blue-700', bg: 'bg-blue-50', to: '/admin/users' },
+            { label: 'Manual Deductions', value: `Rs ${(stats.earnings_breakdown.manual_subtractions * 100).toFixed(0)}`, color: 'text-red-700', bg: 'bg-red-50', to: '/admin/users' },
+            { label: 'Net Manual', value: `Rs ${(stats.earnings_breakdown.net_manual * 100).toFixed(0)}`, color: stats.earnings_breakdown.net_manual >= 0 ? 'text-green-700' : 'text-red-700', bg: 'bg-gray-50', to: '/admin/reports' },
+          ].map((c) => (
+            <Link key={c.label} to={c.to} className={`${c.bg} rounded-2xl p-4 hover:shadow-md transition group block`}>
+              <p className="text-xs text-gray-500 mb-1">{c.label}</p>
+              <p className={`text-xl font-black ${c.color}`}>{c.value}</p>
+              <p className="text-xs text-gray-400 mt-2 opacity-0 group-hover:opacity-100 transition flex items-center gap-0.5">
+                View <ChevronRightIcon className="w-3 h-3" />
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent activity */}
+      {recent && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">
+                <UserPlusIcon className="w-4 h-4 text-blue-500" />
+                Recent Signups
+              </h3>
+              <Link to="/admin/users" className="text-xs font-semibold text-orange-500 flex items-center gap-0.5 hover:gap-1 transition-all">
+                View all <ChevronRightIcon className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {(recent.recent_users || []).slice(0, 6).map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => setSelectedUserId(u.id)}
+                  className="w-full flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl hover:bg-orange-50 hover:border-orange-200 border border-transparent transition text-left"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {u.username?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-800 text-sm truncate">{u.username}</p>
+                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {u.is_active ? 'Active' : 'Blocked'}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">{new Date(u.created_at).toLocaleDateString()}</p>
+                  </div>
+                </button>
+              ))}
+              {(!recent.recent_users || recent.recent_users.length === 0) && (
+                <p className="text-sm text-gray-400 text-center py-6">No recent signups</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-800 flex items-center gap-2 text-sm">
+                <BanknotesIcon className="w-4 h-4 text-red-500" />
+                Recent Withdrawals
+              </h3>
+              <Link to="/admin/withdrawals" className="text-xs font-semibold text-orange-500 flex items-center gap-0.5 hover:gap-1 transition-all">
+                View all <ChevronRightIcon className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {(recent.recent_withdrawals || []).slice(0, 6).map((w) => (
+                <Link
+                  key={w.id}
+                  to="/admin/withdrawals"
+                  className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl hover:bg-orange-50 transition"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm">{w.user__username}</p>
+                    <p className="text-xs text-gray-400 capitalize">{w.payment_method}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-black text-gray-800 text-sm">Rs {(w.amount * 100).toFixed(0)}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                      w.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      w.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {w.status}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+              {(!recent.recent_withdrawals || recent.recent_withdrawals.length === 0) && (
+                <p className="text-sm text-gray-400 text-center py-6">No recent withdrawals</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
