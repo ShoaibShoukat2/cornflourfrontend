@@ -2,12 +2,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import ProfileAvatar from './ProfileAvatar';
+import { NavIcon } from './NavIcons';
 
 const tabs = [
-  { path: '/dashboard', icon: '🏠', label: 'Home' },
-  { path: '/tasks', icon: '🎯', label: 'Tasks' },
-  { path: '/wallet', icon: '💰', label: 'Wallet', center: true },
-  { path: '/referrals', icon: '👥', label: 'Team' },
+  { path: '/dashboard', icon: 'home', label: 'Home' },
+  { path: '/tasks', icon: 'tasks', label: 'Tasks' },
+  { path: '/wallet', icon: 'wallet', label: 'Wallet', center: true },
+  { path: '/referrals', icon: 'users', label: 'Team' },
   { path: '/settings', icon: null, label: 'Profile', isProfile: true },
 ];
 
@@ -30,7 +31,9 @@ const MobileBottomNav = () => {
                 <ProfileAvatar size="sm" ring={false} />
               </span>
             ) : (
-              <span className="ig-bottom-nav-icon">{tab.icon}</span>
+              <span className="ig-bottom-nav-icon">
+                <NavIcon name={tab.icon} size={22} />
+              </span>
             )}
           </Link>
         );

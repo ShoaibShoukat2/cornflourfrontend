@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import logo from '../assets/tasklogo.jpeg';
 import ProfileAvatar from './ProfileAvatar';
+import { NavIcon } from './NavIcons';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -20,6 +21,23 @@ const Navbar = () => {
 
   const linkClass = (path) =>
     `neon-nav-link ${isActive(path) ? 'neon-nav-link-active' : ''}`;
+
+  const customerLinks = [
+    { to: '/dashboard', icon: 'home', label: 'Home' },
+    { to: '/tasks', icon: 'tasks', label: 'Tasks' },
+    { to: '/referrals', icon: 'users', label: 'Referrals' },
+    { to: '/wallet', icon: 'wallet', label: 'Wallet' },
+    { to: '/package', icon: 'package', label: 'Package' },
+    { to: '/settings', icon: 'settings', label: 'Settings' },
+    { to: '/contact', icon: 'contact', label: 'Contact' },
+  ];
+
+  const NavLinkItem = ({ to, icon, label, onClick, className }) => (
+    <Link to={to} onClick={onClick} className={className || linkClass(to)}>
+      <NavIcon name={icon} size={16} className="neon-nav-link-icon" />
+      <span>{label}</span>
+    </Link>
+  );
 
   const UserChip = () => (
     <section className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-purple-500/30 bg-purple-500/10">
@@ -66,13 +84,9 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/dashboard" className={linkClass('/dashboard')}>🏠 Home</Link>
-                  <Link to="/tasks" className={linkClass('/tasks')}>🎯 Tasks</Link>
-                  <Link to="/referrals" className={linkClass('/referrals')}>👥 Referrals</Link>
-                  <Link to="/wallet" className={linkClass('/wallet')}>💰 Wallet</Link>
-                  <Link to="/package" className={linkClass('/package')}>📦 Package</Link>
-                  <Link to="/settings" className={linkClass('/settings')}>⚙️ Settings</Link>
-                  <Link to="/contact" className={linkClass('/contact')}>📩 Contact</Link>
+                  {customerLinks.map((item) => (
+                    <NavLinkItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
+                  ))}
                   <section className="h-6 w-px bg-white/20 mx-2" />
                   <UserChip />
                 </>
@@ -111,13 +125,16 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Link to="/dashboard" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">🏠 Home</Link>
-                    <Link to="/tasks" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">🎯 Tasks</Link>
-                    <Link to="/referrals" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">👥 Referrals</Link>
-                    <Link to="/wallet" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">💰 Wallet</Link>
-                    <Link to="/package" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📦 Package</Link>
-                    <Link to="/settings" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">⚙️ Settings</Link>
-                    <Link to="/contact" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📩 Contact</Link>
+                    {customerLinks.map((item) => (
+                      <NavLinkItem
+                        key={item.to}
+                        to={item.to}
+                        icon={item.icon}
+                        label={item.label}
+                        onClick={() => setIsOpen(false)}
+                        className={`neon-nav-link px-4 py-3${isActive(item.to) ? ' neon-nav-link-active' : ''}`}
+                      />
+                    ))}
                   </>
                 )}
                 <button onClick={handleLogout} className="mt-2 px-4 py-3 bg-red-500/80 text-white rounded-lg font-medium">

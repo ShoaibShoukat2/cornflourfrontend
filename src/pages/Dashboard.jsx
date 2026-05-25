@@ -3,47 +3,27 @@ import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import ProfileAvatar from '../components/ProfileAvatar';
-
-const GridIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-);
-
-const StatsIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M4 19V5M4 19h16M8 19V11M12 19V7M16 19V14" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const OfferIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.8 5.7 21l2.3-7-6-4.6h7.6L12 2z" strokeLinejoin="round" />
-  </svg>
-);
+import { NavIcon, GridIcon, StatsIcon, OfferIcon, LockIcon, MenuIcon } from '../components/NavIcons';
 
 const HIGHLIGHTS = [
-  { to: '/tasks', emoji: '🎯', label: 'Tasks' },
-  { to: '/wallet', emoji: '💰', label: 'Wallet' },
-  { to: '/referrals', emoji: '👥', label: 'Team' },
-  { to: '/package', emoji: '📦', label: 'Package' },
-  { to: '/contact', emoji: '📩', label: 'Contact' },
-  { to: '/settings', emoji: '⚙️', label: 'Settings' },
+  { to: '/tasks', icon: 'tasks', label: 'Tasks' },
+  { to: '/wallet', icon: 'wallet', label: 'Wallet' },
+  { to: '/referrals', icon: 'users', label: 'Team' },
+  { to: '/package', icon: 'package', label: 'Package' },
+  { to: '/contact', icon: 'contact', label: 'Contact' },
+  { to: '/settings', icon: 'settings', label: 'Settings' },
 ];
 
 const GRID_ITEMS = [
-  { to: '/tasks', icon: '🎯', label: 'Tasks', needsPackage: true },
-  { to: '/wallet', icon: '💸', label: 'Withdraw', needsPackage: true },
-  { to: '/referrals', icon: '👥', label: 'Referrals', needsPackage: false },
-  { to: '/package', icon: '📦', label: 'Package', needsPackage: false },
-  { to: '/contact', icon: '📩', label: 'Contact', needsPackage: false },
-  { to: '/settings', icon: '⚙️', label: 'Settings', needsPackage: false },
-  { to: '/wallet', icon: '💵', label: 'Balance', needsPackage: false },
-  { to: '/tasks', icon: '✅', label: 'Earn', needsPackage: true },
-  { to: '/referrals', icon: '🔗', label: 'Invite', needsPackage: false },
+  { to: '/tasks', icon: 'tasks', label: 'Tasks', needsPackage: true },
+  { to: '/wallet', icon: 'withdraw', label: 'Withdraw', needsPackage: true },
+  { to: '/referrals', icon: 'users', label: 'Referrals', needsPackage: false },
+  { to: '/package', icon: 'package', label: 'Package', needsPackage: false },
+  { to: '/contact', icon: 'contact', label: 'Contact', needsPackage: false },
+  { to: '/settings', icon: 'settings', label: 'Settings', needsPackage: false },
+  { to: '/wallet', icon: 'balance', label: 'Balance', needsPackage: false },
+  { to: '/tasks', icon: 'check', label: 'Earn', needsPackage: true },
+  { to: '/referrals', icon: 'link', label: 'Invite', needsPackage: false },
 ];
 
 const Dashboard = () => {
@@ -100,9 +80,13 @@ const Dashboard = () => {
     <section className="ig-profile">
       {/* IG-style username header */}
       <header className="ig-profile-header">
-        <span className="ig-profile-header-lock" aria-hidden="true">🔒</span>
+        <span className="ig-profile-header-lock" aria-hidden="true">
+          <LockIcon size={16} />
+        </span>
         <h1 className="ig-profile-header-title">{user?.username}</h1>
-        <Link to="/settings" className="ig-profile-header-menu" aria-label="Menu">☰</Link>
+        <Link to="/settings" className="ig-profile-header-menu" aria-label="Menu">
+          <MenuIcon size={20} />
+        </Link>
       </header>
 
       {/* Avatar + stats row (posts / followers / following layout) */}
@@ -157,7 +141,9 @@ const Dashboard = () => {
       <section className="ig-highlights">
         {HIGHLIGHTS.map((h) => (
           <Link key={h.label} to={h.to} className="ig-highlight">
-            <span className="ig-highlight-ring">{h.emoji}</span>
+            <span className="ig-highlight-ring">
+              <NavIcon name={h.icon} size={22} />
+            </span>
             <span className="ig-highlight-label">{h.label}</span>
           </Link>
         ))}
@@ -214,7 +200,9 @@ const Dashboard = () => {
             const locked = item.needsPackage && !hasPackage;
             const content = (
               <>
-                <span className="ig-grid-item-icon">{item.icon}</span>
+                <span className="ig-grid-item-icon">
+                  <NavIcon name={item.icon} size={26} />
+                </span>
                 <span>{item.label}</span>
               </>
             );
