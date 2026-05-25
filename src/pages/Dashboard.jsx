@@ -118,9 +118,6 @@ const Dashboard = () => {
           <br />
           Rs {balance} available to withdraw
         </p>
-        {referralStats?.referral_link && (
-          <p className="ig-profile-bio-link mt-1 truncate">{referralStats.referral_link}</p>
-        )}
       </section>
 
       {/* Action buttons */}
@@ -150,11 +147,6 @@ const Dashboard = () => {
       </section>
 
       {/* Alerts */}
-      {!hasPackage && !isPending && (
-        <Link to="/package" className="block neon-banner mb-3 text-center text-sm py-3">
-          📦 Buy INSTOVA Plan — Rs 1800
-        </Link>
-      )}
       {isPending && (
         <section className="neon-alert neon-alert-warning mb-3 text-sm">⏳ Package under review (24h)</section>
       )}
