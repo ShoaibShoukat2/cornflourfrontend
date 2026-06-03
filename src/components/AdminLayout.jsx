@@ -17,7 +17,8 @@ const LoginAsUserModal = ({ onClose, onConfirm }) => {
     const timer = setTimeout(async () => {
       try {
         const res = await api.get(`/admin/users/?search=${encodeURIComponent(query.trim())}`);
-        setResults(res.data.slice(0, 6));
+        const users = res.data.users ?? (Array.isArray(res.data) ? res.data : []);
+        setResults(users.slice(0, 6));
       } catch { }
     }, 300);
     return () => clearTimeout(timer);
@@ -37,7 +38,7 @@ const LoginAsUserModal = ({ onClose, onConfirm }) => {
           <input ref={inputRef} type="text" value={query}
             onChange={e => { setQuery(e.target.value); setSelected(null); }}
             placeholder="Search by email or username..."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-blue-400" />
           {results.length > 0 && !selected && (
             <div className="mt-2 border border-gray-100 rounded-xl overflow-hidden shadow-sm">
               {results.map(u => (
@@ -385,7 +386,7 @@ const AdminLayout = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '20px' }} className="pb-5">
+        <main style={{ flex: 1, overflowY: 'auto', padding: '20px' }} className="admin-panel pb-5">
           {children}
         </main>
       </div>

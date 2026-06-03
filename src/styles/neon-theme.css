@@ -416,6 +416,24 @@ body {
   color: #fff;
 }
 
+/* Admin panel: light UI — readable text in inputs (body defaults to white) */
+.admin-panel {
+  color: #1f2937;
+}
+
+.admin-panel input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+.admin-panel textarea,
+.admin-panel select {
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+
+.admin-panel input::placeholder,
+.admin-panel textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
 .neon-label {
   display: block;
   color: rgba(255, 255, 255, 0.7);

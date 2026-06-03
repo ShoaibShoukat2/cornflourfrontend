@@ -26,6 +26,7 @@ import {
 } from '@heroicons/react/24/outline';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
+import DashboardCharts from '../../components/admin/DashboardCharts';
 
 // ── Reusable User Detail (same as ManageUsers) ────────────────────────────────
 const UserDetail = ({ userId, onBack }) => {
@@ -286,9 +287,9 @@ const UserDetail = ({ userId, onBack }) => {
           <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➕ Add Balance (Rs)</p>
           <div className="space-y-2">
             <input type="number" value={addAmt} onChange={e => setAddAmt(e.target.value)} placeholder="Amount in Rs"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-green-400" />
             <input type="text" value={addRemarks} onChange={e => setAddRemarks(e.target.value)} placeholder="Remarks (e.g. Bonus, Compensation...)"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-green-400" />
             <button onClick={doAdd} className="w-full bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">Add Balance</button>
           </div>
         </div>
@@ -296,9 +297,9 @@ const UserDetail = ({ userId, onBack }) => {
           <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➖ Deduct Balance (Rs)</p>
           <div className="space-y-2">
             <input type="number" value={subAmt} onChange={e => setSubAmt(e.target.value)} placeholder="Amount in Rs"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-red-400" />
             <input type="text" value={subRemarks} onChange={e => setSubRemarks(e.target.value)} placeholder="Remarks (e.g. Penalty, Correction...)"
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-red-400" />
             <button onClick={doSub} className="w-full bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition">Deduct Balance</button>
           </div>
         </div>
@@ -401,7 +402,7 @@ const UserDetail = ({ userId, onBack }) => {
               <label className="text-xs text-gray-500 mb-1 block font-semibold">{f.label}</label>
               <input type={f.type} value={form[f.key] || ''} placeholder={f.placeholder || ''}
                 onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 text-sm" />
             </div>
           ))}
         </div>
@@ -563,7 +564,8 @@ const UserSearch = ({ onSelect }) => {
       setSearching(true);
       try {
         const res = await api.get(`/admin/users/?search=${encodeURIComponent(query.trim())}`);
-        setResults(res.data.slice(0, 8));
+        const users = res.data.users ?? (Array.isArray(res.data) ? res.data : []);
+        setResults(users.slice(0, 8));
       } catch { }
       finally { setSearching(false); }
     }, 300);
@@ -586,7 +588,7 @@ const UserSearch = ({ onSelect }) => {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search user by email or username..."
-          className="flex-1 text-sm focus:outline-none text-gray-700 placeholder-gray-400"
+          className="flex-1 text-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none"
         />
         {query && (
           <button onClick={() => { setQuery(''); setResults([]); }} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
@@ -639,6 +641,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [chartRefresh, setChartRefresh] = useState(0);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -654,6 +657,7 @@ const AdminDashboard = () => {
       setStats(statsRes.data);
       setRecent(recentRes.data);
       setPendingPackages(pkgRes.data.count || 0);
+      setChartRefresh((t) => t + 1);
     } catch (e) { console.error(e); }
     finally {
       setLoading(false);
@@ -760,6 +764,9 @@ const AdminDashboard = () => {
           ))}
         </div>
       </div>
+
+      {/* Live charts — profit, users, packages */}
+      <DashboardCharts refreshToken={chartRefresh} />
 
       {/* Info + Task row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">

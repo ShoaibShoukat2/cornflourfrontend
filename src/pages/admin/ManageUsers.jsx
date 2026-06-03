@@ -156,16 +156,16 @@ const UserDetail = ({ userId, onBack }) => {
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➕ Add Balance (Rs)</p>
           <div className="space-y-2">
-            <input type="number" value={addAmt} onChange={e => setAddAmt(e.target.value)} placeholder="Amount in Rs" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
-            <input type="text" value={addRemarks} onChange={e => setAddRemarks(e.target.value)} placeholder="Remarks (e.g. Bonus...)" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400" />
+            <input type="number" value={addAmt} onChange={e => setAddAmt(e.target.value)} placeholder="Amount in Rs" className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-green-400" />
+            <input type="text" value={addRemarks} onChange={e => setAddRemarks(e.target.value)} placeholder="Remarks (e.g. Bonus...)" className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-green-400" />
             <button onClick={doAdd} className="w-full bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600">Add Balance</button>
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase mb-3">➖ Deduct Balance (Rs)</p>
           <div className="space-y-2">
-            <input type="number" value={subAmt} onChange={e => setSubAmt(e.target.value)} placeholder="Amount in Rs" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
-            <input type="text" value={subRemarks} onChange={e => setSubRemarks(e.target.value)} placeholder="Remarks (e.g. Penalty...)" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-400" />
+            <input type="number" value={subAmt} onChange={e => setSubAmt(e.target.value)} placeholder="Amount in Rs" className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-red-400" />
+            <input type="text" value={subRemarks} onChange={e => setSubRemarks(e.target.value)} placeholder="Remarks (e.g. Penalty...)" className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-red-400" />
             <button onClick={doSub} className="w-full bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600">Deduct Balance</button>
           </div>
         </div>
@@ -232,7 +232,7 @@ const UserDetail = ({ userId, onBack }) => {
           {[['Username','username','text'],['Email','email','email'],['Phone','phone','text'],['Level','level','number'],['Balance (Rs)','balance','number'],['New Password','password','password']].map(([label,key,type]) => (
             <div key={key}>
               <label className="text-xs text-gray-500 mb-1 block font-semibold">{label}</label>
-              <input type={type} value={form[key]||''} placeholder={key==='password'?'Leave blank to keep':''} onChange={e => setForm({...form,[key]:e.target.value})} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 text-sm" />
+              <input type={type} value={form[key]||''} placeholder={key==='password'?'Leave blank to keep':''} onChange={e => setForm({...form,[key]:e.target.value})} className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-orange-400 text-sm" />
             </div>
           ))}
         </div>
@@ -311,7 +311,7 @@ const ManageUsers = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Users ??</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Manage Users</h1>
         <span className="text-sm text-gray-400">{total} total</span>
       </div>
 
@@ -322,9 +322,9 @@ const ManageUsers = () => {
       )}
 
       <div className="bg-white rounded-xl p-4 shadow-sm">
-        <input type="text" placeholder="?? Search by username or email..."
+        <input type="text" placeholder="Search by username or email..."
           value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
       </div>
 
       {loading ? (
@@ -397,12 +397,12 @@ const ManageUsers = () => {
         <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
             className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition disabled:opacity-40 disabled:cursor-not-allowed">
-            ? Previous
+            ← Previous
           </button>
           <span className="text-sm text-gray-600 font-semibold">Page {page} of {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
             className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition disabled:opacity-40 disabled:cursor-not-allowed">
-            Next ?
+            Next →
           </button>
         </div>
       )}
