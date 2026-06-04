@@ -21,10 +21,14 @@ const ManageTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editTask, setEditTask] = useState(null); // null = create mode
+  const [showLinks, setShowLinks] = useState(false);
+  const [editTask, setEditTask] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [linkEdits, setLinkEdits] = useState({});
+  const [bulkPaste, setBulkPaste] = useState('');
   const [msg, setMsg] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingLinks, setSavingLinks] = useState(false);
 
   useEffect(() => { fetchTasks(); }, []);
 
@@ -33,6 +37,9 @@ const ManageTasks = () => {
     try {
       const res = await api.get('/admin/tasks/');
       setTasks(res.data);
+      const edits = {};
+      res.data.forEach(t => { edits[t.id] = t.url || ''; });
+      setLinkEdits(edits);
     } catch { flash('Failed to load tasks'); }
     finally { setLoading(false); }
   };
@@ -51,7 +58,7 @@ const ManageTasks = () => {
       title: task.title,
       description: task.description,
       task_type: task.task_type,
-      reward: (task.reward * 100).toFixed(0), // show in Rs
+      reward: (task.reward * 100).toFixed(0),
       time_required: task.time_required,
       url: task.url || '',
       verification_code: task.verification_code || '',
@@ -61,13 +68,53 @@ const ManageTasks = () => {
     setShowForm(true);
   };
 
+  const openLinkManager = () => {
+    const edits = {};
+    tasks.forEach(t => { edits[t.id] = t.url || ''; });
+    setLinkEdits(edits);
+    setBulkPaste('');
+    setShowLinks(true);
+  };
+
+  const applyBulkPaste = () => {
+    const lines = bulkPaste.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return flash('Paste at least one URL');
+    const ordered = [...tasks].sort((a, b) => a.id - b.id);
+    const next = { ...linkEdits };
+    ordered.forEach((task, i) => {
+      if (lines[i]) next[task.id] = lines[i];
+    });
+    setLinkEdits(next);
+    flash(`✅ ${Math.min(lines.length, ordered.length)} link(s) applied — click Save Links`);
+  };
+
+  const saveAllLinks = async () => {
+    setSavingLinks(true);
+    try {
+      const updates = tasks.map(t => ({ id: t.id, url: linkEdits[t.id] || '' }));
+      const res = await api.post('/admin/tasks/bulk-update-links/', { updates });
+      flash(`✅ ${res.data.updated ?? updates.length} link(s) saved`);
+      setShowLinks(false);
+      fetchTasks();
+    } catch (e) { flash(e.response?.data?.error || 'Failed to save links'); }
+    finally { setSavingLinks(false); }
+  };
+
+  const saveQuickLink = async (taskId) => {
+    try {
+      await api.post(`/admin/tasks/edit/${taskId}/`, { url: linkEdits[taskId] || '' });
+      flash('✅ Link updated');
+      fetchTasks();
+    } catch { flash('Failed to update link'); }
+  };
+
   const saveTask = async () => {
     if (!form.title || !form.reward) return flash('Title and reward are required');
     setSaving(true);
     try {
       const payload = {
         ...form,
-        reward: parseFloat(form.reward) / 100, // convert Rs to decimal
+        reward: parseFloat(form.reward) / 100,
         time_required: parseInt(form.time_required),
         max_completions: parseInt(form.max_completions),
       };
@@ -108,17 +155,73 @@ const ManageTasks = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-gray-800">🎯 Manage Tasks</h1>
-        <button onClick={openCreate}
-          className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
-          + Add Task
-        </button>
+        <div className="flex gap-2">
+          <button onClick={openLinkManager} disabled={tasks.length === 0}
+            className="bg-blue-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition disabled:opacity-50">
+            🔗 Manage Links
+          </button>
+          <button onClick={openCreate}
+            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition">
+            + Add Task
+          </button>
+        </div>
       </div>
 
       {msg && (
         <div className={`px-4 py-3 rounded-xl text-sm font-semibold border ${msg.includes('✅') ? 'bg-green-50 border-green-300 text-green-700' : 'bg-red-50 border-red-300 text-red-700'}`}>
           {msg}
+        </div>
+      )}
+
+      {/* Link Manager Modal */}
+      {showLinks && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-bold text-gray-800 text-lg">🔗 Task Links</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Code ya command chalane ki zaroorat nahi — yahan se links set karein</p>
+              </div>
+              <button onClick={() => setShowLinks(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
+              <label className="text-xs font-semibold text-blue-800 uppercase block">Bulk paste (ek line = ek task, order by ID)</label>
+              <textarea value={bulkPaste} onChange={e => setBulkPaste(e.target.value)}
+                placeholder={'https://youtube.com/shorts/abc\nhttps://youtube.com/shorts/xyz\n...'}
+                rows={4}
+                className="w-full px-3 py-2 border border-blue-200 rounded-xl text-sm font-mono focus:outline-none focus:border-blue-400 resize-none" />
+              <button onClick={applyBulkPaste}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition">
+                Apply to tasks below
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {[...tasks].sort((a, b) => a.id - b.id).map(task => (
+                <div key={task.id} className="border border-gray-100 rounded-xl p-3">
+                  <p className="text-sm font-bold text-gray-800 mb-1.5">{task.title}</p>
+                  <input value={linkEdits[task.id] ?? ''}
+                    onChange={e => setLinkEdits({ ...linkEdits, [task.id]: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:border-orange-400" />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setShowLinks(false)}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold text-sm hover:bg-gray-200 transition">
+                Cancel
+              </button>
+              <button onClick={saveAllLinks} disabled={savingLinks}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:opacity-90 transition disabled:opacity-60">
+                {savingLinks ? 'Saving...' : 'Save All Links'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -177,10 +280,11 @@ const ManageTasks = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Task URL</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Task URL (YouTube / website link)</label>
                 <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })}
                   placeholder="https://youtube.com/watch?v=..."
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+                <p className="text-xs text-gray-400 mt-1">User task start karte waqt yeh link khulegi</p>
               </div>
 
               <div>
@@ -244,8 +348,26 @@ const ManageTasks = () => {
                   <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
                     <span>⏱ {Math.floor(task.time_required / 60)}m {task.time_required % 60}s</span>
                     <span>✅ {task.current_completions}{task.max_completions > 0 ? `/${task.max_completions}` : ''} done</span>
-                    {task.url && <span>🔗 Has link</span>}
+                    {task.url ? (
+                      <a href={task.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[200px]">
+                        🔗 {task.url}
+                      </a>
+                    ) : (
+                      <span className="text-amber-600 font-semibold">⚠️ No link</span>
+                    )}
                     {task.verification_code && <span>🔑 Has code</span>}
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      value={linkEdits[task.id] ?? task.url ?? ''}
+                      onChange={e => setLinkEdits({ ...linkEdits, [task.id]: e.target.value })}
+                      placeholder="Paste task link here..."
+                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:border-orange-400"
+                    />
+                    <button onClick={() => saveQuickLink(task.id)}
+                      className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition whitespace-nowrap">
+                      Save Link
+                    </button>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
