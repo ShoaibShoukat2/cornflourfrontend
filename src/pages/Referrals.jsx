@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 const Referrals = () => {
@@ -46,6 +47,24 @@ const Referrals = () => {
           <h1 className="text-3xl font-bold neon-title mb-2">👥 INVITE FRIENDS</h1>
           <p className="text-lg neon-subtitle">Share • Earn Money Together</p>
         </header>
+
+        {stats.ads_locked ? (
+          <section className="neon-card p-5 mb-6 border border-red-500/40 text-center">
+            <p className="text-2xl mb-2">🔒</p>
+            <h2 className="text-lg font-bold text-white mb-2">Ads Locked — Weekly Joining Required</h2>
+            <p className="neon-subtitle text-sm mb-3">
+              Is hafte: {stats.weekly_joinings}/{stats.weekly_joinings_required} joining.
+              Kam az kam 1 member package activate karwayein taake ads unlock hon.
+            </p>
+            <Link to="/tasks" className="text-sm neon-gradient-text underline">Tasks page par jayein</Link>
+          </section>
+        ) : (
+          <section className="neon-card p-4 mb-6 text-center border border-green-500/30">
+            <p className="text-sm text-green-400 font-semibold">
+              ✅ Is hafte {stats.weekly_joinings}/{stats.weekly_joinings_required} joining — Ads unlocked
+            </p>
+          </section>
+        )}
 
         <section className="grid grid-cols-2 gap-4 mb-8">
           <section className="neon-wallet-hero p-6 neon-delay-1">

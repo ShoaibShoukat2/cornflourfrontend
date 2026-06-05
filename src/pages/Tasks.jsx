@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import tasklogo from '../assets/tasklogo.jpeg';
 
@@ -137,6 +138,8 @@ const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [locked, setLocked] = useState(false);
+  const [weeklyLocked, setWeeklyLocked] = useState(false);
+  const [weeklyStatus, setWeeklyStatus] = useState(null);
   const [promoCode, setPromoCode] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
@@ -161,19 +164,34 @@ const Tasks = () => {
 
   const fetchTasks = async () => {
     setLoading(true);
+    setLocked(false);
+    setWeeklyLocked(false);
     try {
       const res = await api.get('/tasks/');
       if (res.data.tasks) {
-        // New format with limits
         setTasks(res.data.tasks);
         setDailyLimit(res.data.daily_limit || 0);
         setCompletedToday(res.data.completed_today || 0);
+        setWeeklyStatus({
+          weekly_joinings: res.data.weekly_joinings ?? 0,
+          weekly_joinings_required: res.data.weekly_joinings_required ?? 1,
+          ads_locked: res.data.ads_locked ?? false,
+        });
       } else {
-        // Old format fallback
         setTasks(res.data);
       }
     } catch (e) {
-      if (e.response?.data?.error === 'package_required') setLocked(true);
+      const err = e.response?.data;
+      if (err?.error === 'package_required') {
+        setLocked(true);
+      } else if (err?.error === 'weekly_joining_required') {
+        setWeeklyLocked(true);
+        setWeeklyStatus({
+          weekly_joinings: err.weekly_joinings ?? 0,
+          weekly_joinings_required: err.weekly_joinings_required ?? 1,
+          ads_locked: true,
+        });
+      }
     } finally { setLoading(false); }
   };
 
@@ -216,6 +234,25 @@ const Tasks = () => {
     </div>
   );
 
+  if (weeklyLocked) return (
+    <div className="neon-loading p-4">
+      <div className="neon-card p-8 text-center max-w-sm w-full">
+        <p className="text-5xl mb-4">🔒</p>
+        <h2 className="text-xl font-black text-white mb-2">Ads Temporarily Locked</h2>
+        <p className="text-gray-500 text-sm mb-4">
+          Har hafte kam az kam 1 member join karwana zaroori hai. Is hafte aap ne abhi tak{' '}
+          <span className="text-white font-bold">{weeklyStatus?.weekly_joinings ?? 0}</span> joining ki hai.
+        </p>
+        <p className="text-gray-500 text-sm mb-6">
+          Jaisay hi 1 naya member package activate karwaye, aap ki ads dobara unlock ho jayengi.
+        </p>
+        <Link to="/referrals" className="neon-btn inline-block px-6 py-3">
+          👥 Referral Link Share Karein
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
     <div className="py-6 px-4">
       <div className="max-w-2xl mx-auto space-y-5">
@@ -232,6 +269,14 @@ const Tasks = () => {
             </div>
           )}
         </div>
+
+        {weeklyStatus && !weeklyStatus.ads_locked && (
+          <div className="neon-card p-3 text-center">
+            <p className="text-xs neon-subtitle">
+              ✅ Weekly Joining: {weeklyStatus.weekly_joinings}/{weeklyStatus.weekly_joinings_required} — Ads unlocked
+            </p>
+          </div>
+        )}
 
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-3">
