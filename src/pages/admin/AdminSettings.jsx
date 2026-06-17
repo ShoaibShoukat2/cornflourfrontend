@@ -27,6 +27,7 @@ const GeneralSettings = () => {
   const [form, setForm] = useState({
     site_name: '', minimum_withdrawal: '', signup_bonus: '',
     daily_bonus: '', max_tasks_per_day: '', maintenance_mode: false,
+    whatsapp_channel_link: '', whatsapp_community_link: '',
   });
   const [msg, setMsg] = useState('');
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
@@ -40,6 +41,8 @@ const GeneralSettings = () => {
         daily_bonus: r.data.daily_bonus || '',
         max_tasks_per_day: r.data.max_tasks_per_day || '',
         maintenance_mode: r.data.maintenance_mode || false,
+        whatsapp_channel_link: r.data.whatsapp_channel_link || '',
+        whatsapp_community_link: r.data.whatsapp_community_link || '',
       });
     }).catch(() => {});
   }, []);
@@ -57,6 +60,8 @@ const GeneralSettings = () => {
     { key: 'signup_bonus', label: '🎁 Signup Bonus (decimal)', type: 'number', hint: 'e.g. 0.50 = Rs 50' },
     { key: 'daily_bonus', label: '📅 Daily Bonus (decimal)', type: 'number' },
     { key: 'max_tasks_per_day', label: '🎯 Max Tasks Per Day', type: 'number' },
+    { key: 'whatsapp_channel_link', label: '📢 WhatsApp Channel Link', type: 'url' },
+    { key: 'whatsapp_community_link', label: '👥 WhatsApp Community Link', type: 'url' },
   ];
 
   return (

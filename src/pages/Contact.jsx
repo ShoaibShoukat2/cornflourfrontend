@@ -1,6 +1,24 @@
+import { useEffect, useState } from 'react';
+import api from '../api/axios';
 import logo from '../assets/tasklogo.jpeg';
 
 const Contact = () => {
+  const [links, setLinks] = useState({
+    whatsapp_channel_link: 'https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n',
+    whatsapp_community_link: 'https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn',
+  });
+
+  useEffect(() => {
+    api.get('/admin/contact-links/')
+      .then((res) => {
+        setLinks((prev) => ({
+          whatsapp_channel_link: res.data?.whatsapp_channel_link || prev.whatsapp_channel_link,
+          whatsapp_community_link: res.data?.whatsapp_community_link || prev.whatsapp_community_link,
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="flex items-center justify-center p-4 min-h-[70vh]">
       <section className="neon-card neon-card-glow p-8 w-full max-w-sm text-center">
@@ -13,7 +31,7 @@ const Contact = () => {
 
           <section className="space-y-4">
             <a
-              href="https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n"
+              href={links.whatsapp_channel_link}
               target="_blank"
               rel="noopener noreferrer"
               className="neon-btn neon-btn-block flex items-center justify-center gap-3 py-4 text-base"
@@ -25,7 +43,7 @@ const Contact = () => {
             </a>
 
             <a
-              href="https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn"
+              href={links.whatsapp_community_link}
               target="_blank"
               rel="noopener noreferrer"
               className="neon-btn neon-btn-block flex items-center justify-center gap-3 py-4 text-base"

@@ -1,6 +1,24 @@
+import { useEffect, useState } from 'react';
+import api from '../../api/axios';
 import logo from '../../assets/tasklogo.jpeg';
 
 const AdminContact = () => {
+  const [links, setLinks] = useState({
+    whatsapp_channel_link: 'https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n',
+    whatsapp_community_link: 'https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn',
+  });
+
+  useEffect(() => {
+    api.get('/admin/contact-links/')
+      .then((res) => {
+        setLinks((prev) => ({
+          whatsapp_channel_link: res.data?.whatsapp_channel_link || prev.whatsapp_channel_link,
+          whatsapp_community_link: res.data?.whatsapp_community_link || prev.whatsapp_community_link,
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="flex items-center justify-center p-4 min-h-[60vh]">
       <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm text-center">
@@ -11,7 +29,7 @@ const AdminContact = () => {
 
         <div className="space-y-4">
           <a
-            href="https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n"
+            href={links.whatsapp_channel_link}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl text-base shadow-lg transition"
@@ -23,7 +41,7 @@ const AdminContact = () => {
           </a>
 
           <a
-            href="https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn"
+            href={links.whatsapp_community_link}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl text-base shadow-lg transition"
