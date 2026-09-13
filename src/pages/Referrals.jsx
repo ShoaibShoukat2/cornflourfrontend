@@ -6,19 +6,23 @@ const Referrals = () => {
   const [stats, setStats] = useState(null);
   const [referrals, setReferrals] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    setLoadError(false);
     try {
-      const [statsRes, refRes] = await Promise.all([
+      const [statsRes, refRes] = await Promise.allSettled([
         api.get('/referrals/stats/'),
         api.get('/referrals/list/')
       ]);
-      setStats(statsRes.data);
-      setReferrals(refRes.data);
+      if (statsRes.status === 'fulfilled') setStats(statsRes.value.data);
+      if (refRes.status === 'fulfilled') setReferrals(refRes.value.data);
+      if (statsRes.status !== 'fulfilled') setLoadError(true);
     } catch (error) {
       console.error(error);
+      setLoadError(true);
     }
   };
 
@@ -35,8 +39,17 @@ const Referrals = () => {
 
   if (!stats) return (
     <section className="neon-loading">
-      <div className="neon-spinner" />
-      <p className="neon-loading-text">Loading...</p>
+      {loadError ? (
+        <div className="text-center space-y-3 px-4">
+          <p className="neon-loading-text">Data load nahi hui</p>
+          <button onClick={fetchData} className="neon-btn text-sm px-5 py-2">Retry</button>
+        </div>
+      ) : (
+        <>
+          <div className="neon-spinner" />
+          <p className="neon-loading-text">Loading...</p>
+        </>
+      )}
     </section>
   );
 

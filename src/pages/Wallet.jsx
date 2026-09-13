@@ -12,19 +12,23 @@ const Wallet = () => {
     payment_details: ''
   });
   const [message, setMessage] = useState('');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    setLoadError(false);
     try {
-      const [walletRes, withdrawalsRes] = await Promise.all([
+      const [walletRes, withdrawalsRes] = await Promise.allSettled([
         api.get('/wallet/'),
         api.get('/wallet/withdrawals/')
       ]);
-      setWallet(walletRes.data);
-      setWithdrawals(withdrawalsRes.data);
+      if (walletRes.status === 'fulfilled') setWallet(walletRes.value.data);
+      if (withdrawalsRes.status === 'fulfilled') setWithdrawals(withdrawalsRes.value.data);
+      if (walletRes.status !== 'fulfilled') setLoadError(true);
     } catch (error) {
       console.error(error);
+      setLoadError(true);
     }
   };
 
@@ -55,8 +59,17 @@ const Wallet = () => {
 
   if (!wallet) return (
     <section className="neon-loading">
-      <div className="neon-spinner" />
-      <p className="neon-loading-text">Loading...</p>
+      {loadError ? (
+        <div className="text-center space-y-3 px-4">
+          <p className="neon-loading-text">Wallet load nahi hui</p>
+          <button onClick={fetchData} className="neon-btn text-sm px-5 py-2">Retry</button>
+        </div>
+      ) : (
+        <>
+          <div className="neon-spinner" />
+          <p className="neon-loading-text">Loading...</p>
+        </>
+      )}
     </section>
   );
 

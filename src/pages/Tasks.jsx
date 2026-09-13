@@ -148,6 +148,7 @@ const Tasks = () => {
   const [dailyLimit, setDailyLimit] = useState(0);
   const [completedToday, setCompletedToday] = useState(0);
   const [walletBalance, setWalletBalance] = useState(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -166,6 +167,7 @@ const Tasks = () => {
     setLoading(true);
     setLocked(false);
     setWeeklyLocked(false);
+    setLoadError(false);
     try {
       const res = await api.get('/tasks/');
       if (res.data.tasks) {
@@ -191,6 +193,8 @@ const Tasks = () => {
           weekly_joinings_required: err.weekly_joinings_required ?? 1,
           ads_locked: true,
         });
+      } else {
+        setLoadError(true);
       }
     } finally { setLoading(false); }
   };
@@ -221,6 +225,15 @@ const Tasks = () => {
   if (loading) return (
     <div className="neon-loading">
       <div className="neon-spinner"></div>
+    </div>
+  );
+
+  if (loadError) return (
+    <div className="neon-loading p-4">
+      <div className="neon-card p-8 text-center max-w-sm w-full space-y-3">
+        <p className="text-white font-semibold">Tasks load nahi hue</p>
+        <button onClick={() => setRefresh(r => r + 1)} className="neon-btn text-sm px-5 py-2">Retry</button>
+      </div>
     </div>
   );
 

@@ -300,6 +300,7 @@ const ManageUsers = () => {
         setTotalPages(1);
         setTotal(Array.isArray(res.data) ? res.data.length : 0);
       }
+      setMessage('');
     } catch { setMessage('Failed to load users'); }
     finally { setLoading(false); }
   };
@@ -330,6 +331,13 @@ const ManageUsers = () => {
       {loading ? (
         <div className="flex justify-center items-center h-40">
           <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : message && users.length === 0 ? (
+        <div className="bg-white rounded-xl p-10 text-center shadow-sm space-y-3">
+          <p className="text-gray-500 text-sm">{message}</p>
+          <button onClick={fetchUsers} className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold">
+            Retry
+          </button>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">

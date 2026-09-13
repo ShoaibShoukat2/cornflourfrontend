@@ -33,6 +33,7 @@ const Dashboard = () => {
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [packageStatus, setPackageStatus] = useState('none');
   const [activeTab, setActiveTab] = useState('grid');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -40,32 +41,46 @@ const Dashboard = () => {
   }, []);
 
   const fetchData = async () => {
+    setLoadError(false);
     try {
-      const [walletRes, refRes, tasksRes, pkgRes] = await Promise.all([
+      const [walletRes, refRes, tasksRes, pkgRes] = await Promise.allSettled([
         api.get('/wallet/'),
         api.get('/referrals/stats/'),
         api.get('/tasks/my-tasks/'),
         api.get('/auth/package-status/'),
       ]);
-      setWallet(walletRes.data);
-      setReferralStats(refRes.data);
-      const tasksData = tasksRes.data;
-      if (tasksData?.total_completed !== undefined) {
-        setCompletedTasksCount(tasksData.total_completed);
-      } else if (Array.isArray(tasksData)) {
-        setCompletedTasksCount(tasksData.filter(t => t.status === 'verified').length);
+      if (walletRes.status === 'fulfilled') setWallet(walletRes.value.data);
+      if (refRes.status === 'fulfilled') setReferralStats(refRes.value.data);
+      if (tasksRes.status === 'fulfilled') {
+        const tasksData = tasksRes.value.data;
+        if (tasksData?.total_completed !== undefined) {
+          setCompletedTasksCount(tasksData.total_completed);
+        } else if (Array.isArray(tasksData)) {
+          setCompletedTasksCount(tasksData.filter(t => t.status === 'verified').length);
+        }
       }
-      setPackageStatus(pkgRes.data.status || 'none');
+      if (pkgRes.status === 'fulfilled') setPackageStatus(pkgRes.value.data.status || 'none');
+      if (walletRes.status !== 'fulfilled') setLoadError(true);
     } catch (error) {
       console.error(error);
+      setLoadError(true);
     }
   };
 
   if (!wallet) {
     return (
       <section className="neon-loading">
-        <span className="neon-spinner" />
-        <p className="neon-loading-text">Loading...</p>
+        {loadError ? (
+          <div className="text-center space-y-3 px-4">
+            <p className="neon-loading-text">Data load nahi hui</p>
+            <button onClick={fetchData} className="neon-btn text-sm px-5 py-2">Retry</button>
+          </div>
+        ) : (
+          <>
+            <span className="neon-spinner" />
+            <p className="neon-loading-text">Loading...</p>
+          </>
+        )}
       </section>
     );
   }

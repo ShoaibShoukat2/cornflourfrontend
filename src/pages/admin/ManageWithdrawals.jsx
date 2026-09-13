@@ -21,6 +21,7 @@ const ManageWithdrawals = () => {
     try {
       const res = await api.get('/admin/withdrawals/?status=all');
       setAll(res.data);
+      setMessage('');
     } catch {
       setMessage('Failed to load withdrawals');
     } finally {
@@ -78,6 +79,15 @@ const ManageWithdrawals = () => {
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (message && all.length === 0) return (
+    <div className="text-center py-20 space-y-3">
+      <p className="text-gray-500">{message}</p>
+      <button onClick={fetchAll} className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold">
+        Retry
+      </button>
     </div>
   );
 

@@ -147,10 +147,12 @@ const ManagePackages = () => {
                     }`}>
                       {p.status.toUpperCase()}
                     </span>
-                    <button onClick={() => setPreview(p.screenshot)}
-                      className="text-xs text-blue-500 underline">
-                      View Screenshot
-                    </button>
+                    {p.screenshot && (
+                      <button onClick={() => setPreview(p.screenshot)}
+                        className="text-xs text-blue-500 underline">
+                        View Screenshot
+                      </button>
+                    )}
                     {p.status === 'pending' && (
                       <div className="flex gap-2">
                         <button onClick={() => approve(p.id)}

@@ -3,6 +3,7 @@ import axios from 'axios';
 // Use environment variable or fallback to localhost
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  timeout: 25000,
 });
 
 api.interceptors.request.use((config) => {
@@ -12,5 +13,15 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

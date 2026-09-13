@@ -29,18 +29,20 @@ const ManageTasks = () => {
   const [msg, setMsg] = useState('');
   const [saving, setSaving] = useState(false);
   const [savingLinks, setSavingLinks] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => { fetchTasks(); }, []);
 
   const fetchTasks = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const res = await api.get('/admin/tasks/');
       setTasks(res.data);
       const edits = {};
       res.data.forEach(t => { edits[t.id] = t.url || ''; });
       setLinkEdits(edits);
-    } catch { flash('Failed to load tasks'); }
+    } catch { setLoadError(true); }
     finally { setLoading(false); }
   };
 
@@ -150,6 +152,15 @@ const ManageTasks = () => {
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (loadError && tasks.length === 0 && !showForm) return (
+    <div className="text-center py-20 space-y-3">
+      <p className="text-gray-500">Tasks load nahi hue</p>
+      <button onClick={fetchTasks} className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold">
+        Retry
+      </button>
     </div>
   );
 

@@ -642,24 +642,33 @@ const AdminDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [chartRefresh, setChartRefresh] = useState(0);
+  const [error, setError] = useState('');
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
+    setError('');
     try {
-      const [statsRes, recentRes, pkgRes] = await Promise.all([
+      const [statsRes, recentRes, pkgRes] = await Promise.allSettled([
         api.get('/admin/dashboard-stats/'),
         api.get('/admin/recent-activities/'),
         api.get('/admin/package-payments/count/'),
       ]);
-      setStats(statsRes.data);
-      setRecent(recentRes.data);
-      setPendingPackages(pkgRes.data.count || 0);
-      setChartRefresh((t) => t + 1);
-    } catch (e) { console.error(e); }
-    finally {
+      if (statsRes.status === 'fulfilled') {
+        setStats(statsRes.value.data);
+        setChartRefresh((t) => t + 1);
+      }
+      if (recentRes.status === 'fulfilled') setRecent(recentRes.value.data);
+      if (pkgRes.status === 'fulfilled') setPendingPackages(pkgRes.value.data.count || 0);
+      if (statsRes.status !== 'fulfilled') {
+        setError('Dashboard data load nahi hui. Internet check karke Retry dabain.');
+      }
+    } catch (e) {
+      console.error(e);
+      setError('Dashboard data load nahi hui. Retry karein.');
+    } finally {
       setLoading(false);
       setRefreshing(false);
     }
@@ -676,7 +685,17 @@ const AdminDashboard = () => {
     </div>
   );
 
-  if (!stats) return <div className="text-center text-gray-400 py-20">No data available</div>;
+  if (!stats) return (
+    <div className="text-center py-20 space-y-3">
+      <p className="text-gray-500">{error || 'No data available'}</p>
+      <button
+        onClick={() => fetchData()}
+        className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition"
+      >
+        Retry
+      </button>
+    </div>
+  );
 
   const statCards = [
     { label: 'Total Users', value: stats.users.total, sub: `+${stats.users.new_today || 0} new today · ${stats.users.today_approved || 0} approved today`, accent: 'from-blue-500 to-blue-600', icon: UsersIcon, to: '/admin/users' },

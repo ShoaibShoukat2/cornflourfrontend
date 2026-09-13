@@ -19,15 +19,37 @@ const Tab = ({ active, onClick, icon, label, badge }) => (
 const ApprovedUsers = () => {
   const [data, setData] = useState(null);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    api.get('/admin/approved-users/').then(r => setData(r.data)).catch(() => {});
-  }, []);
+  const load = () => {
+    setLoading(true);
+    setError(false);
+    api.get('/admin/approved-users/')
+      .then(r => setData(r.data))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
 
   const filtered = data?.users?.filter(u =>
     u.username.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase())
   ) || [];
+
+  if (loading) return (
+    <div className="flex justify-center py-12">
+      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error || !data) return (
+    <div className="text-center py-12 space-y-3">
+      <p className="text-gray-500 text-sm">Approved users load nahi hue</p>
+      <button onClick={load} className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -76,9 +98,18 @@ const NewUserRequests = ({ onRefresh }) => {
   const [data, setData] = useState(null);
   const [preview, setPreview] = useState(null);
   const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
 
-  const load = () => api.get('/admin/new-user-requests/').then(r => setData(r.data)).catch(() => {});
+  const load = () => {
+    setLoading(true);
+    setError(false);
+    api.get('/admin/new-user-requests/')
+      .then(r => setData(r.data))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, []);
 
   const approve = async (id, username) => {
@@ -90,6 +121,19 @@ const NewUserRequests = ({ onRefresh }) => {
     try { await api.post(`/admin/reject-package/${id}/`, { reason }); flash(`❌ ${username} rejected`); load(); onRefresh?.(); }
     catch { flash('❌ Failed'); }
   };
+
+  if (loading && !data) return (
+    <div className="flex justify-center py-12">
+      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error && !data) return (
+    <div className="text-center py-12 space-y-3">
+      <p className="text-gray-500 text-sm">Requests load nahi hue</p>
+      <button onClick={load} className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-4">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowPathIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import api from '../../api/axios';
@@ -169,15 +169,22 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
   const [charts, setCharts] = useState(null);
   const [days, setDays] = useState(14);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const inFlight = useRef(false);
 
   const load = useCallback(async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setError(false);
     try {
       const res = await api.get(`/admin/dashboard-charts/?days=${days}`);
       setCharts(res.data);
     } catch (e) {
       console.error(e);
+      setError(true);
     } finally {
       setLoading(false);
+      inFlight.current = false;
     }
   }, [days]);
 
@@ -187,7 +194,7 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
   }, [load, refreshToken]);
 
   useEffect(() => {
-    const id = setInterval(load, 45000);
+    const id = setInterval(() => { load(); }, 120000);
     return () => clearInterval(id);
   }, [load]);
 
@@ -199,7 +206,16 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
     );
   }
 
-  if (!charts) return null;
+  if (!charts) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center space-y-3">
+        <p className="text-sm text-gray-500">{error ? 'Charts load nahi hue' : 'No chart data'}</p>
+        <button onClick={load} className="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const { labels, series, user_segments, package_tiers, summary } = charts;
   const profitPositive = summary.platform_net_rs >= 0;
