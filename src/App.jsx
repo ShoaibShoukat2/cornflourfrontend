@@ -22,7 +22,9 @@ import ManageTasks from './pages/admin/ManageTasks';
 import AdminContact from './pages/admin/AdminContact';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminReports from './pages/admin/AdminReports';
+import ManageUpgrades from './pages/admin/ManageUpgrades';
 import Package from './pages/Package';
+import Upgrade from './pages/Upgrade';
 import Contact from './pages/Contact';
 import AccountCreated from './pages/AccountCreated';
 import Notifications from './pages/Notifications';
@@ -40,6 +42,7 @@ const AppContent = () => {
         <Route path="/admin/users" element={<AdminRoute><AdminLayout><ManageUsers /></AdminLayout></AdminRoute>} />
         <Route path="/admin/withdrawals" element={<AdminRoute><AdminLayout><ManageWithdrawals /></AdminLayout></AdminRoute>} />
         <Route path="/admin/packages" element={<AdminRoute><AdminLayout><ManagePackages /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/upgrades" element={<AdminRoute><AdminLayout><ManageUpgrades /></AdminLayout></AdminRoute>} />
         <Route path="/admin/tasks" element={<AdminRoute><AdminLayout><ManageTasks /></AdminLayout></AdminRoute>} />
         <Route path="/admin/contact" element={<AdminRoute><AdminLayout><AdminContact /></AdminLayout></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminLayout><AdminSettings /></AdminLayout></AdminRoute>} />
@@ -63,6 +66,7 @@ const AppContent = () => {
         <Route path="/referrals" element={<PrivateRoute><Referrals /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
+        <Route path="/upgrade" element={<PrivateRoute><Upgrade /></PrivateRoute>} />
         <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
         <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
         <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />

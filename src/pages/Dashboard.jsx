@@ -10,6 +10,7 @@ const HIGHLIGHTS = [
   { to: '/wallet', icon: 'wallet', label: 'Wallet' },
   { to: '/referrals', icon: 'users', label: 'Team' },
   { to: '/package', icon: 'package', label: 'Package' },
+  { to: '/upgrade', icon: 'offer', label: 'Upgrade' },
   { to: '/contact', icon: 'contact', label: 'Contact' },
   { to: '/settings', icon: 'settings', label: 'Settings' },
 ];
@@ -19,6 +20,7 @@ const GRID_ITEMS = [
   { to: '/wallet', icon: 'withdraw', label: 'Withdraw', needsPackage: true },
   { to: '/referrals', icon: 'users', label: 'Referrals', needsPackage: false },
   { to: '/package', icon: 'package', label: 'Package', needsPackage: false },
+  { to: '/upgrade', icon: 'offer', label: 'Upgrade', needsPackage: false },
   { to: '/contact', icon: 'contact', label: 'Contact', needsPackage: false },
   { to: '/settings', icon: 'settings', label: 'Profile', needsPackage: false },
   { to: '/notifications', icon: 'offer', label: 'Alerts', needsPackage: false },
@@ -151,6 +153,7 @@ const Dashboard = () => {
         ) : (
           <Link to="/package" className="ig-profile-btn ig-profile-btn-primary">Unlock Tasks</Link>
         )}
+        <Link to="/upgrade" className="ig-profile-btn">Upgrade Package</Link>
       </section>
 
       {/* Story highlights */}
@@ -181,6 +184,11 @@ const Dashboard = () => {
       {hasPackage && (
         <section className="neon-alert neon-alert-success mb-3 text-sm">
           Approved · {plan?.package_label || 'Plan'} {plan?.amount ? `· Rs ${plan.amount}` : ''}
+        </section>
+      )}
+      {plan?.upgrade_status === 'pending' && (
+        <section className="neon-alert neon-alert-warning mb-3 text-sm">
+          Upgrade request is Pending. Your current package stays the same until admin approval.
         </section>
       )}
       {packageStatus === 'none' && (

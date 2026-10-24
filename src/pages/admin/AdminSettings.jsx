@@ -30,6 +30,8 @@ const GeneralSettings = () => {
     whatsapp_channel_link: '', whatsapp_community_link: '',
     approval_hours: 5, support_phone: '', frontend_url: '',
     package_price_normal: '', package_price_super: '', package_price_premium: '', package_price_high_octane: '',
+    upgrade_payment_method: '', upgrade_account_number: '', upgrade_trade_id_note: '',
+    upgrade_center_number: '', upgrade_proof_note: '', upgrade_submit_note: '', upgrade_rules: '',
   });
   const [msg, setMsg] = useState('');
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
@@ -53,6 +55,13 @@ const GeneralSettings = () => {
         package_price_super: r.data.package_prices?.super ?? '',
         package_price_premium: r.data.package_prices?.premium ?? '',
         package_price_high_octane: r.data.package_prices?.high_octane ?? '',
+        upgrade_payment_method: r.data.upgrade_payment_method || '',
+        upgrade_account_number: r.data.upgrade_account_number || '',
+        upgrade_trade_id_note: r.data.upgrade_trade_id_note || '',
+        upgrade_center_number: r.data.upgrade_center_number || '',
+        upgrade_proof_note: r.data.upgrade_proof_note || '',
+        upgrade_submit_note: r.data.upgrade_submit_note || '',
+        upgrade_rules: r.data.upgrade_rules || '',
       });
     }).catch(() => {});
   }, []);
@@ -78,6 +87,13 @@ const GeneralSettings = () => {
     { key: 'package_price_premium', label: '💎 Premium Plan Price (Rs)', type: 'number' },
     { key: 'package_price_high_octane', label: '🚀 High Octane Plan Price (Rs)', type: 'number' },
     { key: 'max_tasks_per_day', label: '🎯 Max Tasks Per Day', type: 'number' },
+    { key: 'upgrade_payment_method', label: '⬆️ Upgrade payment method', type: 'text' },
+    { key: 'upgrade_account_number', label: '🏦 Upgrade account number', type: 'text' },
+    { key: 'upgrade_trade_id_note', label: '🧾 Trade ID instructions', type: 'text' },
+    { key: 'upgrade_center_number', label: '📍 Center number', type: 'text' },
+    { key: 'upgrade_proof_note', label: '📸 Proof instructions', type: 'text' },
+    { key: 'upgrade_submit_note', label: '📝 Submit instructions', type: 'text' },
+    { key: 'upgrade_rules', label: '⚠️ Upgrade rules', type: 'text' },
     { key: 'whatsapp_channel_link', label: '📢 WhatsApp Channel Link', type: 'url' },
     { key: 'whatsapp_community_link', label: '👥 WhatsApp Community Link', type: 'url' },
   ];

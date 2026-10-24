@@ -81,6 +81,7 @@ const navItems = [
   { path: '/admin/users',       icon: '👥', label: 'Users',        desc: 'Manage members' },
   { path: '/admin/withdrawals', icon: '💸', label: 'Withdrawals',  desc: 'Payout requests' },
   { path: '/admin/packages',    icon: '📦', label: 'Packages',     desc: 'Deposits & plans' },
+  { path: '/admin/upgrades',   icon: '⬆️', label: 'Package Upgrade Requests', desc: 'Approve remaining payments' },
   { path: '/admin/tasks',       icon: '🎯', label: 'Tasks',        desc: 'Manage tasks' },
   { path: '/admin/settings',    icon: '⚙️', label: 'Settings',     desc: 'Site configuration' },
   { path: '/admin/contact',     icon: '📩', label: 'Contact Us',   desc: 'Support links' },

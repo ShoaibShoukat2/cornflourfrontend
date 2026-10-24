@@ -80,6 +80,7 @@ const Navbar = () => {
                   <Link to="/admin/users" className={linkClass('/admin/users')}>👥 Users</Link>
                   <Link to="/admin/withdrawals" className={linkClass('/admin/withdrawals')}>💸 Withdrawals</Link>
                   <Link to="/admin/packages" className={linkClass('/admin/packages')}>📦 Packages</Link>
+                  <Link to="/admin/upgrades" className={linkClass('/admin/upgrades')}>⬆️ Upgrades</Link>
                   <Link to="/admin/contact" className={linkClass('/admin/contact')}>📩 Contact Us</Link>
                   <section className="h-6 w-px bg-white/20 mx-2" />
                   <UserChip />
@@ -123,6 +124,7 @@ const Navbar = () => {
                     <Link to="/admin/users" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">👥 Manage Users</Link>
                     <Link to="/admin/withdrawals" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">💸 Manage Withdrawals</Link>
                     <Link to="/admin/packages" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📦 Manage Packages</Link>
+                    <Link to="/admin/upgrades" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">⬆️ Package Upgrades</Link>
                     <Link to="/admin/contact" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📩 Contact Us</Link>
                   </>
                 ) : (
