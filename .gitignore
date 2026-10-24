@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Local environment. Keep .env.example in git; the real .env stays on each machine.
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
