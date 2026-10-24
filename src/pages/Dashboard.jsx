@@ -20,7 +20,9 @@ const GRID_ITEMS = [
   { to: '/referrals', icon: 'users', label: 'Referrals', needsPackage: false },
   { to: '/package', icon: 'package', label: 'Package', needsPackage: false },
   { to: '/contact', icon: 'contact', label: 'Contact', needsPackage: false },
-  { to: '/settings', icon: 'settings', label: 'Settings', needsPackage: false },
+  { to: '/settings', icon: 'settings', label: 'Profile', needsPackage: false },
+  { to: '/notifications', icon: 'offer', label: 'Alerts', needsPackage: false },
+  { to: '/transactions', icon: 'stats', label: 'History', needsPackage: false },
   { to: '/wallet', icon: 'balance', label: 'Balance', needsPackage: false },
   { to: '/tasks', icon: 'check', label: 'Earn', needsPackage: true },
   { to: '/referrals', icon: 'link', label: 'Invite', needsPackage: false },
@@ -32,6 +34,7 @@ const Dashboard = () => {
   const [referralStats, setReferralStats] = useState(null);
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [packageStatus, setPackageStatus] = useState('none');
+  const [overview, setOverview] = useState(null);
   const [activeTab, setActiveTab] = useState('grid');
   const [loadError, setLoadError] = useState(false);
 
@@ -43,24 +46,16 @@ const Dashboard = () => {
   const fetchData = async () => {
     setLoadError(false);
     try {
-      const [walletRes, refRes, tasksRes, pkgRes] = await Promise.allSettled([
-        api.get('/wallet/'),
-        api.get('/referrals/stats/'),
-        api.get('/tasks/my-tasks/'),
-        api.get('/auth/package-status/'),
-      ]);
-      if (walletRes.status === 'fulfilled') setWallet(walletRes.value.data);
-      if (refRes.status === 'fulfilled') setReferralStats(refRes.value.data);
-      if (tasksRes.status === 'fulfilled') {
-        const tasksData = tasksRes.value.data;
-        if (tasksData?.total_completed !== undefined) {
-          setCompletedTasksCount(tasksData.total_completed);
-        } else if (Array.isArray(tasksData)) {
-          setCompletedTasksCount(tasksData.filter(t => t.status === 'verified').length);
-        }
-      }
-      if (pkgRes.status === 'fulfilled') setPackageStatus(pkgRes.value.data.status || 'none');
-      if (walletRes.status !== 'fulfilled') setLoadError(true);
+      const dashRes = await api.get('/auth/dashboard-stats/');
+      const data = dashRes.data;
+      setOverview(data);
+      setWallet(data.wallet);
+      setReferralStats({
+        total_referrals: data.team?.direct || 0,
+        total_earnings: data.commissions?.total || 0,
+      });
+      setCompletedTasksCount(data.stats?.completed_tasks || 0);
+      setPackageStatus(data.plan?.status || 'none');
     } catch (error) {
       console.error(error);
       setLoadError(true);
@@ -87,9 +82,18 @@ const Dashboard = () => {
 
   const hasPackage = packageStatus === 'approved' || user?.has_package;
   const isPending = packageStatus === 'pending';
+  const isRejected = packageStatus === 'rejected';
   const balance = (wallet.main_balance * 100).toFixed(0);
   const totalEarned = (wallet.total_earned * 100).toFixed(0);
-  const teamCount = referralStats?.total_referrals || 0;
+  const teamCount = overview?.team?.total ?? referralStats?.total_referrals ?? 0;
+  const plan = overview?.plan;
+  const level = overview?.level;
+  const remainingText = (() => {
+    const seconds = plan?.seconds_remaining || 0;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  })();
 
   return (
     <section className="ig-profile">
@@ -129,7 +133,7 @@ const Dashboard = () => {
       <section className="ig-profile-bio">
         <p className="ig-profile-bio-name">{user?.username}</p>
         <p className="ig-profile-bio-text">
-          Level {user?.level ?? 0} · INSTOVA Member
+          Level {level?.current ?? user?.level ?? 0} of {level?.max_level ?? 9} · {plan?.package_label || 'No active plan'}
           <br />
           Rs {balance} available to withdraw
         </p>
@@ -163,10 +167,26 @@ const Dashboard = () => {
 
       {/* Alerts */}
       {isPending && (
-        <section className="neon-alert neon-alert-warning mb-3 text-sm">⏳ Package under review (24h)</section>
+        <section className="neon-alert neon-alert-warning mb-3 text-sm">
+          Pending approval. Limit is {plan?.approval_hours || 5} hours.
+          {' '}{plan?.is_overdue ? 'This request is past the limit and still waiting for admin.' : `Time left: ${remainingText}.`}
+        </section>
+      )}
+      {isRejected && (
+        <section className="neon-alert neon-alert-error mb-3 text-sm">
+          Plan rejected{plan?.admin_note ? `: ${plan.admin_note}` : ''}.{' '}
+          <Link to="/package" className="underline">Choose a plan again</Link>
+        </section>
       )}
       {hasPackage && (
-        <section className="neon-alert neon-alert-success mb-3 text-sm">✅ INSTOVA Plan Active</section>
+        <section className="neon-alert neon-alert-success mb-3 text-sm">
+          Approved · {plan?.package_label || 'Plan'} {plan?.amount ? `· Rs ${plan.amount}` : ''}
+        </section>
+      )}
+      {packageStatus === 'none' && (
+        <section className="neon-alert neon-alert-warning mb-3 text-sm">
+          No plan yet. <Link to="/package" className="underline">View plans</Link>
+        </section>
       )}
 
       {/* Tab bar */}
@@ -238,8 +258,15 @@ const Dashboard = () => {
             { label: 'Pending Balance', value: `Rs ${(wallet.pending_balance * 100).toFixed(0)}` },
             { label: 'Tasks Completed', value: completedTasksCount },
             { label: 'Active Team', value: teamCount },
-            { label: 'Referral Earnings', value: `Rs ${((referralStats?.total_earnings || 0) * 100).toFixed(0)}` },
-            { label: 'Account Level', value: `Level ${user?.level ?? 0}` },
+            { label: 'Direct Referrals', value: overview?.team?.direct ?? 0 },
+            { label: 'Indirect Referrals', value: overview?.team?.indirect ?? 0 },
+            { label: 'Direct Commission', value: `Rs ${((overview?.commissions?.direct || 0) * 100).toFixed(0)}` },
+            { label: 'Indirect Commission', value: `Rs ${((overview?.commissions?.indirect || 0) * 100).toFixed(0)}` },
+            { label: 'Bonuses Received', value: `Rs ${((overview?.bonuses?.total || 0) * 100).toFixed(0)}` },
+            { label: 'Withdrawn', value: `Rs ${((wallet.total_withdrawn || 0) * 100).toFixed(0)}` },
+            { label: 'Withdrawal Status', value: overview?.withdrawals?.latest_status || 'none' },
+            { label: 'Account Level', value: `Level ${level?.current ?? user?.level ?? 0}` },
+            { label: 'Next Level', value: level?.next_level == null ? 'Max level' : `${level.members_remaining} more approved direct members for level ${level.next_level}` },
           ].map((row) => (
             <section key={row.label} className="ig-stats-row">
               <span className="ig-stats-row-label">{row.label}</span>

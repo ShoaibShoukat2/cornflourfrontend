@@ -6,6 +6,7 @@ const Contact = () => {
   const [links, setLinks] = useState({
     whatsapp_channel_link: 'https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n',
     whatsapp_community_link: 'https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn',
+    support_phone: '',
   });
 
   useEffect(() => {
@@ -14,6 +15,7 @@ const Contact = () => {
         setLinks((prev) => ({
           whatsapp_channel_link: res.data?.whatsapp_channel_link || prev.whatsapp_channel_link,
           whatsapp_community_link: res.data?.whatsapp_community_link || prev.whatsapp_community_link,
+          support_phone: res.data?.support_phone || '',
         }));
       })
       .catch(() => {});
@@ -30,6 +32,11 @@ const Contact = () => {
           <p className="neon-subtitle text-sm mb-8">Join our official WhatsApp groups for support and updates</p>
 
           <section className="space-y-4">
+            {links.support_phone && (
+              <a href={`tel:${links.support_phone}`} className="neon-btn neon-btn-block py-4 text-base">
+                Official Support: {links.support_phone}
+              </a>
+            )}
             <a
               href={links.whatsapp_channel_link}
               target="_blank"

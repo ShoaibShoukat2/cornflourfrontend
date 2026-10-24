@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 const Wallet = () => {
@@ -44,7 +45,7 @@ const Wallet = () => {
           : formData.payment_details,
       };
       await api.post('/wallet/withdraw/', payload);
-      setMessage('✅ Money Request Sent! We will send money in 24 hours');
+      setMessage('✅ Withdrawal request is pending. The reference is in the list below.');
       setShowWithdrawForm(false);
       setFormData({ amount: '', payment_method: 'jazzcash', account_name: '', payment_details: '' });
       fetchData();
@@ -94,22 +95,28 @@ const Wallet = () => {
         </section>
 
         <section className="grid grid-cols-2 gap-4 mb-8">
-          <section className="neon-card p-6 text-center neon-delay-1">
-            <span className="text-3xl mb-2 block">🎁</span>
-            <h3 className="text-lg font-bold text-white mb-1">Bonus Money</h3>
-            <p className="text-2xl font-bold neon-gradient-text">Rs {(wallet.bonus_balance * 100).toFixed(0)}</p>
-          </section>
-          <section className="neon-card p-6 text-center neon-delay-2">
-            <span className="text-3xl mb-2 block">⏳</span>
-            <h3 className="text-lg font-bold text-white mb-1">Pending Money</h3>
-            <p className="text-2xl font-bold neon-gradient-text">Rs {(wallet.pending_balance * 100).toFixed(0)}</p>
-          </section>
+          {[
+            ['Total Earnings', wallet.total_earned],
+            ['Withdrawable', wallet.withdrawable_balance ?? wallet.main_balance],
+            ['Pending', wallet.pending_balance],
+            ['Withdrawn', wallet.total_withdrawn],
+            ['Bonus Balance', wallet.bonus_balance],
+          ].map(([label, amount]) => (
+            <section key={label} className="neon-card p-6 text-center">
+              <h3 className="text-lg font-bold text-white mb-1">{label}</h3>
+              <p className="text-2xl font-bold neon-gradient-text">Rs {(Number(amount) * 100).toFixed(0)}</p>
+            </section>
+          ))}
         </section>
 
         <section className="neon-card p-6 mb-8">
           <header className="text-center mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">💸 GET YOUR MONEY</h2>
-            <p className="neon-subtitle">First Withdrawal: Rs 50 • After that: Rs 500 minimum</p>
+            <p className="neon-subtitle">
+              {wallet.is_first_withdrawal ? 'First' : 'Next'} minimum: Rs {(
+                Number(wallet.is_first_withdrawal ? wallet.minimum_withdrawal_first : wallet.minimum_withdrawal) * 100
+              ).toFixed(0)}
+            </p>
           </header>
 
           {!showWithdrawForm ? (
@@ -168,6 +175,8 @@ const Wallet = () => {
           )}
         </section>
 
+        <Link to="/transactions" className="neon-btn neon-btn-block mb-6 text-center">Full transaction history</Link>
+
         {withdrawals.length > 0 && (
           <section className="neon-card p-6">
             <h2 className="text-xl font-bold text-white mb-4 text-center">📋 Your Money Requests</h2>
@@ -177,7 +186,7 @@ const Wallet = () => {
                   <section>
                     <p className="font-bold text-lg text-white">Rs {(withdrawal.amount * 100).toFixed(0)}</p>
                     <p className="text-sm neon-subtitle capitalize">{withdrawal.payment_method}</p>
-                    <p className="text-xs text-white/40">{new Date(withdrawal.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-white/40">{withdrawal.reference || `WD${String(withdrawal.id).padStart(6, '0')}`} · {new Date(withdrawal.created_at).toLocaleString()}</p>
                   </section>
                   <section className="text-right">
                     <span className={`px-3 py-1.5 rounded-full text-sm font-bold block mb-1 ${

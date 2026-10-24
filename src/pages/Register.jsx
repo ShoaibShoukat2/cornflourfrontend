@@ -18,19 +18,22 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!formData.username.trim()) return setError('Username is required');
-    if (formData.username.length < 3) return setError('Username must be at least 3 characters long');
+    if (!formData.username.trim()) return setError('Name is required');
+    if (formData.username.length < 3) return setError('Name must be at least 3 characters long');
     if (!formData.email.trim()) return setError('Email is required');
+    if (!formData.phone.trim()) return setError('Phone number is required');
     if (!formData.password) return setError('Password is required');
     if (formData.password !== formData.password2) return setError('Passwords do not match');
 
     try {
       await register(formData);
-      navigate('/dashboard');
+      navigate('/account-created');
     } catch (err) {
       const errorData = err.response?.data;
-      if (errorData?.username) setError(`Username: ${errorData.username[0]}`);
+      if (errorData?.username) setError(`Name: ${errorData.username[0]}`);
       else if (errorData?.email) setError(`Email: ${errorData.email[0]}`);
+      else if (errorData?.phone) setError(`Phone: ${Array.isArray(errorData.phone) ? errorData.phone[0] : errorData.phone}`);
+      else if (errorData?.referral_code) setError(`Referral code: ${errorData.referral_code[0]}`);
       else if (errorData?.password) setError(`Password: ${errorData.password[0]}`);
       else if (errorData?.error) setError(errorData.error);
       else setError('Registration failed. Please try again.');
@@ -76,10 +79,10 @@ const Register = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <section>
-              <label className="neon-label">Username</label>
+              <label className="neon-label">Name</label>
               <input type="text" value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                placeholder="Choose a username" className="neon-input" required />
+                placeholder="Enter your name" className="neon-input" required />
             </section>
             <section>
               <label className="neon-label">Email</label>
@@ -88,10 +91,10 @@ const Register = () => {
                 placeholder="Enter your email" className="neon-input" required />
             </section>
             <section>
-              <label className="neon-label">Phone (Optional)</label>
+              <label className="neon-label">Phone Number</label>
               <input type="tel" value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="Enter your phone number" className="neon-input" />
+                placeholder="Enter your phone number" className="neon-input" required />
             </section>
             <PasswordField label="Password" value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -102,10 +105,11 @@ const Register = () => {
               show={showPassword2} onToggle={() => setShowPassword2(!showPassword2)}
               placeholder="Confirm your password" />
             <section>
-              <label className="neon-label">Referral Code <span className="text-white/40 font-normal">(optional)</span></label>
+              <label className="neon-label">Referral Code {refCode ? '' : <span className="text-white/40 font-normal">(optional)</span>}</label>
               <input type="text" value={formData.referral_code}
-                onChange={(e) => setFormData({ ...formData, referral_code: e.target.value })}
-                placeholder="Enter referral code" className="neon-input" />
+                onChange={(e) => setFormData({ ...formData, referral_code: e.target.value.toUpperCase() })}
+                placeholder="Enter referral code" className="neon-input" readOnly={Boolean(refCode)} />
+              {refCode && <p className="text-xs text-green-400 mt-1">Referral code from your invite link</p>}
             </section>
             <button type="submit" className="neon-btn neon-btn-block py-3 font-semibold mt-6">Create Account</button>
           </form>

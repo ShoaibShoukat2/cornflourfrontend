@@ -24,6 +24,9 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminReports from './pages/admin/AdminReports';
 import Package from './pages/Package';
 import Contact from './pages/Contact';
+import AccountCreated from './pages/AccountCreated';
+import Notifications from './pages/Notifications';
+import Transactions from './pages/Transactions';
 import MobileBottomNav from './components/MobileBottomNav';
 
 const AppContent = () => {
@@ -53,6 +56,7 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/account-created" element={<PrivateRoute><AccountCreated /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
         <Route path="/wallet" element={<PrivateRoute><Wallet /></PrivateRoute>} />
@@ -60,6 +64,8 @@ const AppContent = () => {
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         <Route path="/package" element={<PrivateRoute><Package /></PrivateRoute>} />
         <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
+        <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
+        <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
       </Routes>
       <MobileBottomNav />
     </UserLayout>

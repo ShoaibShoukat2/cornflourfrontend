@@ -28,8 +28,10 @@ const Navbar = () => {
     { to: '/referrals', icon: 'users', label: 'Referrals' },
     { to: '/wallet', icon: 'wallet', label: 'Wallet' },
     { to: '/package', icon: 'package', label: 'Package' },
-    { to: '/settings', icon: 'settings', label: 'Settings' },
-    { to: '/contact', icon: 'contact', label: 'Contact' },
+    { to: '/settings', icon: 'settings', label: 'Profile' },
+    { to: '/notifications', icon: 'offer', label: 'Alerts' },
+    { to: '/transactions', icon: 'stats', label: 'History' },
+    { to: '/contact', icon: 'contact', label: 'Support' },
   ];
 
   const NavLinkItem = ({ to, icon, label, onClick, className }) => (

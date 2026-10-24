@@ -52,14 +52,27 @@ const Package = () => {
   const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [statusInfo, setStatusInfo] = useState(null);
+  const [priceMap, setPriceMap] = useState({});
 
-  useEffect(() => { fetchStatus(); }, []);
+  useEffect(() => {
+    fetchStatus();
+    api.get('/auth/plans/').then((res) => {
+      const next = {};
+      (res.data || []).forEach((plan) => { next[plan.key] = Number(plan.price); });
+      setPriceMap(next);
+    }).catch(() => {});
+  }, []);
+
+  const packages = PACKAGES.map((pkg) => ({ ...pkg, price: priceMap[pkg.key] || pkg.price }));
 
   const fetchStatus = async () => {
     try {
       const res = await api.get('/auth/package-status/');
+      setStatusInfo(res.data);
       if (res.data.status === 'pending') setStep('submitted');
       if (res.data.status === 'approved') setStep('active');
+      if (res.data.status === 'rejected') setStep('rejected');
     } catch {}
   };
 
@@ -95,7 +108,10 @@ const Package = () => {
       <div className="neon-card p-8 text-center max-w-sm w-full">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-black neon-gradient-text mb-2">Package Active!</h2>
-        <p className="neon-subtitle">Your package is active. Start earning now!</p>
+        <p className="neon-subtitle">
+          {statusInfo?.package_label || 'Your plan'} is approved
+          {statusInfo?.amount ? ` · Rs ${statusInfo.amount}` : ''}. Tasks and withdrawals are open.
+        </p>
       </div>
     </div>
   );
@@ -105,8 +121,24 @@ const Package = () => {
     <div className="flex items-center justify-center p-4 min-h-[70vh]">
       <div className="neon-card p-8 text-center max-w-sm w-full">
         <div className="text-6xl mb-4">⏳</div>
-        <h2 className="text-2xl font-black neon-gradient-text mb-2">Under Review</h2>
-        <p className="neon-subtitle text-sm">Your payment is being verified. Account will be activated within <span className="font-bold text-orange-500">24 hours</span>.</p>
+        <h2 className="text-2xl font-black neon-gradient-text mb-2">Pending Approval</h2>
+        <p className="neon-subtitle text-sm">
+          Status: Pending. Review limit is <span className="font-bold text-orange-500">{statusInfo?.approval_hours || 5} hours</span>.
+          {statusInfo?.is_overdue
+            ? ' This request is past the limit and still waiting for admin.'
+            : ` Time left: ${Math.floor((statusInfo?.seconds_remaining || 0) / 3600)}h ${Math.floor(((statusInfo?.seconds_remaining || 0) % 3600) / 60)}m.`}
+        </p>
+      </div>
+    </div>
+  );
+
+  if (step === 'rejected') return (
+    <div className="flex items-center justify-center p-4 min-h-[70vh]">
+      <div className="neon-card p-8 text-center max-w-sm w-full">
+        <div className="text-6xl mb-4">❌</div>
+        <h2 className="text-2xl font-black neon-gradient-text mb-2">Rejected</h2>
+        <p className="neon-subtitle text-sm mb-4">{statusInfo?.admin_note || 'Your payment was rejected. You can submit a new one.'}</p>
+        <button onClick={() => setStep('info')} className="neon-btn neon-btn-block">Choose a plan again</button>
       </div>
     </div>
   );
@@ -186,7 +218,7 @@ const Package = () => {
 
         {/* Package Cards */}
         <div className="space-y-4">
-          {PACKAGES.map(pkg => (
+          {packages.map(pkg => (
             <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-2xl neon-card-glow animate-fadeIn"
               style={{ background: pkg.gradient }}>
               {pkg.badge && (

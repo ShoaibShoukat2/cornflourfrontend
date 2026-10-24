@@ -25,9 +25,11 @@ const Flash = ({ msg }) => {
 // ── General Settings Tab ───────────────────────────────────────────────────────
 const GeneralSettings = () => {
   const [form, setForm] = useState({
-    site_name: '', minimum_withdrawal: '', signup_bonus: '',
+    site_name: '', minimum_withdrawal: '', minimum_withdrawal_first: '', signup_bonus: '',
     daily_bonus: '', max_tasks_per_day: '', maintenance_mode: false,
     whatsapp_channel_link: '', whatsapp_community_link: '',
+    approval_hours: 5, support_phone: '', frontend_url: '',
+    package_price_normal: '', package_price_super: '', package_price_premium: '', package_price_high_octane: '',
   });
   const [msg, setMsg] = useState('');
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
@@ -37,12 +39,20 @@ const GeneralSettings = () => {
       setForm({
         site_name: r.data.site_name || '',
         minimum_withdrawal: r.data.minimum_withdrawal || '',
+        minimum_withdrawal_first: r.data.minimum_withdrawal_first || '',
         signup_bonus: r.data.signup_bonus || '',
         daily_bonus: r.data.daily_bonus || '',
         max_tasks_per_day: r.data.max_tasks_per_day || '',
         maintenance_mode: r.data.maintenance_mode || false,
         whatsapp_channel_link: r.data.whatsapp_channel_link || '',
         whatsapp_community_link: r.data.whatsapp_community_link || '',
+        approval_hours: r.data.approval_hours ?? 5,
+        support_phone: r.data.support_phone || '',
+        frontend_url: r.data.frontend_url || '',
+        package_price_normal: r.data.package_prices?.normal ?? '',
+        package_price_super: r.data.package_prices?.super ?? '',
+        package_price_premium: r.data.package_prices?.premium ?? '',
+        package_price_high_octane: r.data.package_prices?.high_octane ?? '',
       });
     }).catch(() => {});
   }, []);
@@ -56,9 +66,17 @@ const GeneralSettings = () => {
 
   const fields = [
     { key: 'site_name', label: '🏷 Site Name', type: 'text' },
-    { key: 'minimum_withdrawal', label: '💸 Min Withdrawal (decimal)', type: 'number', hint: 'e.g. 0.50 = Rs 50' },
-    { key: 'signup_bonus', label: '🎁 Signup Bonus (decimal)', type: 'number', hint: 'e.g. 0.50 = Rs 50' },
+    { key: 'minimum_withdrawal', label: '💸 Later Min Withdrawal (decimal)', type: 'number', hint: 'e.g. 5.00 = Rs 500' },
+    { key: 'minimum_withdrawal_first', label: '💸 First Min Withdrawal (decimal)', type: 'number', hint: 'e.g. 0.50 = Rs 50' },
+    { key: 'signup_bonus', label: '🎁 Signup Bonus (decimal)', type: 'number', hint: 'e.g. 0.50 = Rs 50. This amount is paid on registration.' },
     { key: 'daily_bonus', label: '📅 Daily Bonus (decimal)', type: 'number' },
+    { key: 'approval_hours', label: '⏱ Plan Approval Limit (hours)', type: 'number', hint: 'Shown to users. Default 5.' },
+    { key: 'support_phone', label: '📞 Official Support Number', type: 'text' },
+    { key: 'frontend_url', label: '🔗 Referral Site URL', type: 'text' },
+    { key: 'package_price_normal', label: '🌱 Normal Plan Price (Rs)', type: 'number' },
+    { key: 'package_price_super', label: '⭐ Super Plan Price (Rs)', type: 'number' },
+    { key: 'package_price_premium', label: '💎 Premium Plan Price (Rs)', type: 'number' },
+    { key: 'package_price_high_octane', label: '🚀 High Octane Plan Price (Rs)', type: 'number' },
     { key: 'max_tasks_per_day', label: '🎯 Max Tasks Per Day', type: 'number' },
     { key: 'whatsapp_channel_link', label: '📢 WhatsApp Channel Link', type: 'url' },
     { key: 'whatsapp_community_link', label: '👥 WhatsApp Community Link', type: 'url' },
@@ -95,14 +113,27 @@ const GeneralSettings = () => {
 // ── Referral Commission Settings Tab ──────────────────────────────────────────
 const ReferralSettings = () => {
   const [data, setData] = useState(null);
-  const [form, setForm] = useState({ signup_bonus: '', referral_enabled: true });
+  const [form, setForm] = useState({
+    signup_bonus: '', referral_enabled: true,
+    l1_package: '', l2_package: '', l3_package: '',
+    l1_task: '', l2_task: '', l3_task: '',
+  });
   const [msg, setMsg] = useState('');
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
 
   useEffect(() => {
     api.get('/admin/referral-commission-settings/').then(r => {
       setData(r.data);
-      setForm({ signup_bonus: r.data.signup_bonus, referral_enabled: r.data.referral_enabled });
+      setForm({
+        signup_bonus: r.data.signup_bonus,
+        referral_enabled: r.data.referral_enabled,
+        l1_package: r.data.l1_package,
+        l2_package: r.data.l2_package,
+        l3_package: r.data.l3_package,
+        l1_task: r.data.l1_task,
+        l2_task: r.data.l2_task,
+        l3_task: r.data.l3_task,
+      });
     }).catch(() => {});
   }, []);
 
@@ -138,7 +169,7 @@ const ReferralSettings = () => {
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-2">* Commission rates are fixed in system logic. Contact developer to change percentages.</p>
+        <p className="text-xs text-gray-400 mt-2">Rates below are the live payout percentages.</p>
       </div>
 
       {/* Editable Settings */}
@@ -152,6 +183,21 @@ const ReferralSettings = () => {
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
             <p className="text-xs text-gray-400 mt-1">e.g. 0.50 = Rs 50</p>
           </div>
+          {[
+            ['l1_package', 'L1 Package %'],
+            ['l2_package', 'L2 Package %'],
+            ['l3_package', 'L3 Package %'],
+            ['l1_task', 'L1 Task %'],
+            ['l2_task', 'L2 Task %'],
+            ['l3_task', 'L3 Task %'],
+          ].map(([key, label]) => (
+            <div key={key}>
+              <label className="text-xs font-semibold text-gray-500 mb-1 block">{label}</label>
+              <input type="number" value={form[key] ?? ''}
+                onChange={e => setForm({ ...form, [key]: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+            </div>
+          ))}
           <div className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl">
             <label className="text-sm font-semibold text-gray-600 flex-1">🔗 Referral System</label>
             <button onClick={() => setForm({ ...form, referral_enabled: !form.referral_enabled })}
@@ -171,10 +217,33 @@ const ReferralSettings = () => {
 // ── Level Settings Tab ─────────────────────────────────────────────────────────
 const LevelSettings = () => {
   const [data, setData] = useState(null);
+  const [requirements, setRequirements] = useState('');
+  const [bonuses, setBonuses] = useState('');
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    api.get('/admin/level-settings/').then(r => setData(r.data)).catch(() => {});
+    api.get('/admin/level-settings/').then(r => {
+      setData(r.data);
+      setRequirements((r.data.level_requirements || []).join(', '));
+      setBonuses((r.data.level_bonuses || []).join(', '));
+    }).catch(() => {});
   }, []);
+
+  const save = async () => {
+    try {
+      const level_requirements = requirements.split(',').map(v => parseInt(v.trim(), 10));
+      const level_bonuses = bonuses.split(',').map(v => v.trim());
+      if (!data) return;
+      if (level_requirements.length !== 10 || level_requirements.some(Number.isNaN) || level_bonuses.length !== 10) {
+        setMsg('Enter 10 level requirements and 10 bonuses');
+        return;
+      }
+      await api.post('/admin/level-settings/', { level_requirements, level_bonuses, level_rewards: data.level_rewards });
+      setMsg('✅ Level rules saved');
+    } catch {
+      setMsg('❌ Failed to save');
+    }
+  };
 
   const packageColors = {
     normal: 'bg-blue-50 border-blue-200 text-blue-700',
@@ -215,7 +284,18 @@ const LevelSettings = () => {
             </div>
           </div>
         ))}
-        <p className="text-xs text-gray-400 mt-2">* Level settings are configured in system code. Contact developer to update.</p>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
+          <h3 className="text-sm font-bold text-gray-700">Approved direct members required for levels 0–9</h3>
+          <input value={requirements} onChange={e => setRequirements(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm" />
+          <h3 className="text-sm font-bold text-gray-700">Level bonus in wallet units (0.10 = Rs 10), levels 0–9</h3>
+          <input value={bonuses} onChange={e => setBonuses(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm" />
+          {msg && <p className="text-sm font-semibold">{msg}</p>}
+          <button onClick={save} className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-bold text-sm">
+            Save Level Rules
+          </button>
+        </div>
       </div>
     </div>
   );

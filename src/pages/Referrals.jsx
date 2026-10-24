@@ -94,10 +94,36 @@ const Referrals = () => {
           </section>
         </section>
 
+        <section className="grid grid-cols-2 gap-4 mb-8">
+          {[
+            ['Direct Members', stats.direct_referrals ?? stats.total_referrals],
+            ['Indirect Members', stats.indirect_referrals ?? 0],
+            ['Direct Commission', `Rs ${((stats.direct_commission || 0) * 100).toFixed(0)}`],
+            ['Indirect Commission', `Rs ${((stats.indirect_commission || 0) * 100).toFixed(0)}`],
+          ].map(([label, value]) => (
+            <section key={label} className="neon-card p-4 text-center">
+              <p className="text-xs neon-subtitle">{label}</p>
+              <p className="text-xl font-black text-white">{value}</p>
+            </section>
+          ))}
+        </section>
+
+        <section className="neon-card p-5 mb-8 text-center">
+          <h2 className="text-xl font-bold text-white mb-2">Level {stats.level ?? 0} of {(stats.levels_total || 10) - 1}</h2>
+          <p className="neon-subtitle text-sm">
+            Unlocked levels: {(stats.unlocked_levels || [0]).join(', ')}
+          </p>
+          <p className="text-white text-sm mt-2">
+            {stats.next_level == null
+              ? 'All levels are unlocked.'
+              : `Level ${stats.next_level} needs ${stats.next_level_required} approved direct members. ${stats.members_remaining} more to go.`}
+          </p>
+        </section>
+
         <section className="neon-card p-6 mb-8">
           <h2 className="text-2xl font-bold text-white mb-4 text-center">🔗 YOUR LINK</h2>
           <p className="text-center neon-subtitle mb-6 text-lg">
-            Share this link • Get 25% Refer Commission when they complete Registration!
+            Share this link. Direct commission is paid when their plan is approved, and indirect commission follows your upline rates.
           </p>
           <section className="rounded-xl p-4 mb-6 border border-purple-500/30 bg-black/30">
             <p className="text-sm neon-subtitle mb-2">Your Link:</p>
@@ -118,7 +144,7 @@ const Referrals = () => {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: '📤', title: '1. SHARE LINK', desc: 'Send your link to friends on WhatsApp, Facebook, etc.' },
-              { icon: '👤', title: '2. FRIEND JOINS', desc: 'When they register, you will get 25%!' },
+              { icon: '👤', title: '2. FRIEND JOINS', desc: 'When their plan is approved, you receive the direct commission.' },
               { icon: '💰', title: '3. EARN MORE', desc: "When your Member invites a Member, you get 3%. When your Member's Member invites, you get 1%!" },
             ].map((step) => (
               <section key={step.title} className="text-center neon-stat p-4">
@@ -144,7 +170,9 @@ const Referrals = () => {
                       </span>
                       <section>
                         <p className="font-bold text-white">{ref.username}</p>
-                        <p className="text-xs text-white/40">Joined: {new Date(ref.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-white/40">
+                          {ref.relation === 'indirect' ? `Indirect · depth ${ref.depth}` : 'Direct'} · {new Date(ref.created_at).toLocaleDateString()}
+                        </p>
                       </section>
                     </section>
                     <section className="text-right">

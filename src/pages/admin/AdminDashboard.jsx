@@ -317,6 +317,7 @@ const UserDetail = ({ userId, onBack }) => {
               const typeColors = {
                 task: 'bg-blue-100 text-blue-700',
                 referral: 'bg-purple-100 text-purple-700',
+                commission: 'bg-purple-100 text-purple-700',
                 bonus: 'bg-green-100 text-green-700',
                 withdrawal: 'bg-red-100 text-red-700',
                 commission: 'bg-orange-100 text-orange-700',

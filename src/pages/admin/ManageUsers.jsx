@@ -179,7 +179,7 @@ const UserDetail = ({ userId, onBack }) => {
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {transactions.map(tx => {
               const isPos = tx.amount >= 0;
-              const colors = { task:'bg-blue-100 text-blue-700', referral:'bg-purple-100 text-purple-700', bonus:'bg-green-100 text-green-700', withdrawal:'bg-red-100 text-red-700' };
+              const colors = { task:'bg-blue-100 text-blue-700', referral:'bg-purple-100 text-purple-700', commission:'bg-purple-100 text-purple-700', bonus:'bg-green-100 text-green-700', withdrawal:'bg-red-100 text-red-700' };
               return (
                 <div key={tx.id} className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl">
                   <div className="min-w-0 flex-1">

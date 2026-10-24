@@ -114,7 +114,7 @@ const NewUserRequests = ({ onRefresh }) => {
 
   const approve = async (id, username) => {
     try { await api.post(`/admin/approve-package/${id}/`); flash(`✅ ${username} approved`); load(); onRefresh?.(); }
-    catch { flash('❌ Failed'); }
+    catch (e) { flash(e.response?.data?.error || '❌ Failed'); }
   };
   const reject = async (id, username) => {
     const reason = prompt('Rejection reason:') || 'Rejected by admin';
@@ -148,6 +148,10 @@ const NewUserRequests = ({ onRefresh }) => {
             <p className="text-xs text-gray-500">Submitted Today</p>
             <p className="text-2xl font-black text-blue-700">{data.today}</p>
           </div>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 col-span-2">
+            <p className="text-xs text-gray-500">Past {data.requests?.[0]?.approval_hours || 5} hour limit</p>
+            <p className="text-2xl font-black text-red-700">{data.overdue || 0}</p>
+          </div>
         </div>
       )}
       <div className="space-y-3">
@@ -158,6 +162,7 @@ const NewUserRequests = ({ onRefresh }) => {
                 <p className="font-bold text-gray-800">{r.username}</p>
                 <p className="text-xs text-gray-400">{r.email}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{new Date(r.submitted_at).toLocaleString()}</p>
+                {r.is_overdue && <p className="text-xs font-bold text-red-600 mt-1">Over approval time</p>}
               </div>
               <div className="text-right">
                 <p className="font-black text-orange-500">Rs {r.amount}</p>
