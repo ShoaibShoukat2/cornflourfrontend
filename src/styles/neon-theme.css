@@ -1329,14 +1329,30 @@ body {
 }
 
 .lux-mark-face {
+  position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 22%;
+  border-radius: 28%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #ffb347, #ff4fa3 42%, #7a3cff 78%, #4d7dff);
-  box-shadow: 0 0 16px rgba(255, 120, 180, 0.65), inset 0 0 0 2px rgba(255, 230, 170, 0.55);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.55), transparent 28%),
+    linear-gradient(145deg, #ffb347 0%, #ff4f8b 38%, #c026d3 68%, #7c3aed 100%);
+  box-shadow:
+    0 0 22px rgba(255, 90, 180, 0.85),
+    0 0 40px rgba(120, 40, 255, 0.45),
+    inset 0 0 0 2px rgba(255, 230, 170, 0.7);
+}
+
+.lux-mark-face::after {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 24%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  pointer-events: none;
 }
 
 .lux-mark-letter {
@@ -1880,20 +1896,30 @@ body {
 }
 
 .lux-nav-crown {
+  position: relative;
   width: 52px;
   height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 30% 30%, #ff7ad9, #c026d3 45%, #6d28d9);
-  box-shadow: 0 0 16px rgba(255, 80, 180, 0.75);
+  background: radial-gradient(circle at 30% 30%, #ff7ad9, #e11d8f 48%, #7c3aed);
+  box-shadow: 0 0 16px rgba(255, 80, 180, 0.75), inset 0 0 0 2px rgba(255, 220, 160, 0.45);
 }
 
-.lux-nav-crown svg {
-  width: 26px;
-  height: 18px;
-  fill: #ffe7a3;
+.lux-nav-crown svg.lux-nav-crown-mark {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 22px;
+  height: 14px;
+  transform: translateX(-50%);
+  fill: #f6c453;
+  filter: drop-shadow(0 0 4px rgba(255, 196, 70, 0.9));
+}
+
+.lux-nav-crown .nav-icon {
+  color: white;
 }
 
 .lux-team-banner {
@@ -2370,4 +2396,192 @@ body {
 .lux-quote span {
   color: #8b7c9e;
   font-size: 0.75rem;
+}
+
+.lux-tasks {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 120, 210, 0.35), transparent 22%),
+    radial-gradient(circle at 82% 8%, rgba(255, 80, 160, 0.28), transparent 18%),
+    radial-gradient(circle at 70% 40%, rgba(120, 40, 220, 0.35), transparent 26%),
+    radial-gradient(1px 1px at 12% 22%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 28% 8%, #ffe7a3, transparent),
+    radial-gradient(1px 1px at 64% 16%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 88% 28%, #ffd0f0, transparent),
+    radial-gradient(1px 1px at 40% 48%, #fff, transparent),
+    radial-gradient(1px 1px at 76% 62%, #ffe7a3, transparent),
+    linear-gradient(180deg, #3a0a62 0%, #5a1288 22%, #2a0848 55%, #14031f 100%);
+}
+
+.lux-tasks .lux-page-head h1 {
+  font-size: 2rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 18px rgba(255, 196, 90, 0.45);
+}
+
+.lux-balance-crown {
+  position: relative;
+  display: inline-flex;
+  margin-top: 8px;
+}
+
+.lux-balance-crown > svg {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 22px;
+  height: 12px;
+  transform: translateX(-50%);
+  fill: #f6c453;
+  filter: drop-shadow(0 0 4px rgba(255, 196, 70, 0.9));
+}
+
+.lux-tasks .lux-balance-icon {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 214, 120, 0.7);
+  background: radial-gradient(circle at 30% 30%, #6d28d9, #2a0848);
+}
+
+.lux-join-pill {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 9px 12px;
+  border: 1px solid rgba(74, 222, 128, 0.7);
+  background: rgba(10, 40, 24, 0.35);
+  color: #d9ffe8;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.lux-join-pill span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #22c55e;
+  color: white;
+  font-size: 0.72rem;
+  flex: 0 0 auto;
+}
+
+.lux-join-pill.is-locked {
+  border-color: rgba(251, 191, 36, 0.7);
+  color: #ffe7a3;
+}
+
+.lux-join-pill.is-locked span {
+  background: #f59e0b;
+}
+
+.lux-tasks .lux-stats article {
+  min-height: 92px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #6d28d9, #3b0764);
+  box-shadow: 0 0 14px rgba(140, 40, 220, 0.35), inset 0 0 0 1px rgba(255, 206, 120, 0.28);
+}
+
+.lux-tasks .lux-stat-gold {
+  background: linear-gradient(180deg, #a16207, #6d28d9 70%);
+}
+
+.lux-tasks .lux-stat-icon {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+}
+
+.lux-tasks .lux-stat-icon .nav-icon,
+.lux-tasks .lux-stat-gold .nav-icon {
+  color: #ffe7a3;
+}
+
+.lux-tasks .lux-stage {
+  min-height: 300px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 80, 180, 0.28), transparent 36%),
+    radial-gradient(circle at 20% 80%, rgba(80, 20, 140, 0.45), transparent 30%),
+    linear-gradient(180deg, rgba(74, 16, 120, 0.55), rgba(28, 6, 52, 0.92));
+}
+
+.lux-tasks .lux-stage-hero {
+  min-height: 340px;
+}
+
+.lux-orbit-a,
+.lux-orbit-b {
+  width: 210px;
+  height: 78px;
+}
+
+.lux-orbit-b {
+  width: 250px;
+  height: 96px;
+  transform: rotate(18deg);
+  opacity: 0.7;
+}
+
+.lux-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px #fff;
+}
+
+.lux-spark-a { top: 18%; left: 22%; }
+.lux-spark-b { top: 30%; right: 18%; }
+
+.lux-float {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 180, 0.8));
+}
+
+.lux-float svg {
+  width: 100%;
+  height: 100%;
+  fill: #ff4fa3;
+}
+
+.lux-float-heart { left: 16%; top: 38%; }
+.lux-float-plane { right: 14%; top: 22%; }
+.lux-float-plane svg { fill: #7dd3fc; transform: rotate(-20deg); }
+
+.lux-tasks .lux-tap {
+  position: absolute;
+  bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.lux-tasks .lux-tap svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: white;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lux-nav-item-active {
+  color: #ff4fa3;
+}
+
+.lux-nav-item-active .nav-icon {
+  color: #ff4fa3;
+}
+
+.lux-nav-item-active .lux-nav-crown .nav-icon {
+  color: white;
 }

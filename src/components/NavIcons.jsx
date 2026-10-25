@@ -170,6 +170,27 @@ export const MenuIcon = (props) => (
   </Svg>
 );
 
+export const UserIcon = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="8" r="3.2" />
+    <path d="M5.5 19.5v-1.2A4.8 4.8 0 0110.3 13.5h3.4a4.8 4.8 0 014.8 4.8v1.2" />
+  </Svg>
+);
+
+export const ClockIcon = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="8" />
+    <path d="M12 8v4.5l3 2" />
+  </Svg>
+);
+
+export const CoinIcon = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="8" />
+    <path d="M12 7.5v9M9.5 9.5c.6-.8 1.4-1.2 2.5-1.2 1.6 0 2.6.8 2.6 2s-1 1.8-2.6 1.8-2.6.8-2.6 2 1 2 2.6 2c1.1 0 1.9-.4 2.5-1.2" />
+  </Svg>
+);
+
 const ICON_MAP = {
   home: HomeIcon,
   tasks: TasksIcon,
@@ -192,6 +213,9 @@ const ICON_MAP = {
   link: LinkIcon,
   lock: LockIcon,
   menu: MenuIcon,
+  user: UserIcon,
+  clock: ClockIcon,
+  coin: CoinIcon,
 };
 
 export const NavIcon = ({ name, size = 24, className = '' }) => {

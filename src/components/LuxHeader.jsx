@@ -51,7 +51,7 @@ const LuxHeader = () => {
         <InstovaMark size={42} crowned />
         <span>
           <span className="lux-brand-name">INSTOVA</span>
-          <span className="lux-brand-tag">Grow · Work · Earn</span>
+          <span className="lux-brand-tag">Grow · Work · Earn · Together</span>
         </span>
       </Link>
       <span className="lux-header-actions">
@@ -60,7 +60,7 @@ const LuxHeader = () => {
           {unread > 0 && <span className="lux-badge">{unread > 9 ? '9+' : unread}</span>}
         </Link>
         <Link to="/settings" className="lux-icon-btn" aria-label="Profile">
-          <NavIcon name="users" size={18} />
+          <NavIcon name="user" size={18} />
         </Link>
       </span>
       {open && (

@@ -66,8 +66,17 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 
   const stage = (
     <div className={`lux-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
-      <span className="lux-orbit" />
-      <InstovaMark size={index === 0 ? 112 : 78} crowned />
+      <span className="lux-orbit lux-orbit-a" />
+      <span className="lux-orbit lux-orbit-b" />
+      <span className="lux-spark lux-spark-a" />
+      <span className="lux-spark lux-spark-b" />
+      <span className="lux-float lux-float-heart" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2 4 4 0 017 2c0 4.6-7 9-7 9z" /></svg>
+      </span>
+      <span className="lux-float lux-float-plane" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 11.5L21 4l-7.2 16-2.3-6.2L3 11.5z" /></svg>
+      </span>
+      <InstovaMark size={index === 0 ? 132 : 96} crowned />
       {phase === 'timer' && (
         <div className="lux-stage-overlay">
           <span className="lux-timer">{mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : secs}</span>
@@ -76,7 +85,12 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
         </div>
       )}
       {phase === 'done' && <div className="lux-stage-overlay"><span className="lux-stage-note">Completed</span></div>}
-      {phase === 'idle' && <span className="lux-tap">Tap to Start</span>}
+      {phase === 'idle' && (
+        <span className="lux-tap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V6.5a1.5 1.5 0 013 0V11M11 10.5V5.5a1.5 1.5 0 013 0V11M14 10.8V7.5a1.5 1.5 0 013 0V13c0 4-2 7-6 7h-1c-2.5 0-4-1.2-5-3L3 13.5a1.4 1.4 0 012.2-1.6L8 14" /></svg>
+          Tap to Start
+        </span>
+      )}
     </div>
   );
 
@@ -229,11 +243,13 @@ const Tasks = () => {
 
   const balanceText = walletBalance === null ? '—' : `Rs ${(walletBalance * 100).toFixed(0)}`;
 
+  const joining = weeklyStatus || { weekly_joinings: 0, weekly_joinings_required: 1, ads_locked: false };
+
   return (
-    <section className="lux-page">
+    <section className="lux-page lux-tasks">
       <div className="lux-wrap">
         <header className="lux-page-head">
-          <InstovaMark size={54} crowned />
+          <InstovaMark size={62} crowned />
           <div>
             <h1>Tasks</h1>
             <p>Complete tasks and earn money instantly</p>
@@ -241,25 +257,27 @@ const Tasks = () => {
         </header>
 
         <section className="lux-balance">
-          <span className="lux-balance-icon"><NavIcon name="wallet" size={22} /></span>
+          <span className="lux-balance-crown">
+            <svg viewBox="0 0 24 14" aria-hidden="true"><path d="M2 12 L5 4 L9 9 L12 2 L15 9 L19 4 L22 12 Z" /></svg>
+            <span className="lux-balance-icon"><NavIcon name="wallet" size={20} /></span>
+          </span>
           <div>
             <p className="lux-kicker">Current Balance</p>
             <p className="lux-balance-amt">{balanceText}</p>
           </div>
-          <Link to="/wallet" className="lux-withdraw">Withdraw</Link>
+          <Link to="/wallet" className="lux-withdraw">Withdraw <span aria-hidden="true">›</span></Link>
         </section>
 
-        {weeklyStatus && !weeklyStatus.ads_locked && (
-          <p className="lux-status">
-            Weekly Joining: {weeklyStatus.weekly_joinings}/{weeklyStatus.weekly_joinings_required} — Ads unlocked
-          </p>
-        )}
+        <p className={`lux-join-pill${joining.ads_locked ? ' is-locked' : ''}`}>
+          <span>{joining.ads_locked ? '!' : '✓'}</span>
+          Weekly Joining: {joining.weekly_joinings}/{joining.weekly_joinings_required} — {joining.ads_locked ? 'Ads locked' : 'Ads unlocked'}
+        </p>
 
         <section className="lux-stats">
-          <article><span className="lux-stat-icon"><NavIcon name="users" size={16} /></span><strong>{available.length}</strong><span>Available</span></article>
-          <article><span className="lux-stat-icon"><NavIcon name="check" size={16} /></span><strong>{completedToday}</strong><span>Done Today</span></article>
-          <article><span className="lux-stat-icon"><NavIcon name="history" size={16} /></span><strong>{dailyLimit}</strong><span>Daily Limit</span></article>
-          <article className="lux-stat-gold"><span className="lux-stat-icon"><NavIcon name="balance" size={16} /></span><strong>Rs {(completedToday * currentEarning).toFixed(0)}</strong><span>Earned</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="user" size={18} /></span><strong>{available.length}</strong><span>Available</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="check" size={18} /></span><strong>{completedToday}</strong><span>Done Today</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="clock" size={18} /></span><strong>{dailyLimit}</strong><span>Daily Limit</span></article>
+          <article className="lux-stat-gold"><span className="lux-stat-icon"><NavIcon name="coin" size={18} /></span><strong>Rs {(completedToday * currentEarning).toFixed(0)}</strong><span>Earned</span></article>
         </section>
 
         {available.length === 0 ? (
