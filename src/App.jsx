@@ -34,7 +34,9 @@ import Notifications from './pages/Notifications';
 import Transactions from './pages/Transactions';
 import Terms from './pages/Terms';
 import Complaint from './pages/Complaint';
+import Levels from './pages/Levels';
 import MobileBottomNav from './components/MobileBottomNav';
+import LuxHeader from './components/LuxHeader';
 
 const AppContent = () => {
   const location = useLocation();
@@ -61,6 +63,7 @@ const AppContent = () => {
 
   return (
     <UserLayout>
+      <LuxHeader />
       <Navbar />
       <Routes>
         <Route path="/" element={<Login />} />
@@ -80,6 +83,7 @@ const AppContent = () => {
         <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
         <Route path="/terms" element={<PrivateRoute><Terms /></PrivateRoute>} />
         <Route path="/complaint" element={<PrivateRoute><Complaint /></PrivateRoute>} />
+        <Route path="/levels" element={<PrivateRoute><Levels /></PrivateRoute>} />
       </Routes>
       <MobileBottomNav />
     </UserLayout>

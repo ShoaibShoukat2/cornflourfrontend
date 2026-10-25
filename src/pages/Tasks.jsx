@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
-import tasklogo from '../assets/tasklogo.jpeg';
-
-const ICONS = {
-  youtube: '▶️', website: '🌐', ad: '📢',
-  social: '📱', app: '📲', survey: '📋', offer: '🎁',
-};
+import InstovaMark from '../components/InstovaMark';
+import { NavIcon } from '../components/NavIcons';
 
 const LEVEL_EARNINGS = [
   { level: 0, earning: 7 },
@@ -68,68 +64,42 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
   const secs = timeLeft % 60;
   const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
 
-  return (
-    <div className="flex flex-col items-center gap-2">
-      {/* Just the logo — tap to start */}
-      <div className="relative" onClick={phase === 'idle' ? startTask : undefined}
-        style={{ cursor: phase === 'idle' ? 'pointer' : 'default' }}>
-        <img
-          src={tasklogo}
-          alt={`Task ${index + 1}`}
-          className={`w-56 h-56 rounded-3xl object-cover neon-task-logo ${phase === 'idle' ? 'active:scale-95 transition-transform cursor-pointer' : ''}`}
-        />
-        {/* Timer overlay */}
-        {phase === 'timer' && (
-          <div className="absolute inset-0 bg-black bg-opacity-60 rounded-3xl flex flex-col items-center justify-center">
-            <span className="text-white text-4xl font-black">{mins > 0 ? `${mins}:${secs.toString().padStart(2,'0')}` : secs}</span>
-            <span className="text-orange-300 text-xs mt-1 font-semibold">Wait...</span>
-            <div className="w-32 h-1.5 bg-gray-600 rounded-full mt-3 overflow-hidden">
-              <div className="h-full bg-orange-400 rounded-full transition-all" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
-        {/* Done overlay */}
-        {phase === 'done' && (
-          <div className="absolute inset-0 bg-green-500 bg-opacity-80 rounded-3xl flex items-center justify-center">
-            <span className="text-white text-3xl">✅</span>
-          </div>
-        )}
-        {/* Idle tap hint */}
-        {phase === 'idle' && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center">
-            <span className="neon-btn text-xs font-bold px-4 py-1.5 shadow" style={{ borderRadius: '9999px' }}>
-              👆 Tap to Start
-            </span>
-          </div>
-        )}
-      </div>
+  const stage = (
+    <div className={`lux-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
+      <span className="lux-orbit" />
+      <InstovaMark size={index === 0 ? 112 : 78} crowned />
+      {phase === 'timer' && (
+        <div className="lux-stage-overlay">
+          <span className="lux-timer">{mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : secs}</span>
+          <span className="lux-stage-note">Please wait</span>
+          <span className="lux-progress"><span style={{ width: `${progress}%` }} /></span>
+        </div>
+      )}
+      {phase === 'done' && <div className="lux-stage-overlay"><span className="lux-stage-note">Completed</span></div>}
+      {phase === 'idle' && <span className="lux-tap">Tap to Start</span>}
+    </div>
+  );
 
-      {/* Timer / Claim — only shows when active */}
+  return (
+    <article className="lux-task">
+      {stage}
       {phase === 'ready' && (
-        <button onClick={completeTask} className="neon-btn text-sm py-2 px-5">
-          ✅ Claim Rs {currentEarning}
-        </button>
+        <button type="button" onClick={completeTask} className="lux-claim">Claim Rs {currentEarning}</button>
       )}
       {phase === 'verify' && (
-        <div className="flex flex-col items-center gap-2 w-40">
-          <input value={verCode} onChange={e => setVerCode(e.target.value)}
-            placeholder="Verify code"
-            className="w-full neon-input text-sm text-center" />
-          <button onClick={completeTask} className="w-full neon-btn text-sm py-2">
-            ✅ Submit
-          </button>
+        <div className="lux-verify">
+          <input value={verCode} onChange={(event) => setVerCode(event.target.value)} placeholder="Verification code" className="lux-input" />
+          <button type="button" onClick={completeTask} className="lux-claim">Submit</button>
         </div>
       )}
-      {phase === 'done' && (
-        <p className="font-black text-green-600 text-sm">+Rs {earning} Earned!</p>
-      )}
+      {phase === 'done' && <p className="lux-earned">+Rs {earning} earned</p>}
       {phase === 'error' && (
         <div className="text-center">
-          <p className="text-red-500 text-xs">{errMsg}</p>
-          <button onClick={() => { setPhase('idle'); setErrMsg(''); }} className="text-xs text-gray-400 underline">Retry</button>
+          <p className="text-red-300 text-xs">{errMsg}</p>
+          <button type="button" onClick={() => { setPhase('idle'); setErrMsg(''); }} className="text-xs text-amber-200 underline">Retry</button>
         </div>
       )}
-    </div>
+    </article>
   );
 };
 
@@ -238,123 +208,99 @@ const Tasks = () => {
   );
 
   if (locked) return (
-    <div className="neon-loading p-4">
-      <div className="neon-card p-8 text-center max-w-sm w-full">
-        <p className="text-5xl mb-4">🔒</p>
-        <h2 className="text-xl font-black text-white mb-2">Tasks Locked</h2>
-        <p className="text-gray-500 text-sm">Buy a package to unlock all tasks and start earning.</p>
+    <section className="lux-page">
+      <div className="lux-empty">
+        <h2>Tasks locked</h2>
+        <p>Buy a package to unlock tasks and start earning.</p>
+        <Link to="/package" className="lux-withdraw">View packages</Link>
       </div>
-    </div>
+    </section>
   );
 
   if (weeklyLocked) return (
-    <div className="neon-loading p-4">
-      <div className="neon-card p-8 text-center max-w-sm w-full">
-        <p className="text-5xl mb-4">🔒</p>
-        <h2 className="text-xl font-black text-white mb-2">Ads Temporarily Locked</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Har hafte kam az kam 1 member join karwana zaroori hai. Is hafte aap ne abhi tak{' '}
-          <span className="text-white font-bold">{weeklyStatus?.weekly_joinings ?? 0}</span> joining ki hai.
-        </p>
-        <p className="text-gray-500 text-sm mb-6">
-          Jaisay hi 1 naya member package activate karwaye, aap ki ads dobara unlock ho jayengi.
-        </p>
-        <Link to="/referrals" className="neon-btn inline-block px-6 py-3">
-          👥 Referral Link Share Karein
-        </Link>
+    <section className="lux-page">
+      <div className="lux-empty">
+        <h2>Ads temporarily locked</h2>
+        <p>Is hafte {weeklyStatus?.weekly_joinings ?? 0} joining hui hai. Ek naya member package activate karwayein, ads unlock ho jayengi.</p>
+        <Link to="/referrals" className="lux-withdraw">Share referral link</Link>
       </div>
-    </div>
+    </section>
   );
 
-  return (
-    <div className="py-6 px-4">
-      <div className="max-w-2xl mx-auto space-y-5">
+  const balanceText = walletBalance === null ? '—' : `Rs ${(walletBalance * 100).toFixed(0)}`;
 
-        {/* Header */}
-        <div className="text-center">
-          <img src={tasklogo} alt="Tasks" className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover neon-task-logo" />
-          <h1 className="text-2xl font-black neon-title">🎯 Tasks</h1>
-          <p className="neon-subtitle text-sm mt-1">Complete tasks and earn money instantly</p>
-          {walletBalance !== null && (
-            <div className="mt-3 inline-block neon-stat px-5 py-2">
-              <p className="neon-stat-value text-lg">Rs {(walletBalance * 100).toFixed(0)}</p>
-              <p className="neon-stat-label">Current Balance</p>
-            </div>
-          )}
-        </div>
+  return (
+    <section className="lux-page">
+      <div className="lux-wrap">
+        <header className="lux-page-head">
+          <InstovaMark size={54} crowned />
+          <div>
+            <h1>Tasks</h1>
+            <p>Complete tasks and earn money instantly</p>
+          </div>
+        </header>
+
+        <section className="lux-balance">
+          <span className="lux-balance-icon"><NavIcon name="wallet" size={22} /></span>
+          <div>
+            <p className="lux-kicker">Current Balance</p>
+            <p className="lux-balance-amt">{balanceText}</p>
+          </div>
+          <Link to="/wallet" className="lux-withdraw">Withdraw</Link>
+        </section>
 
         {weeklyStatus && !weeklyStatus.ads_locked && (
-          <div className="neon-card p-3 text-center">
-            <p className="text-xs neon-subtitle">
-              ✅ Weekly Joining: {weeklyStatus.weekly_joinings}/{weeklyStatus.weekly_joinings_required} — Ads unlocked
-            </p>
-          </div>
+          <p className="lux-status">
+            Weekly Joining: {weeklyStatus.weekly_joinings}/{weeklyStatus.weekly_joinings_required} — Ads unlocked
+          </p>
         )}
 
-        {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-3">
-          <div className="neon-stat p-3">
-            <p className="neon-stat-value text-xl">{available.length}</p>
-            <p className="neon-stat-label mt-0.5">Available</p>
-          </div>
-          <div className="neon-stat p-3">
-            <p className="neon-stat-value text-xl">{completedToday}</p>
-            <p className="neon-stat-label mt-0.5">Done Today</p>
-          </div>
-          <div className="neon-stat p-3">
-            <p className="neon-stat-value text-xl">{dailyLimit}</p>
-            <p className="neon-stat-label mt-0.5">Daily Limit</p>
-          </div>
-          <div className="neon-stat p-3">
-            <p className="neon-stat-value text-xl">Rs {(completedToday * currentEarning).toFixed(0)}</p>
-            <p className="neon-stat-label mt-0.5">Earned</p>
-          </div>
-        </div>
+        <section className="lux-stats">
+          <article><span className="lux-stat-icon"><NavIcon name="users" size={16} /></span><strong>{available.length}</strong><span>Available</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="check" size={16} /></span><strong>{completedToday}</strong><span>Done Today</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="history" size={16} /></span><strong>{dailyLimit}</strong><span>Daily Limit</span></article>
+          <article className="lux-stat-gold"><span className="lux-stat-icon"><NavIcon name="balance" size={16} /></span><strong>Rs {(completedToday * currentEarning).toFixed(0)}</strong><span>Earned</span></article>
+        </section>
 
-        {/* Available Tasks */}
         {available.length === 0 ? (
-          <div className="neon-card p-10 text-center">
-            <p className="text-4xl mb-3">🎉</p>
-            <p className="font-bold text-white">All tasks completed!</p>
-            <p className="neon-subtitle text-sm mt-1">Check back later for new tasks</p>
-          </div>
+          <section className="lux-empty">
+            <p>All tasks completed</p>
+            <span>Check back later for new tasks</span>
+          </section>
         ) : (
-          <div className="flex flex-col items-center space-y-6">
-            {available.map((task, index) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                index={index}
-                currentEarning={currentEarning}
-                onDone={(newBalance) => {
-                  if (newBalance !== undefined) setWalletBalance(newBalance);
-                  setRefresh(r => r + 1);
-                }}
-              />
-            ))}
-          </div>
+          available.map((task, index) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              index={index}
+              currentEarning={currentEarning}
+              onDone={(newBalance) => {
+                if (newBalance !== undefined) setWalletBalance(newBalance);
+                setRefresh((value) => value + 1);
+              }}
+            />
+          ))
         )}
 
-        {/* Completed Tasks */}
         {completed.length > 0 && (
-          <div className="neon-card p-4">
-            <p className="text-xs font-semibold neon-subtitle uppercase mb-3">✅ Completed</p>
-            <div className="space-y-2">
-              {completed.map(task => (
-                <div key={task.id} className="flex items-center justify-between py-2 border-b border-purple-500/10 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <span>{ICONS[task.task_type] || '🎯'}</span>
-                    <p className="text-sm text-white/70">{task.title}</p>
-                  </div>
-                  <span className="text-xs font-bold neon-gradient-text">+Rs {currentEarning}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <section className="lux-done">
+            <p>Completed</p>
+            {completed.map((task) => (
+              <div key={task.id}>
+                <span>{task.title}</span>
+                <strong>+Rs {currentEarning}</strong>
+              </div>
+            ))}
+          </section>
         )}
 
+        <section className="lux-promo">
+          <input value={promoCode} onChange={(event) => setPromoCode(event.target.value)} placeholder="Promo code" className="lux-input" />
+          <button type="button" onClick={redeemPromo} className="lux-withdraw">Apply</button>
+          {promoMsg && <p>{promoMsg}</p>}
+        </section>
       </div>
-    </div>
+    </section>
   );
 };
 
