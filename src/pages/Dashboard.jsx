@@ -12,6 +12,8 @@ const HIGHLIGHTS = [
   { to: '/package', icon: 'package', label: 'Package' },
   { to: '/upgrade', icon: 'offer', label: 'Upgrade' },
   { to: '/contact', icon: 'contact', label: 'Contact' },
+  { to: '/terms', icon: 'stats', label: 'Terms' },
+  { to: '/complaint', icon: 'offer', label: 'Complaint' },
   { to: '/settings', icon: 'settings', label: 'Settings' },
 ];
 
@@ -22,6 +24,8 @@ const GRID_ITEMS = [
   { to: '/package', icon: 'package', label: 'Package', needsPackage: false },
   { to: '/upgrade', icon: 'offer', label: 'Upgrade', needsPackage: false },
   { to: '/contact', icon: 'contact', label: 'Contact', needsPackage: false },
+  { to: '/terms', icon: 'stats', label: 'Terms', needsPackage: false },
+  { to: '/complaint', icon: 'offer', label: 'Complaint', needsPackage: false },
   { to: '/settings', icon: 'settings', label: 'Profile', needsPackage: false },
   { to: '/notifications', icon: 'offer', label: 'Alerts', needsPackage: false },
   { to: '/transactions', icon: 'stats', label: 'History', needsPackage: false },

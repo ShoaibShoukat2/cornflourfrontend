@@ -85,6 +85,9 @@ const navItems = [
   { path: '/admin/tasks',       icon: '🎯', label: 'Tasks',        desc: 'Manage tasks' },
   { path: '/admin/settings',    icon: '⚙️', label: 'Settings',     desc: 'Site configuration' },
   { path: '/admin/contact',     icon: '📩', label: 'Contact Us',   desc: 'Support links' },
+  { path: '/admin/complaints',  icon: '📝', label: 'Complaints & Feedback', desc: 'User messages' },
+  { path: '/admin/terms',       icon: '📜', label: 'Terms & Conditions', desc: 'Edit policies' },
+  { path: '/admin/history',     icon: '🗂️', label: 'Complete History', desc: 'Filters and CSV' },
 ];
 
 // ── Pending Packages Slide Panel ───────────────────────────────────────────────

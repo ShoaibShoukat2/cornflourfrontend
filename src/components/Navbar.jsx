@@ -32,6 +32,8 @@ const Navbar = () => {
     { to: '/notifications', icon: 'offer', label: 'Alerts' },
     { to: '/transactions', icon: 'stats', label: 'History' },
     { to: '/contact', icon: 'contact', label: 'Support' },
+    { to: '/terms', icon: 'stats', label: 'Terms' },
+    { to: '/complaint', icon: 'offer', label: 'Complaint' },
   ];
 
   const NavLinkItem = ({ to, icon, label, onClick, className }) => (
@@ -82,6 +84,7 @@ const Navbar = () => {
                   <Link to="/admin/packages" className={linkClass('/admin/packages')}>📦 Packages</Link>
                   <Link to="/admin/upgrades" className={linkClass('/admin/upgrades')}>⬆️ Upgrades</Link>
                   <Link to="/admin/contact" className={linkClass('/admin/contact')}>📩 Contact Us</Link>
+                  <Link to="/admin/complaints" className={linkClass('/admin/complaints')}>📝 Complaints</Link>
                   <section className="h-6 w-px bg-white/20 mx-2" />
                   <UserChip />
                 </>
@@ -126,6 +129,7 @@ const Navbar = () => {
                     <Link to="/admin/packages" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📦 Manage Packages</Link>
                     <Link to="/admin/upgrades" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">⬆️ Package Upgrades</Link>
                     <Link to="/admin/contact" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📩 Contact Us</Link>
+                    <Link to="/admin/complaints" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📝 Complaints</Link>
                   </>
                 ) : (
                   <>

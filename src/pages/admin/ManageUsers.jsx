@@ -272,24 +272,25 @@ const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [message, setMessage] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => { setPage(1); }, [searchTerm]);
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => { fetchUsers(); }, 400);
     return () => clearTimeout(timer);
-  }, [searchTerm, page]);
+  }, [searchTerm, statusFilter, page]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const search = searchTerm.trim();
-      const url = `/admin/users/?page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+      const url = `/admin/users/?page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}${statusFilter ? `&status=${statusFilter}` : ''}`;
       const res = await api.get(url);
       if (res.data.users) {
         setUsers(res.data.users);
@@ -323,9 +324,18 @@ const ManageUsers = () => {
       )}
 
       <div className="bg-white rounded-xl p-4 shadow-sm">
-        <input type="text" placeholder="Search by username or email..."
+        <input type="text" placeholder="Search by name, email, or user ID..."
           value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
           className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="mt-3 w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 text-sm">
+          <option value="">All members</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
+        </select>
       </div>
 
       {loading ? (
@@ -348,8 +358,9 @@ const ManageUsers = () => {
               <div key={user.id} className="p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50" onClick={() => setSelectedUserId(user.id)}>
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-800 text-sm truncate">{user.username}</p>
-                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
-                  <p className="text-xs font-bold text-green-600 mt-0.5">Rs {(user.balance * 100).toFixed(0)}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.email} · ID {user.id}</p>
+                  <p className="text-xs text-gray-500">Joined {new Date(user.created_at).toLocaleDateString()} · {user.account_status || 'member'}{user.sponsor ? ` · Sponsor ${user.sponsor}` : ''}</p>
+                  <p className="text-xs font-bold text-green-600 mt-0.5">Rs {(user.balance * 100).toFixed(0)} · Direct {user.direct_team || 0}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

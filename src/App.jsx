@@ -23,12 +23,17 @@ import AdminContact from './pages/admin/AdminContact';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminReports from './pages/admin/AdminReports';
 import ManageUpgrades from './pages/admin/ManageUpgrades';
+import AdminTerms from './pages/admin/AdminTerms';
+import AdminComplaints from './pages/admin/AdminComplaints';
+import AdminHistory from './pages/admin/AdminHistory';
 import Package from './pages/Package';
 import Upgrade from './pages/Upgrade';
 import Contact from './pages/Contact';
 import AccountCreated from './pages/AccountCreated';
 import Notifications from './pages/Notifications';
 import Transactions from './pages/Transactions';
+import Terms from './pages/Terms';
+import Complaint from './pages/Complaint';
 import MobileBottomNav from './components/MobileBottomNav';
 
 const AppContent = () => {
@@ -47,6 +52,9 @@ const AppContent = () => {
         <Route path="/admin/contact" element={<AdminRoute><AdminLayout><AdminContact /></AdminLayout></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminLayout><AdminSettings /></AdminLayout></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminLayout><AdminReports /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/terms" element={<AdminRoute><AdminLayout><AdminTerms /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/complaints" element={<AdminRoute><AdminLayout><AdminComplaints /></AdminLayout></AdminRoute>} />
+        <Route path="/admin/history" element={<AdminRoute><AdminLayout><AdminHistory /></AdminLayout></AdminRoute>} />
       </Routes>
     );
   }
@@ -70,6 +78,8 @@ const AppContent = () => {
         <Route path="/contact" element={<PrivateRoute><Contact /></PrivateRoute>} />
         <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
         <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
+        <Route path="/terms" element={<PrivateRoute><Terms /></PrivateRoute>} />
+        <Route path="/complaint" element={<PrivateRoute><Complaint /></PrivateRoute>} />
       </Routes>
       <MobileBottomNav />
     </UserLayout>

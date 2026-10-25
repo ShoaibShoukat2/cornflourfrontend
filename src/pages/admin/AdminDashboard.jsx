@@ -700,6 +700,8 @@ const AdminDashboard = () => {
   const statCards = [
     { label: 'Total Users', value: stats.users.total, sub: `+${stats.users.new_today || 0} new today · ${stats.users.today_approved || 0} approved today`, accent: 'from-blue-500 to-blue-600', icon: UsersIcon, to: '/admin/users' },
     { label: 'Approved Members', value: stats.users.approved, sub: `Today deposited: Rs ${Number(stats.users.today_deposited || 0).toFixed(0)}`, accent: 'from-green-500 to-green-600', icon: CheckCircleIcon, to: '/admin/reports' },
+    { label: 'Pending Accounts', value: stats.users.pending || 0, sub: `Rejected ${stats.users.rejected || 0}`, accent: 'from-amber-500 to-orange-500', icon: ClipboardDocumentListIcon, to: '/admin/packages' },
+    { label: 'Active / Inactive', value: stats.users.active, sub: `Inactive ${stats.users.inactive || 0} · Team ${stats.users.team || 0}`, accent: 'from-teal-500 to-cyan-600', icon: UserGroupIcon, to: '/admin/users' },
     { label: 'Total Deposited', value: `Rs ${Number(stats.financial.total_deposited).toFixed(0)}`, sub: 'All approved packages', accent: 'from-orange-500 to-red-500', icon: ArrowDownTrayIcon, to: '/admin/packages' },
     { label: 'Referral Commission', value: `Rs ${(stats.financial.total_referral_commission * 100).toFixed(0)}`, sub: 'Level 1 + 2 + 3', accent: 'from-purple-500 to-purple-600', icon: UserGroupIcon, to: '/admin/reports' },
     { label: "Today's Withdrawals", value: `Rs ${(stats.financial.today_withdrawals * 100).toFixed(0)}`, sub: `${stats.financial.pending_count} pending requests`, accent: 'from-yellow-500 to-amber-600', icon: ArrowUpTrayIcon, to: '/admin/withdrawals' },
@@ -714,6 +716,9 @@ const AdminDashboard = () => {
     { label: 'Tasks', desc: 'Manage tasks', to: '/admin/tasks', icon: FlagIcon, color: 'bg-purple-500' },
     { label: 'Settings', desc: 'Site config', to: '/admin/settings', icon: Cog6ToothIcon, color: 'bg-slate-600' },
     { label: 'Contact', desc: 'Support links', to: '/admin/contact', icon: EnvelopeIcon, color: 'bg-teal-500' },
+    { label: 'Complaints', desc: 'Feedback box', to: '/admin/complaints', icon: EnvelopeIcon, color: 'bg-rose-500' },
+    { label: 'History', desc: 'Date filters', to: '/admin/history', icon: ClipboardDocumentListIcon, color: 'bg-sky-600' },
+    { label: 'Terms', desc: 'Edit policies', to: '/admin/terms', icon: Cog6ToothIcon, color: 'bg-slate-500' },
     { label: 'Analytics', desc: 'Full reports', to: '/admin/reports', icon: ChartBarIcon, color: 'bg-indigo-500' },
   ];
 
