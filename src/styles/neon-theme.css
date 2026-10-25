@@ -1726,14 +1726,22 @@ body {
 }
 
 .lux-progress-card {
-  padding: 16px 16px 12px;
-  text-align: center;
+  padding: 16px 14px 14px;
+}
+
+.lux-levels {
+  background:
+    radial-gradient(circle at 8% 18%, rgba(255, 140, 190, 0.22), transparent 24%),
+    radial-gradient(circle at 92% 30%, rgba(255, 160, 200, 0.18), transparent 22%),
+    linear-gradient(180deg, #3a0a62 0%, #4a1278 30%, #1a0533 100%);
 }
 
 .lux-progress-title {
-  margin: 0 0 10px;
+  margin: 0;
+  text-align: center;
   color: #ffe7a3;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .lux-progress-main {
@@ -1755,30 +1763,56 @@ body {
   box-shadow: 0 0 16px rgba(255, 190, 70, 0.7);
 }
 
+.lux-medal svg,
 .lux-level-crown {
   width: 34px;
   height: 22px;
   fill: #fff6d8;
 }
 
-.lux-level-name {
-  margin: 0;
+.lux-level-plaque {
+  margin: 6px auto 0;
+  width: fit-content;
+  padding: 4px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 214, 120, 0.85);
+  background: linear-gradient(180deg, rgba(90, 20, 40, 0.55), rgba(40, 8, 70, 0.7));
   color: #ffe7a3;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 0 0 1px rgba(255, 180, 80, 0.25);
 }
 
 .lux-level-count {
-  margin: 2px 0 0;
-  font-size: 1.35rem;
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 1.55rem;
   font-weight: 800;
 }
 
 .lux-level-caption {
   margin: 0;
+  text-align: center;
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.78rem;
+}
+
+.lux-level-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lux-level-meter .lux-level-bar {
+  flex: 1;
+  margin-top: 0;
+}
+
+.lux-level-meter strong {
+  color: #ffe7a3;
+  font-size: 0.85rem;
 }
 
 .lux-level-bar {
@@ -1864,10 +1898,28 @@ body {
 .lux-pill {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 4px 10px;
   font-size: 0.72rem;
   font-weight: 700;
+}
+
+.lux-pill svg {
+  width: 14px;
+  height: 12px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lux-pill-now svg {
+  width: 14px;
+  height: 10px;
+  fill: white;
+  stroke: none;
 }
 
 .lux-pill-done {
@@ -1893,6 +1945,68 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lux-wreath {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+}
+
+.lux-wreath svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #f6c453;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.lux-wreath span {
+  position: absolute;
+  inset: 18px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffe7a3;
+}
+
+.lux-wreath small {
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+}
+
+.lux-wreath strong {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.lux-wreath-locked svg {
+  stroke: #c4b8d4;
+}
+
+.lux-wreath-locked span {
+  color: #ddd6e8;
+}
+
+.lux-wreath-lock {
+  position: absolute;
+  right: 2px;
+  bottom: 6px;
+  width: 16px !important;
+  height: 16px !important;
+  fill: none;
+  stroke: #ddd6e8;
+  stroke-width: 1.8;
+  background: #2a0848;
+  border-radius: 50%;
+}
+
+.lux-level-locked {
+  filter: saturate(0.55);
 }
 
 .lux-nav-crown {
@@ -1907,15 +2021,11 @@ body {
   box-shadow: 0 0 16px rgba(255, 80, 180, 0.75), inset 0 0 0 2px rgba(255, 220, 160, 0.45);
 }
 
-.lux-nav-crown svg.lux-nav-crown-mark {
-  position: absolute;
-  top: -11px;
-  left: 50%;
-  width: 22px;
-  height: 14px;
-  transform: translateX(-50%);
-  fill: #f6c453;
-  filter: drop-shadow(0 0 4px rgba(255, 196, 70, 0.9));
+.lux-nav-crown svg {
+  width: 26px;
+  height: 16px;
+  fill: #ffe7a3;
+  filter: drop-shadow(0 0 4px rgba(255, 214, 120, 0.85));
 }
 
 .lux-nav-crown .nav-icon {

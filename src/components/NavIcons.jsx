@@ -27,9 +27,9 @@ export const HomeIcon = (props) => (
 
 export const TasksIcon = (props) => (
   <Svg {...props}>
-    <rect x="6" y="4" width="12" height="16" rx="2" />
-    <path d="M9 4.5h6" />
-    <path d="M9 10h6M9 14h6M9 18h4" />
+    <rect x="3" y="7" width="18" height="12" rx="2" />
+    <path d="M8 7V5.5A2.5 2.5 0 0110.5 3h3A2.5 2.5 0 0116 5.5V7" />
+    <path d="M3 12h18" />
   </Svg>
 );
 
