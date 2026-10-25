@@ -7,7 +7,7 @@ const tabs = [
   { path: '/dashboard', icon: 'home', label: 'Dashboard' },
   { path: '/tasks', icon: 'tasks', label: 'Work' },
   { path: '/wallet', icon: 'wallet', label: 'Wallet' },
-  { path: '/levels', label: 'Levels', center: true },
+  { path: '/levels', icon: 'star', label: 'Levels' },
   { path: '/referrals', icon: 'users', label: 'My Team' },
 ];
 
@@ -22,12 +22,8 @@ const MobileBottomNav = () => {
       {tabs.map((tab) => {
         const active = location.pathname === tab.path;
         return (
-          <Link key={tab.path} to={tab.path} className={`lux-nav-item${active ? ' lux-nav-item-active' : ''}${tab.center ? ' lux-nav-center' : ''}`}>
-            {tab.center ? (
-              <span className="lux-nav-crown" aria-hidden="true">
-                <svg viewBox="0 0 24 16"><path d="M2 14 L5 5 L9 10 L12 2 L15 10 L19 5 L22 14 Z" /></svg>
-              </span>
-            ) : <NavIcon name={tab.icon} size={20} />}
+          <Link key={tab.path} to={tab.path} className={`lux-nav-item${active ? ' lux-nav-item-active' : ''}`}>
+            <NavIcon name={tab.icon} size={20} />
             <span>{tab.label}</span>
           </Link>
         );

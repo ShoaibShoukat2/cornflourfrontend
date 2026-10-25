@@ -1252,6 +1252,25 @@ body {
   flex: 1;
 }
 
+.lux-brand-logo,
+.lux-channel-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center;
+  flex: 0 0 auto;
+  box-shadow: 0 0 12px rgba(255, 80, 160, 0.45);
+}
+
+.lux-channel {
+  grid-template-columns: auto 1fr auto;
+}
+
+.lux-channel-logo {
+  grid-row: span 2;
+}
+
 .lux-brand-name {
   display: block;
   font-weight: 800;
@@ -1650,8 +1669,8 @@ body {
   justify-content: space-around;
   align-items: flex-end;
   padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, rgba(36, 8, 62, 0.96), rgba(16, 4, 30, 0.98));
-  border-top: 1px solid rgba(255, 196, 92, 0.35);
+  background: linear-gradient(180deg, #3b0764, #1a0533);
+  border-top: 1px solid rgba(255, 196, 92, 0.28);
 }
 
 .lux-nav-item {
@@ -1666,7 +1685,7 @@ body {
 }
 
 .lux-nav-item-active {
-  color: #ffe7a3;
+  color: #ff4fa3;
 }
 
 .lux-nav-center {
@@ -2165,13 +2184,239 @@ body {
 }
 
 .lux-member-status.is-active {
-  color: #15803d;
-  background: #dcfce7;
+  color: #16a34a;
+  background: transparent;
 }
 
 .lux-member-status.is-pending {
   color: #a16207;
-  background: #fef3c7;
+  background: transparent;
+}
+
+.lux-team {
+  background:
+    radial-gradient(circle at 0% 12%, rgba(255, 182, 214, 0.55), transparent 28%),
+    radial-gradient(circle at 100% 40%, rgba(255, 170, 210, 0.4), transparent 24%),
+    linear-gradient(180deg, #ffe4f4 0%, #fff5fb 40%, #ffeaf6 100%);
+  color: #3b185e;
+}
+
+.lux-team-badge {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, #ff7ad9, #7c3aed);
+  box-shadow: 0 0 16px rgba(255, 80, 180, 0.55);
+  flex: 0 0 auto;
+}
+
+.lux-team-badge .nav-icon {
+  color: white;
+}
+
+.lux-team-crown {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 22px;
+  height: 12px;
+  transform: translateX(-50%);
+  fill: #f6c453;
+}
+
+.lux-team-banner h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.lux-team-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.lux-team-stats article {
+  min-height: 92px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  padding: 8px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 16px rgba(180, 60, 140, 0.08);
+}
+
+.lux-team-stats span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.lux-team-stats .nav-icon {
+  color: #c026d3;
+}
+
+.lux-team-stats strong,
+.lux-team-stats small {
+  display: block;
+}
+
+.lux-team-stats strong {
+  font-size: 1.05rem;
+  color: #3b185e;
+}
+
+.lux-team-stats small {
+  color: #8b7c9e;
+  font-size: 0.68rem;
+}
+
+.lux-team-stats .is-rose { background: linear-gradient(180deg, #ffe4f2, #fff); }
+.lux-team-stats .is-lilac { background: linear-gradient(180deg, #f3e8ff, #fff); }
+.lux-team-stats .is-blush { background: linear-gradient(180deg, #ffd6ea, #fff); }
+.lux-team-stats .is-level {
+  background: linear-gradient(180deg, #4c1d95, #2e1065);
+  border-color: rgba(255, 206, 120, 0.7);
+}
+.lux-team-stats .is-level strong,
+.lux-team-stats .is-level small { color: #ffe7a3; }
+.lux-team-stats .is-level .nav-icon { color: #ffe7a3; }
+.lux-team-stats .is-level span { background: rgba(255, 255, 255, 0.12); }
+
+.lux-link-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lux-link-head span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff4fa3;
+}
+
+.lux-link-head .nav-icon,
+.lux-link-row .nav-icon {
+  color: white;
+}
+
+.lux-link-head p {
+  margin: 0;
+  color: #ffe7a3;
+  font-weight: 800;
+}
+
+.lux-link-head small,
+.lux-link-note {
+  display: block;
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.75rem;
+}
+
+.lux-link-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lux-member-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ff4fa3, #c026d3);
+  flex: 0 0 auto;
+}
+
+.lux-member-mark .nav-icon {
+  color: white;
+}
+
+.lux-member-card header {
+  gap: 8px;
+}
+
+.lux-bloom {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 18%, #ff8ac4 0 28%, transparent 29%),
+    radial-gradient(circle at 82% 50%, #ff8ac4 0 28%, transparent 29%),
+    radial-gradient(circle at 50% 82%, #ff8ac4 0 28%, transparent 29%),
+    radial-gradient(circle at 18% 50%, #ff8ac4 0 28%, transparent 29%),
+    #ffd0e8;
+}
+
+.lux-bloom.is-lilac {
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 18%, #c084fc 0 28%, transparent 29%),
+    radial-gradient(circle at 82% 50%, #c084fc 0 28%, transparent 29%),
+    radial-gradient(circle at 50% 82%, #c084fc 0 28%, transparent 29%),
+    radial-gradient(circle at 18% 50%, #c084fc 0 28%, transparent 29%),
+    #f3e8ff;
+}
+
+.lux-bloom.is-blush {
+  background:
+    radial-gradient(circle at 50% 50%, #fff7fb 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 18%, #fb7185 0 28%, transparent 29%),
+    radial-gradient(circle at 82% 50%, #fb7185 0 28%, transparent 29%),
+    radial-gradient(circle at 50% 82%, #fb7185 0 28%, transparent 29%),
+    radial-gradient(circle at 18% 50%, #fb7185 0 28%, transparent 29%),
+    #ffe4e6;
+}
+
+.lux-bloom.is-violet {
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 18%, #a78bfa 0 28%, transparent 29%),
+    radial-gradient(circle at 82% 50%, #a78bfa 0 28%, transparent 29%),
+    radial-gradient(circle at 50% 82%, #a78bfa 0 28%, transparent 29%),
+    radial-gradient(circle at 18% 50%, #a78bfa 0 28%, transparent 29%),
+    #ede9fe;
+}
+
+.lux-member-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  padding: 0;
+}
+
+.lux-member-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.lux-member em {
+  color: #c4b5d4;
+  font-style: normal;
+  font-size: 1.2rem;
 }
 
 .lux-wallet-hero {
@@ -2372,13 +2617,17 @@ body {
 
 .lux-channel {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 8px 10px;
   align-items: center;
   border-radius: 18px;
   padding: 14px;
   background: linear-gradient(90deg, #4c1d95, #7a22b8);
   border: 1px solid rgba(255, 206, 120, 0.45);
+}
+
+.lux-channel .lux-channel-logo {
+  grid-row: 1 / span 2;
 }
 
 .lux-channel h2 {
@@ -2682,10 +2931,6 @@ body {
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.lux-nav-item-active {
-  color: #ff4fa3;
 }
 
 .lux-nav-item-active .nav-icon {

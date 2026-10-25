@@ -191,6 +191,12 @@ export const CoinIcon = (props) => (
   </Svg>
 );
 
+export const StarIcon = (props) => (
+  <Svg {...props}>
+    <path d="M12 3.5l2.2 4.6 5 .7-3.6 3.5.9 5.1L12 15.2 7.5 17.4l.9-5.1L4.8 8.8l5-.7L12 3.5z" />
+  </Svg>
+);
+
 const ICON_MAP = {
   home: HomeIcon,
   tasks: TasksIcon,
@@ -216,6 +222,7 @@ const ICON_MAP = {
   user: UserIcon,
   clock: ClockIcon,
   coin: CoinIcon,
+  star: StarIcon,
 };
 
 export const NavIcon = ({ name, size = 24, className = '' }) => {

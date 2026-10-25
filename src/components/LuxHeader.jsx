@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
-import InstovaMark from './InstovaMark';
+import logo from '../assets/tasklogo.jpeg';
 import { NavIcon } from './NavIcons';
 
 const LINKS = [
@@ -48,10 +48,10 @@ const LuxHeader = () => {
         <NavIcon name="menu" size={20} />
       </button>
       <Link to="/dashboard" className="lux-brand">
-        <InstovaMark size={42} crowned />
+        <img src={logo} alt="INSTOVA" className="lux-brand-logo" />
         <span>
           <span className="lux-brand-name">INSTOVA</span>
-          <span className="lux-brand-tag">Grow · Work · Earn · Together</span>
+          <span className="lux-brand-tag">Grow · Work · Earn</span>
         </span>
       </Link>
       <span className="lux-header-actions">

@@ -3,12 +3,13 @@ import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
+import logo from '../assets/tasklogo.jpeg';
 
 const TABS = [
   { to: '/dashboard', icon: 'home', label: 'Dashboard' },
   { to: '/tasks', icon: 'tasks', label: 'Work' },
   { to: '/wallet', icon: 'wallet', label: 'Wallet' },
-  { to: '/levels', icon: 'upgrade', label: 'Levels' },
+  { to: '/levels', icon: 'star', label: 'Levels' },
   { to: '/referrals', icon: 'users', label: 'My Team' },
 ];
 
@@ -109,15 +110,16 @@ const Dashboard = () => {
           <Link to="/wallet"><span><NavIcon name="withdraw" size={18} /></span><strong>Withdraw</strong><small>Get your earnings</small></Link>
           <Link to="/package"><span><NavIcon name="package" size={18} /></span><strong>Plan Details</strong><small>{hasPackage ? (plan?.package_label || 'View your plan') : 'View your plan'}</small></Link>
           <Link to="/referrals"><span><NavIcon name="users" size={18} /></span><strong>My Team</strong><small>Your referrals</small></Link>
-          <Link to="/levels"><span><NavIcon name="upgrade" size={18} /></span><strong>Levels</strong><small>Track progress</small></Link>
+          <Link to="/levels"><span><NavIcon name="star" size={18} /></span><strong>Levels</strong><small>Track progress</small></Link>
         </section>
 
         <article className="lux-channel">
+          <img src={logo} alt="INSTOVA" className="lux-channel-logo" />
           <div>
             <h2>INSTOVA Official Channels</h2>
             <p>Stay updated, get latest news and support.</p>
           </div>
-          <a href={channelUrl} target="_blank" rel="noreferrer" className="lux-join">Join Now</a>
+          <a href={channelUrl} target="_blank" rel="noreferrer" className="lux-join">Join Now ›</a>
           <div className="lux-channel-links">
             {channels?.whatsapp_channel_link && <a href={channels.whatsapp_channel_link} target="_blank" rel="noreferrer">WA</a>}
             {channels?.whatsapp_community_link && <a href={channels.whatsapp_community_link} target="_blank" rel="noreferrer">Chat</a>}
@@ -135,7 +137,7 @@ const Dashboard = () => {
           {recent.length === 0 && <p className="lux-member-empty">Tasks appear here after a package is active.</p>}
           {recent.map((task) => (
             <Link key={task.id} to="/tasks" className="lux-home-task">
-              <span className="lux-member-avatar">{(task.title || 'T').charAt(0)}</span>
+              <span className={`lux-bloom ${['is-rose', 'is-lilac', 'is-blush'][index % 3]}`} aria-hidden="true" />
               <div>
                 <strong>{task.title}</strong>
                 <p>{task.description}</p>
