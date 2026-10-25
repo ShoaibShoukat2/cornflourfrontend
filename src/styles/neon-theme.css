@@ -2037,3 +2037,337 @@ body {
   color: #a16207;
   background: #fef3c7;
 }
+
+.lux-wallet-hero {
+  border-radius: 20px;
+  padding: 16px;
+  border: 1px solid rgba(255, 206, 120, 0.7);
+  background: linear-gradient(180deg, rgba(120, 30, 170, 0.88), rgba(58, 12, 96, 0.94));
+}
+
+.lux-wallet-amount {
+  margin: 4px 0 0;
+  color: #ffe08a;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.lux-wallet-actions,
+.lux-wallet-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lux-wallet-actions a,
+.lux-wallet-actions button,
+.lux-mini-card {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 206, 120, 0.45);
+  background: linear-gradient(180deg, #7a22b8, #4c1478);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lux-wallet-actions .nav-icon,
+.lux-mini-card .nav-icon {
+  color: #ffe7a3;
+}
+
+.lux-mini-card {
+  flex-direction: column;
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 236, 252, 0.95));
+  color: #4a2170;
+}
+
+.lux-mini-card strong {
+  font-size: 1.15rem;
+}
+
+.lux-summary-card {
+  border-radius: 20px;
+  padding: 12px;
+  background: linear-gradient(180deg, #6d28d9, #4c1d95);
+}
+
+.lux-summary-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.lux-summary-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.lux-summary-card a {
+  color: #ffe7a3;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.lux-summary-card > div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.lux-summary-card p {
+  margin: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.lux-summary-card strong,
+.lux-summary-card span {
+  display: block;
+}
+
+.lux-summary-card span {
+  margin-top: 4px;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.lux-withdraw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lux-home {
+  background:
+    radial-gradient(circle at 80% 0%, rgba(255, 150, 210, 0.25), transparent 28%),
+    linear-gradient(180deg, #3a0a62 0%, #f7e7f4 180px);
+}
+
+.lux-top-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  background: white;
+  border-radius: 18px;
+  padding: 6px;
+}
+
+.lux-top-tabs a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: #7a3cff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 8px 2px;
+  border-radius: 14px;
+}
+
+.lux-top-tabs a.is-active {
+  background: linear-gradient(180deg, #ff4fa3, #e11d8f);
+  color: white;
+}
+
+.lux-top-tabs .nav-icon {
+  color: currentColor;
+}
+
+.lux-home-note {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+}
+
+.lux-home-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.lux-home-actions a {
+  background: white;
+  border-radius: 16px;
+  padding: 10px 6px;
+  text-align: center;
+  text-decoration: none;
+  color: #3b185e;
+  box-shadow: 0 8px 18px rgba(90, 20, 80, 0.08);
+}
+
+.lux-home-actions span {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ff4fa3, #7a3cff);
+}
+
+.lux-home-actions .nav-icon {
+  color: white;
+}
+
+.lux-home-actions strong,
+.lux-home-actions small {
+  display: block;
+}
+
+.lux-home-actions strong {
+  font-size: 0.72rem;
+}
+
+.lux-home-actions small {
+  color: #8b7c9e;
+  font-size: 0.62rem;
+}
+
+.lux-channel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 10px;
+  align-items: center;
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(90deg, #4c1d95, #7a22b8);
+  border: 1px solid rgba(255, 206, 120, 0.45);
+}
+
+.lux-channel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.lux-channel p {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.lux-join {
+  border-radius: 999px;
+  background: #ff4fa3;
+  color: white;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 8px 12px;
+}
+
+.lux-channel-links {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+
+.lux-channel-links a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.lux-member-card header a {
+  color: #7a3cff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.lux-home-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #f1e7f8;
+  text-decoration: none;
+  color: inherit;
+}
+
+.lux-home-task strong,
+.lux-home-task p,
+.lux-home-task small {
+  display: block;
+}
+
+.lux-home-task p {
+  margin: 2px 0;
+  color: #8b7c9e;
+  font-size: 0.75rem;
+}
+
+.lux-home-task small {
+  color: #c026d3;
+  font-weight: 700;
+}
+
+.lux-home-task em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.lux-home-task em.is-done {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.lux-home-task em.is-wait {
+  color: #7a3cff;
+  background: #f3e8ff;
+}
+
+.lux-quote {
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(90deg, #ffe4f4, #fff);
+  border: 1px solid rgba(255, 150, 200, 0.45);
+}
+
+.lux-quote p,
+.lux-quote strong,
+.lux-quote span {
+  display: block;
+}
+
+.lux-quote p {
+  margin: 0;
+  color: #c026d3;
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.lux-quote strong {
+  margin-top: 6px;
+  letter-spacing: 0.12em;
+  color: #4c1d95;
+}
+
+.lux-quote span {
+  color: #8b7c9e;
+  font-size: 0.75rem;
+}

@@ -51,7 +51,7 @@ const LuxHeader = () => {
         <InstovaMark size={42} crowned />
         <span>
           <span className="lux-brand-name">INSTOVA</span>
-          <span className="lux-brand-tag">Grow · Work · Earn · Together</span>
+          <span className="lux-brand-tag">Grow · Work · Earn</span>
         </span>
       </Link>
       <span className="lux-header-actions">

@@ -2,28 +2,33 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
-import InstovaMark from '../components/InstovaMark';
 import { NavIcon } from '../components/NavIcons';
 
-const SHORTCUTS = [
-  { to: '/tasks', icon: 'tasks', label: 'Task Room' },
+const TABS = [
+  { to: '/dashboard', icon: 'home', label: 'Dashboard' },
+  { to: '/tasks', icon: 'tasks', label: 'Work' },
   { to: '/wallet', icon: 'wallet', label: 'Wallet' },
-  { to: '/referrals', icon: 'users', label: 'My Team' },
-  { to: '/package', icon: 'package', label: 'Packages' },
   { to: '/levels', icon: 'upgrade', label: 'Levels' },
-  { to: '/upgrade', icon: 'upgrade', label: 'Upgrade' },
-  { to: '/transactions', icon: 'history', label: 'History' },
-  { to: '/terms', icon: 'terms', label: 'Terms' },
-  { to: '/complaint', icon: 'complaint', label: 'Complaint' },
+  { to: '/referrals', icon: 'users', label: 'My Team' },
 ];
+
+const money = (units) => {
+  const value = Number(units || 0) * 100;
+  return `Rs ${value.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
+const taskMoney = (reward) => {
+  const value = Number(reward || 0);
+  const rupees = value >= 1 ? value : value * 100;
+  return `Rs ${rupees.toFixed(0)}`;
+};
 
 const Dashboard = () => {
   const { user, fetchUser } = useContext(AuthContext);
   const [wallet, setWallet] = useState(null);
-  const [referralStats, setReferralStats] = useState(null);
-  const [completedTasksCount, setCompletedTasksCount] = useState(0);
-  const [packageStatus, setPackageStatus] = useState('none');
   const [overview, setOverview] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [channels, setChannels] = useState(null);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
@@ -35,115 +40,117 @@ const Dashboard = () => {
     setLoadError(false);
     try {
       const dashRes = await api.get('/auth/dashboard-stats/');
-      const data = dashRes.data;
-      setOverview(data);
-      setWallet(data.wallet);
-      setReferralStats({
-        total_referrals: data.team?.direct || 0,
-        total_earnings: data.commissions?.total || 0,
-      });
-      setCompletedTasksCount(data.stats?.completed_tasks || 0);
-      setPackageStatus(data.plan?.status || 'none');
-    } catch (error) {
-      console.error(error);
+      setOverview(dashRes.data);
+      setWallet(dashRes.data.wallet);
+    } catch {
       setLoadError(true);
+    }
+    try {
+      const taskRes = await api.get('/tasks/');
+      setTasks(taskRes.data.tasks || []);
+    } catch {
+      setTasks([]);
+    }
+    try {
+      const linkRes = await api.get('/admin/contact-links/');
+      setChannels(linkRes.data);
+    } catch {
+      setChannels(null);
     }
   };
 
   if (!wallet) {
     return (
       <section className="lux-page">
-        {loadError ? (
-          <div className="lux-empty">
-            <p>Dashboard load nahi hui</p>
-            <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
-          </div>
-        ) : (
-          <div className="lux-empty"><p>Loading...</p></div>
-        )}
+        <div className="lux-empty">
+          {loadError ? (
+            <>
+              <p>Dashboard load nahi hui</p>
+              <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
+            </>
+          ) : <p>Loading...</p>}
+        </div>
       </section>
     );
   }
 
-  const hasPackage = packageStatus === 'approved' || user?.has_package;
-  const isPending = packageStatus === 'pending';
-  const isRejected = packageStatus === 'rejected';
-  const balance = (wallet.main_balance * 100).toFixed(0);
-  const totalEarned = (wallet.total_earned * 100).toFixed(0);
-  const teamCount = overview?.team?.total ?? referralStats?.total_referrals ?? 0;
   const plan = overview?.plan;
-  const level = overview?.level;
-  const remainingText = (() => {
-    const seconds = plan?.seconds_remaining || 0;
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  })();
+  const hasPackage = plan?.status === 'approved' || user?.has_package;
+  const channelUrl = channels?.whatsapp_channel_link || '/contact';
+  const recent = tasks.slice(0, 3);
 
   return (
-    <section className="lux-page">
+    <section className="lux-page lux-home">
       <div className="lux-wrap">
-        <header className="lux-page-head">
-          <InstovaMark size={54} crowned />
-          <div>
-            <h1>Dashboard</h1>
-            <p>{user?.username} · Level {level?.current ?? user?.level ?? 0}</p>
-          </div>
-        </header>
-
-        <section className="lux-balance">
-          <span className="lux-balance-icon"><NavIcon name="wallet" size={22} /></span>
-          <div>
-            <p className="lux-kicker">Current Balance</p>
-            <p className="lux-balance-amt">Rs {balance}</p>
-          </div>
-          <Link to={hasPackage ? '/wallet' : '/package'} className="lux-withdraw">
-            {hasPackage ? 'Withdraw' : 'Buy plan'}
-          </Link>
-        </section>
-
-        {isPending && (
-          <p className="lux-status">
-            Plan pending. {plan?.is_overdue ? 'Waiting for admin.' : `Time left ${remainingText}.`}
-          </p>
-        )}
-        {isRejected && (
-          <p className="lux-status lux-status-warn">
-            Plan rejected{plan?.admin_note ? `: ${plan.admin_note}` : ''}.
-          </p>
-        )}
-        {plan?.upgrade_status === 'pending' && (
-          <p className="lux-status">Upgrade request is pending. Package stays the same until approval.</p>
-        )}
-        {hasPackage && (
-          <p className="lux-status">
-            {plan?.package_label || 'Plan'} active{plan?.amount ? ` · Rs ${plan.amount}` : ''}
-          </p>
-        )}
-
-        <section className="lux-stats">
-          <article><span className="lux-stat-icon"><NavIcon name="check" size={16} /></span><strong>{completedTasksCount}</strong><span>Tasks</span></article>
-          <article><span className="lux-stat-icon"><NavIcon name="users" size={16} /></span><strong>{teamCount}</strong><span>Team</span></article>
-          <article><span className="lux-stat-icon"><NavIcon name="upgrade" size={16} /></span><strong>{level?.current ?? user?.level ?? 0}</strong><span>Level</span></article>
-          <article className="lux-stat-gold"><span className="lux-stat-icon"><NavIcon name="balance" size={16} /></span><strong>Rs {totalEarned}</strong><span>Earned</span></article>
-        </section>
-
-        <section className="lux-shortcuts">
-          {SHORTCUTS.map((item) => (
-            <Link key={item.label} to={item.to} className="lux-shortcut">
-              <NavIcon name={item.icon} size={22} />
-              <span>{item.label}</span>
+        <nav className="lux-top-tabs" aria-label="Sections">
+          {TABS.map((tab) => (
+            <Link key={tab.to} to={tab.to} className={tab.to === '/dashboard' ? 'is-active' : ''}>
+              <NavIcon name={tab.icon} size={16} />
+              <span>{tab.label}</span>
             </Link>
           ))}
+        </nav>
+
+        <article className="lux-wallet-hero">
+          <p className="lux-kicker">Your Balance</p>
+          <p className="lux-wallet-amount">{money(wallet.main_balance)}</p>
+          <p className="lux-home-note">Available for withdrawal</p>
+        </article>
+
+        {(plan?.status === 'pending' || plan?.status === 'rejected' || plan?.upgrade_status === 'pending') && (
+          <p className={`lux-status${plan?.status === 'rejected' ? ' lux-status-warn' : ''}`}>
+            {plan?.status === 'pending' && 'Plan request is pending admin approval.'}
+            {plan?.status === 'rejected' && `Plan rejected${plan.admin_note ? `: ${plan.admin_note}` : ''}.`}
+            {plan?.upgrade_status === 'pending' && ' Upgrade request is pending.'}
+          </p>
+        )}
+
+        <section className="lux-home-actions">
+          <Link to="/wallet"><span><NavIcon name="withdraw" size={18} /></span><strong>Withdraw</strong><small>Get your earnings</small></Link>
+          <Link to="/package"><span><NavIcon name="package" size={18} /></span><strong>Plan Details</strong><small>{hasPackage ? (plan?.package_label || 'View your plan') : 'View your plan'}</small></Link>
+          <Link to="/referrals"><span><NavIcon name="users" size={18} /></span><strong>My Team</strong><small>Your referrals</small></Link>
+          <Link to="/levels"><span><NavIcon name="upgrade" size={18} /></span><strong>Levels</strong><small>Track progress</small></Link>
         </section>
 
-        <section className="lux-done">
-          <p>Account</p>
-          <div><span>Direct team</span><strong>{overview?.team?.direct ?? 0}</strong></div>
-          <div><span>Indirect team</span><strong>{overview?.team?.indirect ?? 0}</strong></div>
-          <div><span>Withdrawable</span><strong>Rs {balance}</strong></div>
-          <div><span>Next level</span><strong>{level?.next_level == null ? 'Max' : `${level.members_remaining} more`}</strong></div>
-        </section>
+        <article className="lux-channel">
+          <div>
+            <h2>INSTOVA Official Channels</h2>
+            <p>Stay updated, get latest news and support.</p>
+          </div>
+          <a href={channelUrl} target="_blank" rel="noreferrer" className="lux-join">Join Now</a>
+          <div className="lux-channel-links">
+            {channels?.whatsapp_channel_link && <a href={channels.whatsapp_channel_link} target="_blank" rel="noreferrer">WA</a>}
+            {channels?.whatsapp_community_link && <a href={channels.whatsapp_community_link} target="_blank" rel="noreferrer">Chat</a>}
+            <Link to="/contact">Web</Link>
+          </div>
+        </article>
+
+        <article className="lux-member-card">
+          <header>
+            <div>
+              <h2>Recent Tasks</h2>
+            </div>
+            <Link to="/tasks">View All</Link>
+          </header>
+          {recent.length === 0 && <p className="lux-member-empty">Tasks appear here after a package is active.</p>}
+          {recent.map((task) => (
+            <Link key={task.id} to="/tasks" className="lux-home-task">
+              <span className="lux-member-avatar">{(task.title || 'T').charAt(0)}</span>
+              <div>
+                <strong>{task.title}</strong>
+                <p>{task.description}</p>
+                <small>{taskMoney(task.reward)} · Today</small>
+              </div>
+              <em className={task.is_completed ? 'is-done' : 'is-wait'}>{task.is_completed ? 'Completed' : 'Pending'}</em>
+            </Link>
+          ))}
+        </article>
+
+        <article className="lux-quote">
+          <p>Small steps create big results</p>
+          <strong>INSTOVA</strong>
+          <span>Learn · Work · Grow</span>
+        </article>
       </div>
     </section>
   );
