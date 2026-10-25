@@ -181,7 +181,7 @@ const Wallet = () => {
 
         <section className="lux-shortcuts">
           <Link to="/package" className="lux-shortcut"><NavIcon name="package" size={20} /><span>Deposit</span></Link>
-          <button type="button" className="lux-shortcut" onClick={() => setShowWithdrawForm(true)}><NavIcon name="withdraw" size={20} /><span>Withdraw</span></Link>
+          <button type="button" className="lux-shortcut" onClick={() => setShowWithdrawForm(true)}><NavIcon name="withdraw" size={20} /><span>Withdraw</span></button>
           <Link to="/transactions" className="lux-shortcut"><NavIcon name="history" size={20} /><span>History</span></Link>
           <a href="#withdraw-history" className="lux-shortcut"><NavIcon name="terms" size={20} /><span>W. History</span></a>
         </section>
