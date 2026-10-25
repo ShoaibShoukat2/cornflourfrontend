@@ -380,6 +380,10 @@
   color: var(--nav-icon-color);
 }
 
+.admin-side-icon .nav-icon {
+  color: currentColor;
+}
+
 .neon-nav-link .nav-icon,
 .neon-nav-link-active .nav-icon {
   color: inherit;
@@ -822,12 +826,12 @@ body {
 }
 
 .ig-highlight-ring {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 12px;
   padding: 2px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -840,9 +844,8 @@ body {
 }
 
 .ig-highlight:hover .ig-highlight-ring {
-  transform: scale(1.05);
-  box-shadow: 0 0 16px var(--neon-glow-purple);
-  border-color: rgba(131, 58, 180, 0.5);
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ig-highlight:hover .ig-highlight-ring .nav-icon {

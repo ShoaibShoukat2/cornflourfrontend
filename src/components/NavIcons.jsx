@@ -1,7 +1,7 @@
 const stroke = {
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.75,
+  strokeWidth: 1.6,
   strokeLinecap: 'round',
   strokeLinejoin: 'round',
 };
@@ -27,9 +27,9 @@ export const HomeIcon = (props) => (
 
 export const TasksIcon = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="12" r="9" />
-    <circle cx="12" cy="12" r="5" />
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    <rect x="6" y="4" width="12" height="16" rx="2" />
+    <path d="M9 4.5h6" />
+    <path d="M9 10h6M9 14h6M9 18h4" />
   </Svg>
 );
 
@@ -60,7 +60,7 @@ export const PackageIcon = (props) => (
 export const SettingsIcon = (props) => (
   <Svg {...props}>
     <circle cx="12" cy="12" r="3" />
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" />
   </Svg>
 );
 
@@ -88,7 +88,43 @@ export const StatsIcon = (props) => (
 
 export const OfferIcon = (props) => (
   <Svg {...props}>
-    <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 16.8 5.7 21l2.3-7-6-4.6h7.6L12 2z" />
+    <path d="M4 16l5-5 3 3 8-8" />
+    <path d="M14 6h6v6" />
+  </Svg>
+);
+
+export const UpgradeIcon = (props) => (
+  <Svg {...props}>
+    <path d="M12 19V5" />
+    <path d="M6 11l6-6 6 6" />
+    <path d="M5 21h14" />
+  </Svg>
+);
+
+export const BellIcon = (props) => (
+  <Svg {...props}>
+    <path d="M6 16V10a6 6 0 1112 0v6l1.5 2h-15L6 16z" />
+    <path d="M10 19a2 2 0 004 0" />
+  </Svg>
+);
+
+export const TermsIcon = (props) => (
+  <Svg {...props}>
+    <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
+    <path d="M14 3v6h6M9 13h6M9 17h4" />
+  </Svg>
+);
+
+export const ComplaintIcon = (props) => (
+  <Svg {...props}>
+    <path d="M5 6h14a1 1 0 011 1v8a1 1 0 01-1 1H9l-4 3v-3H5a1 1 0 01-1-1V7a1 1 0 011-1z" />
+  </Svg>
+);
+
+export const HistoryIcon = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="8" />
+    <path d="M12 8v5l3 2" />
   </Svg>
 );
 
@@ -101,8 +137,9 @@ export const WithdrawIcon = (props) => (
 
 export const BalanceIcon = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 7v10M9.5 10.5c0-1.5 1.1-2.5 2.5-2.5S14.5 9 14.5 10.5 13.4 13 12 13s-2.5 1-2.5 2.5S10.6 18 12 18" />
+    <rect x="3" y="6" width="18" height="12" rx="2" />
+    <path d="M3 10h18" />
+    <path d="M7 15h4" />
   </Svg>
 );
 
@@ -144,6 +181,11 @@ const ICON_MAP = {
   grid: GridIcon,
   stats: StatsIcon,
   offer: OfferIcon,
+  upgrade: UpgradeIcon,
+  bell: BellIcon,
+  terms: TermsIcon,
+  complaint: ComplaintIcon,
+  history: HistoryIcon,
   withdraw: WithdrawIcon,
   balance: BalanceIcon,
   check: CheckIcon,

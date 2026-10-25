@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
+import { NavIcon } from './NavIcons';
 import logo from '../assets/tasklogo.jpeg';
 
 // ── Login As User Modal ────────────────────────────────────────────────────────
@@ -76,18 +77,18 @@ const LoginAsUserModal = ({ onClose, onConfirm }) => {
 
 // ── Nav Items ──────────────────────────────────────────────────────────────────
 const navItems = [
-  { path: '/admin/dashboard',   icon: '📊', label: 'Dashboard',    desc: 'Overview & stats' },
-  { path: '/admin/reports',     icon: '📋', label: 'Reports',      desc: 'Users & requests' },
-  { path: '/admin/users',       icon: '👥', label: 'Users',        desc: 'Manage members' },
-  { path: '/admin/withdrawals', icon: '💸', label: 'Withdrawals',  desc: 'Payout requests' },
-  { path: '/admin/packages',    icon: '📦', label: 'Packages',     desc: 'Deposits & plans' },
-  { path: '/admin/upgrades',   icon: '⬆️', label: 'Package Upgrade Requests', desc: 'Approve remaining payments' },
-  { path: '/admin/tasks',       icon: '🎯', label: 'Tasks',        desc: 'Manage tasks' },
-  { path: '/admin/settings',    icon: '⚙️', label: 'Settings',     desc: 'Site configuration' },
-  { path: '/admin/contact',     icon: '📩', label: 'Contact Us',   desc: 'Support links' },
-  { path: '/admin/complaints',  icon: '📝', label: 'Complaints & Feedback', desc: 'User messages' },
-  { path: '/admin/terms',       icon: '📜', label: 'Terms & Conditions', desc: 'Edit policies' },
-  { path: '/admin/history',     icon: '🗂️', label: 'Complete History', desc: 'Filters and CSV' },
+  { path: '/admin/dashboard',   icon: 'stats', label: 'Dashboard',    desc: 'Overview & stats' },
+  { path: '/admin/reports',     icon: 'terms', label: 'Reports',      desc: 'Users & requests' },
+  { path: '/admin/users',       icon: 'users', label: 'Users',        desc: 'Manage members' },
+  { path: '/admin/withdrawals', icon: 'withdraw', label: 'Withdrawals',  desc: 'Payout requests' },
+  { path: '/admin/packages',    icon: 'package', label: 'Packages',     desc: 'Deposits & plans' },
+  { path: '/admin/upgrades',   icon: 'upgrade', label: 'Package Upgrade Requests', desc: 'Approve remaining payments' },
+  { path: '/admin/tasks',       icon: 'tasks', label: 'Tasks',        desc: 'Manage tasks' },
+  { path: '/admin/settings',    icon: 'settings', label: 'Settings',     desc: 'Site configuration' },
+  { path: '/admin/contact',     icon: 'contact', label: 'Contact Us',   desc: 'Support links' },
+  { path: '/admin/complaints',  icon: 'complaint', label: 'Complaints & Feedback', desc: 'User messages' },
+  { path: '/admin/terms',       icon: 'terms', label: 'Terms & Conditions', desc: 'Edit policies' },
+  { path: '/admin/history',     icon: 'history', label: 'Complete History', desc: 'Filters and CSV' },
 ];
 
 // ── Pending Packages Slide Panel ───────────────────────────────────────────────
@@ -250,7 +251,7 @@ const AdminLayout = ({ children }) => {
                   ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/20'
                   : 'text-slate-400 hover:bg-slate-700/60 hover:text-white'
               }`}>
-              <span className="text-base w-5 text-center flex-shrink-0">{item.icon}</span>
+              <span className="admin-side-icon w-5 flex items-center justify-center flex-shrink-0"><NavIcon name={item.icon} size={18} /></span>
               <div className="min-w-0">
                 <p className="leading-tight">{item.label}</p>
                 <p className={`text-xs leading-tight mt-0.5 ${active ? 'text-orange-100' : 'text-slate-500 group-hover:text-slate-400'}`}>{item.desc}</p>
@@ -265,7 +266,7 @@ const AdminLayout = ({ children }) => {
           {/* Pending Approvals */}
           <button onClick={() => { onClose?.(); setPackagesOpen(true); }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-700/60 hover:text-white transition-all group">
-            <span className="text-base w-5 text-center flex-shrink-0">⏳</span>
+            <span className="w-5 flex items-center justify-center flex-shrink-0"><NavIcon name="history" size={18} /></span>
             <div className="flex-1 text-left min-w-0">
               <p className="leading-tight">Pending Approvals</p>
               <p className="text-xs text-slate-500 group-hover:text-slate-400 leading-tight mt-0.5">Package requests</p>
@@ -280,7 +281,7 @@ const AdminLayout = ({ children }) => {
           {/* Login as User */}
           <button onClick={() => { onClose?.(); setLoginAsUserOpen(true); }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-blue-600/30 hover:text-blue-300 transition-all group">
-            <span className="text-base w-5 text-center flex-shrink-0">👤</span>
+            <span className="w-5 flex items-center justify-center flex-shrink-0"><NavIcon name="users" size={18} /></span>
             <div className="flex-1 text-left min-w-0">
               <p className="leading-tight">Login as User</p>
               <p className="text-xs text-slate-500 group-hover:text-blue-400 leading-tight mt-0.5">Switch to user view</p>

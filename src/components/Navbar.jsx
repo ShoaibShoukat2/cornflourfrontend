@@ -29,11 +29,11 @@ const Navbar = () => {
     { to: '/wallet', icon: 'wallet', label: 'Wallet' },
     { to: '/package', icon: 'package', label: 'Package' },
     { to: '/settings', icon: 'settings', label: 'Profile' },
-    { to: '/notifications', icon: 'offer', label: 'Alerts' },
-    { to: '/transactions', icon: 'stats', label: 'History' },
+    { to: '/notifications', icon: 'bell', label: 'Alerts' },
+    { to: '/transactions', icon: 'history', label: 'History' },
     { to: '/contact', icon: 'contact', label: 'Support' },
-    { to: '/terms', icon: 'stats', label: 'Terms' },
-    { to: '/complaint', icon: 'offer', label: 'Complaint' },
+    { to: '/terms', icon: 'terms', label: 'Terms' },
+    { to: '/complaint', icon: 'complaint', label: 'Complaint' },
   ];
 
   const NavLinkItem = ({ to, icon, label, onClick, className }) => (
@@ -78,13 +78,13 @@ const Navbar = () => {
             <section className="hidden md:flex items-center space-x-1 lg:space-x-2">
               {user.is_staff ? (
                 <>
-                  <Link to="/admin/dashboard" className={linkClass('/admin/dashboard')}>📊 Dashboard</Link>
-                  <Link to="/admin/users" className={linkClass('/admin/users')}>👥 Users</Link>
-                  <Link to="/admin/withdrawals" className={linkClass('/admin/withdrawals')}>💸 Withdrawals</Link>
-                  <Link to="/admin/packages" className={linkClass('/admin/packages')}>📦 Packages</Link>
-                  <Link to="/admin/upgrades" className={linkClass('/admin/upgrades')}>⬆️ Upgrades</Link>
-                  <Link to="/admin/contact" className={linkClass('/admin/contact')}>📩 Contact Us</Link>
-                  <Link to="/admin/complaints" className={linkClass('/admin/complaints')}>📝 Complaints</Link>
+                  <Link to="/admin/dashboard" className={linkClass('/admin/dashboard')}><NavIcon name="stats" size={16} /> Dashboard</Link>
+                  <Link to="/admin/users" className={linkClass('/admin/users')}><NavIcon name="users" size={16} /> Users</Link>
+                  <Link to="/admin/withdrawals" className={linkClass('/admin/withdrawals')}><NavIcon name="withdraw" size={16} /> Withdrawals</Link>
+                  <Link to="/admin/packages" className={linkClass('/admin/packages')}><NavIcon name="package" size={16} /> Packages</Link>
+                  <Link to="/admin/upgrades" className={linkClass('/admin/upgrades')}><NavIcon name="upgrade" size={16} /> Upgrades</Link>
+                  <Link to="/admin/contact" className={linkClass('/admin/contact')}><NavIcon name="contact" size={16} /> Contact Us</Link>
+                  <Link to="/admin/complaints" className={linkClass('/admin/complaints')}><NavIcon name="complaint" size={16} /> Complaints</Link>
                   <section className="h-6 w-px bg-white/20 mx-2" />
                   <UserChip />
                 </>
@@ -123,13 +123,13 @@ const Navbar = () => {
 
                 {user.is_staff ? (
                   <>
-                    <Link to="/admin/dashboard" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📊 Admin Dashboard</Link>
-                    <Link to="/admin/users" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">👥 Manage Users</Link>
-                    <Link to="/admin/withdrawals" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">💸 Manage Withdrawals</Link>
-                    <Link to="/admin/packages" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📦 Manage Packages</Link>
-                    <Link to="/admin/upgrades" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">⬆️ Package Upgrades</Link>
-                    <Link to="/admin/contact" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📩 Contact Us</Link>
-                    <Link to="/admin/complaints" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3">📝 Complaints</Link>
+                    <Link to="/admin/dashboard" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="stats" size={16} /> Admin Dashboard</Link>
+                    <Link to="/admin/users" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="users" size={16} /> Manage Users</Link>
+                    <Link to="/admin/withdrawals" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="withdraw" size={16} /> Manage Withdrawals</Link>
+                    <Link to="/admin/packages" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="package" size={16} /> Manage Packages</Link>
+                    <Link to="/admin/upgrades" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="upgrade" size={16} /> Package Upgrades</Link>
+                    <Link to="/admin/contact" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="contact" size={16} /> Contact Us</Link>
+                    <Link to="/admin/complaints" onClick={() => setIsOpen(false)} className="neon-nav-link px-4 py-3"><NavIcon name="complaint" size={16} /> Complaints</Link>
                   </>
                 ) : (
                   <>
