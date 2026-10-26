@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 
 const Crown = () => (
   <svg viewBox="0 0 24 16" aria-hidden="true">
@@ -32,7 +32,7 @@ const Wreath = ({ number, state }) => (
 );
 
 const Levels = () => {
-  const [level, setLevel] = useState(null);
+  const [level, setLevel] = useState(readCache('/auth/dashboard-stats/')?.level || null);
   const [error, setError] = useState(false);
 
   const load = async () => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
 
 const rupees = (units) => {
@@ -9,7 +9,7 @@ const rupees = (units) => {
 };
 
 const Wallet = () => {
-  const [wallet, setWallet] = useState(null);
+  const [wallet, setWallet] = useState(readCache('/wallet/'));
   const [withdrawals, setWithdrawals] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);

@@ -3,9 +3,29 @@ import api from '../api/axios';
 
 export const AuthContext = createContext();
 
+const savedUser = () => {
+  try {
+    const raw = sessionStorage.getItem('instova_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const rememberUser = (next) => {
+  if (next) sessionStorage.setItem('instova_user', JSON.stringify(next));
+  else sessionStorage.removeItem('instova_user');
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const cached = typeof localStorage !== 'undefined' && localStorage.getItem('token') ? savedUser() : null;
+  const [user, setUser] = useState(cached);
+  const [loading, setLoading] = useState(Boolean(typeof localStorage !== 'undefined' && localStorage.getItem('token')) && !cached);
+
+  const applyUser = (next) => {
+    setUser(next);
+    rememberUser(next);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,11 +39,11 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await api.get('/auth/profile/');
-      setUser(response.data);
+      applyUser(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
-        setUser(null);
+        applyUser(null);
       }
     } finally {
       setLoading(false);
@@ -33,14 +53,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await api.post('/auth/login/', { email, password });
     localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
+    applyUser(response.data.user);
     return response.data;
   };
 
   const register = async (userData) => {
     const response = await api.post('/auth/register/', userData);
     localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
+    applyUser(response.data.user);
     return response.data;
   };
 
@@ -51,7 +71,7 @@ export const AuthProvider = ({ children }) => {
       console.error(error);
     }
     localStorage.removeItem('token');
-    setUser(null);
+    applyUser(null);
   };
 
   return (

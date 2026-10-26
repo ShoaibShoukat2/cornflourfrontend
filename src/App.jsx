@@ -37,6 +37,7 @@ import Complaint from './pages/Complaint';
 import Levels from './pages/Levels';
 import MobileBottomNav from './components/MobileBottomNav';
 import LuxHeader from './components/LuxHeader';
+import NetworkBanner from './components/NetworkBanner';
 
 const AppContent = () => {
   const location = useLocation();
@@ -94,6 +95,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <NetworkBanner />
         <AppContent />
       </AuthProvider>
     </Router>

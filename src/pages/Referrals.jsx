@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
 
 const Referrals = () => {
-  const [stats, setStats] = useState(null);
-  const [referrals, setReferrals] = useState([]);
+  const [stats, setStats] = useState(readCache('/referrals/stats/'));
+  const [referrals, setReferrals] = useState(readCache('/referrals/list/') || []);
   const [copied, setCopied] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('all');

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
 import taskLogo from '../assets/tasklogo.jpeg';
 
@@ -119,19 +119,24 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 
 // ── Main Tasks Page ────────────────────────────────────────────────────────────
 const Tasks = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cachedTasks = readCache('/tasks/');
+  const [tasks, setTasks] = useState(cachedTasks?.tasks || []);
+  const [loading, setLoading] = useState(!cachedTasks);
   const [locked, setLocked] = useState(false);
   const [weeklyLocked, setWeeklyLocked] = useState(false);
-  const [weeklyStatus, setWeeklyStatus] = useState(null);
+  const [weeklyStatus, setWeeklyStatus] = useState(cachedTasks ? {
+    weekly_joinings: cachedTasks.weekly_joinings ?? 0,
+    weekly_joinings_required: cachedTasks.weekly_joinings_required ?? 1,
+    ads_locked: cachedTasks.ads_locked ?? false,
+  } : null);
   const [promoCode, setPromoCode] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [userLevel, setUserLevel] = useState(0);
   const [showLevelChart, setShowLevelChart] = useState(false);
-  const [dailyLimit, setDailyLimit] = useState(0);
-  const [completedToday, setCompletedToday] = useState(0);
-  const [walletBalance, setWalletBalance] = useState(null);
+  const [dailyLimit, setDailyLimit] = useState(cachedTasks?.daily_limit || 0);
+  const [completedToday, setCompletedToday] = useState(cachedTasks?.completed_today || 0);
+  const [walletBalance, setWalletBalance] = useState(readCache('/wallet/')?.main_balance ?? null);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
@@ -148,7 +153,7 @@ const Tasks = () => {
   };
 
   const fetchTasks = async () => {
-    setLoading(true);
+    if (!readCache('/tasks/')) setLoading(true);
     setLocked(false);
     setWeeklyLocked(false);
     setLoadError(false);

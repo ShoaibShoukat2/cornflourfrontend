@@ -1213,6 +1213,54 @@ body {
   }
 }
 
+.net-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-size: 0.84rem;
+  font-weight: 700;
+  animation: net-slide 0.35s ease;
+}
+
+.net-banner p {
+  margin: 0;
+}
+
+.net-banner.is-slow {
+  background: linear-gradient(90deg, #b45309, #f59e0b);
+}
+
+.net-banner.is-offline,
+.net-banner.is-error {
+  background: linear-gradient(90deg, #9f1239, #e11d48);
+}
+
+.net-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  flex: 0 0 auto;
+  animation: net-pulse 1s ease-in-out infinite;
+}
+
+@keyframes net-slide {
+  from { transform: translateY(-110%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes net-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.55); opacity: 0.4; }
+}
+
 .lux-page {
   min-height: calc(100vh - 4rem);
   background:

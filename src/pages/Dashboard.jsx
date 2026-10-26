@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
 import logo from '../assets/tasklogo.jpeg';
 
@@ -26,10 +26,11 @@ const taskMoney = (reward) => {
 
 const Dashboard = () => {
   const { user, fetchUser } = useContext(AuthContext);
-  const [wallet, setWallet] = useState(null);
-  const [overview, setOverview] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [channels, setChannels] = useState(null);
+  const cachedDash = readCache('/auth/dashboard-stats/');
+  const [wallet, setWallet] = useState(cachedDash?.wallet || null);
+  const [overview, setOverview] = useState(cachedDash);
+  const [tasks, setTasks] = useState(readCache('/tasks/')?.tasks || []);
+  const [channels, setChannels] = useState(readCache('/admin/contact-links/'));
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
@@ -39,25 +40,19 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     setLoadError(false);
-    try {
-      const dashRes = await api.get('/auth/dashboard-stats/');
-      setOverview(dashRes.data);
-      setWallet(dashRes.data.wallet);
-    } catch {
+    const [dashRes, taskRes, linkRes] = await Promise.allSettled([
+      api.get('/auth/dashboard-stats/'),
+      api.get('/tasks/'),
+      api.get('/admin/contact-links/'),
+    ]);
+    if (dashRes.status === 'fulfilled') {
+      setOverview(dashRes.value.data);
+      setWallet(dashRes.value.data.wallet);
+    } else if (!readCache('/auth/dashboard-stats/')) {
       setLoadError(true);
     }
-    try {
-      const taskRes = await api.get('/tasks/');
-      setTasks(taskRes.data.tasks || []);
-    } catch {
-      setTasks([]);
-    }
-    try {
-      const linkRes = await api.get('/admin/contact-links/');
-      setChannels(linkRes.data);
-    } catch {
-      setChannels(null);
-    }
+    if (taskRes.status === 'fulfilled') setTasks(taskRes.value.data.tasks || []);
+    if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
   };
 
   if (!wallet) {
