@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
-import InstovaMark from '../components/InstovaMark';
 import { NavIcon } from '../components/NavIcons';
+import taskLogo from '../assets/tasklogo.jpeg';
 
 const LEVEL_EARNINGS = [
   { level: 0, earning: 7 },
@@ -76,7 +76,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
       <span className="lux-float lux-float-plane" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M3 11.5L21 4l-7.2 16-2.3-6.2L3 11.5z" /></svg>
       </span>
-      <InstovaMark size={index === 0 ? 132 : 96} crowned />
+      <img src={taskLogo} alt="" className="lux-task-logo" />
       {phase === 'timer' && (
         <div className="lux-stage-overlay">
           <span className="lux-timer">{mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : secs}</span>
@@ -249,7 +249,7 @@ const Tasks = () => {
     <section className="lux-page lux-tasks">
       <div className="lux-wrap">
         <header className="lux-page-head">
-          <InstovaMark size={62} crowned />
+          <img src={taskLogo} alt="INSTOVA" className="lux-task-mark" />
           <div>
             <h1>Tasks</h1>
             <p>Complete tasks and earn money instantly</p>
@@ -286,18 +286,20 @@ const Tasks = () => {
             <span>Check back later for new tasks</span>
           </section>
         ) : (
-          available.map((task, index) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              index={index}
-              currentEarning={currentEarning}
-              onDone={(newBalance) => {
-                if (newBalance !== undefined) setWalletBalance(newBalance);
-                setRefresh((value) => value + 1);
-              }}
-            />
-          ))
+          <div className="lux-task-grid">
+            {available.map((task, index) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                index={index}
+                currentEarning={currentEarning}
+                onDone={(newBalance) => {
+                  if (newBalance !== undefined) setWalletBalance(newBalance);
+                  setRefresh((value) => value + 1);
+                }}
+              />
+            ))}
+          </div>
         )}
 
         {completed.length > 0 && (

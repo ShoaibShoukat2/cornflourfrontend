@@ -2914,13 +2914,71 @@ body {
 .lux-float-plane { right: 14%; top: 22%; }
 .lux-float-plane svg { fill: #7dd3fc; transform: rotate(-20deg); }
 
+.lux-tasks .lux-task-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lux-tasks .lux-task {
+  min-width: 0;
+  gap: 4px;
+}
+
+.lux-tasks .lux-stage,
+.lux-tasks .lux-stage-hero {
+  aspect-ratio: 1;
+  min-height: 0;
+  height: auto;
+  border-radius: 16px;
+  gap: 0;
+}
+
+.lux-task-mark,
+.lux-task-logo {
+  object-fit: cover;
+  object-position: center;
+  border-radius: 22%;
+  flex: 0 0 auto;
+  box-shadow: 0 0 14px rgba(255, 70, 160, 0.75), inset 0 0 0 1px rgba(255, 230, 170, 0.35);
+}
+
+.lux-task-mark {
+  width: 52px;
+  height: 52px;
+}
+
+.lux-tasks .lux-task-logo {
+  position: relative;
+  z-index: 1;
+  width: 46%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.lux-tasks .lux-orbit-a,
+.lux-tasks .lux-orbit-b {
+  width: 86%;
+  height: 34%;
+}
+
+.lux-tasks .lux-float {
+  width: 14px;
+  height: 14px;
+}
+
+.lux-tasks .lux-float-heart { left: 8%; top: 34%; }
+.lux-tasks .lux-float-plane { right: 8%; top: 16%; }
+
 .lux-tasks .lux-tap {
   position: absolute;
-  bottom: 22px;
+  bottom: 6px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   z-index: 2;
+  padding: 4px 7px;
+  font-size: 0.58rem;
 }
 
 .lux-tasks .lux-tap svg {

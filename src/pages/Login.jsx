@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import logo from '../assets/tasklogo.jpeg';
 
@@ -9,6 +9,14 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      navigate(`/register?ref=${encodeURIComponent(ref)}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   useEffect(() => {
     const prefill = localStorage.getItem('prefill_email');

@@ -26,12 +26,22 @@ const Referrals = () => {
     }
   };
 
+  const shareLink = (() => {
+    const code = stats?.referral_code;
+    if (!code) return stats?.referral_link || '';
+    const host = window.location.hostname;
+    const origin = host === 'instovaearn.com' || host === 'www.instovaearn.com'
+      ? 'https://www.instovaearn.com'
+      : window.location.origin;
+    return `${origin}/register?ref=${encodeURIComponent(code)}`;
+  })();
+
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(stats.referral_link);
+      await navigator.clipboard.writeText(shareLink);
     } catch {
       const input = document.createElement('input');
-      input.value = stats.referral_link;
+      input.value = shareLink;
       document.body.appendChild(input);
       input.select();
       document.execCommand('copy');
@@ -115,7 +125,7 @@ const Referrals = () => {
           </div>
           <div className="lux-link-row">
             <NavIcon name="link" size={14} />
-            <span>{stats.referral_link}</span>
+            <span>{shareLink}</span>
             <button type="button" onClick={copyToClipboard}>
               <NavIcon name="tasks" size={14} />
               {copied ? 'Copied' : 'Copy Link'}
