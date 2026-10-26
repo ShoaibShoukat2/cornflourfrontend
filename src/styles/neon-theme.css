@@ -2576,9 +2576,11 @@ body {
 }
 
 .lux-home {
-  background:
+  min-height: 100dvh;
+  background-color: #f7e7f4;
+  background-image:
     radial-gradient(circle at 80% 0%, rgba(255, 150, 210, 0.25), transparent 28%),
-    linear-gradient(180deg, #3a0a62 0%, #f7e7f4 180px);
+    linear-gradient(180deg, #3a0a62 0%, #f7e7f4 22%);
 }
 
 .lux-top-tabs {
@@ -3037,6 +3039,32 @@ body {
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+@media (max-width: 767px) {
+  .lux-tasks {
+    padding: 8px 10px 12px;
+  }
+
+  .lux-tasks .lux-page-head,
+  .lux-tasks .lux-balance,
+  .lux-tasks .lux-join-pill,
+  .lux-tasks .lux-stats {
+    margin-bottom: 8px;
+  }
+
+  .lux-tasks .lux-page-head h1 {
+    font-size: 1.35rem;
+  }
+
+  .lux-tasks .lux-task-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lux-tasks .lux-task-grid {
+    gap: 6px;
+  }
 }
 
 .lux-nav-item-active .nav-icon {

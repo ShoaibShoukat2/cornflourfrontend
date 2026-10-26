@@ -31,38 +31,34 @@ const Wreath = ({ number, state }) => (
   </span>
 );
 
+const FALLBACK_LEVEL = {
+  current: 0,
+  requirements: [0, 7, 20, 35, 50, 100, 120, 300, 450, 800],
+  approved_direct: 0,
+};
+
+const normalizeLevel = (raw) => {
+  if (raw && typeof raw === 'object') return raw;
+  const current = Number(raw);
+  if (Number.isFinite(current)) return { ...FALLBACK_LEVEL, current };
+  return null;
+};
+
 const Levels = () => {
-  const [level, setLevel] = useState(readCache('/auth/dashboard-stats/')?.level || null);
+  const [level, setLevel] = useState(() => normalizeLevel(readCache('/auth/dashboard-stats/')?.level) || FALLBACK_LEVEL);
   const [error, setError] = useState(false);
 
   const load = async () => {
     setError(false);
     try {
       const res = await api.get('/auth/dashboard-stats/');
-      setLevel(res.data.level || null);
+      setLevel(normalizeLevel(res.data?.level) || FALLBACK_LEVEL);
     } catch {
       setError(true);
     }
   };
 
   useEffect(() => { load(); }, []);
-
-  if (!level) {
-    return (
-      <section className="lux-page lux-levels">
-        <div className="lux-empty">
-          {error ? (
-            <>
-              <p>Levels load nahi hue</p>
-              <button type="button" onClick={load} className="lux-withdraw">Retry</button>
-            </>
-          ) : (
-            <p>Loading...</p>
-          )}
-        </div>
-      </section>
-    );
-  }
 
   const requirements = Array.isArray(level.requirements) && level.requirements.length
     ? level.requirements
@@ -89,6 +85,12 @@ const Levels = () => {
   return (
     <section className="lux-page lux-levels">
       <div className="lux-wrap">
+        {error && (
+          <p className="lux-status lux-status-warn">
+            Latest level progress could not refresh.
+            <button type="button" onClick={load} className="lux-withdraw">Retry</button>
+          </p>
+        )}
         <article className="lux-progress-card">
           <div className="lux-progress-main">
             <span className="lux-medal"><Crown /></span>

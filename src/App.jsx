@@ -1,3 +1,4 @@
+import { Component } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -39,6 +40,31 @@ import MobileBottomNav from './components/MobileBottomNav';
 import LuxHeader from './components/LuxHeader';
 import NetworkBanner from './components/NetworkBanner';
 
+class PageBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <section className="lux-page">
+          <div className="lux-empty">
+            <p>This page could not open.</p>
+            <button type="button" className="lux-withdraw" onClick={() => window.location.reload()}>Reload</button>
+          </div>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const AppContent = () => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -66,6 +92,7 @@ const AppContent = () => {
     <UserLayout>
       <LuxHeader />
       <Navbar />
+      <PageBoundary key={location.pathname}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -86,6 +113,7 @@ const AppContent = () => {
         <Route path="/complaint" element={<PrivateRoute><Complaint /></PrivateRoute>} />
         <Route path="/levels" element={<PrivateRoute><Levels /></PrivateRoute>} />
       </Routes>
+      </PageBoundary>
       <MobileBottomNav />
     </UserLayout>
   );

@@ -120,7 +120,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 // ── Main Tasks Page ────────────────────────────────────────────────────────────
 const Tasks = () => {
   const cachedTasks = readCache('/tasks/');
-  const [tasks, setTasks] = useState(cachedTasks?.tasks || []);
+  const [tasks, setTasks] = useState(Array.isArray(cachedTasks?.tasks) ? cachedTasks.tasks : []);
   const [loading, setLoading] = useState(!cachedTasks);
   const [locked, setLocked] = useState(false);
   const [weeklyLocked, setWeeklyLocked] = useState(false);
@@ -159,8 +159,9 @@ const Tasks = () => {
     setLoadError(false);
     try {
       const res = await api.get('/tasks/');
-      if (res.data.tasks) {
-        setTasks(res.data.tasks);
+      const incomingTasks = Array.isArray(res.data?.tasks) ? res.data.tasks : (Array.isArray(res.data) ? res.data : null);
+      if (incomingTasks) {
+        setTasks(incomingTasks);
         setDailyLimit(res.data.daily_limit || 0);
         setCompletedToday(res.data.completed_today || 0);
         setWeeklyStatus({
@@ -169,7 +170,7 @@ const Tasks = () => {
           ads_locked: res.data.ads_locked ?? false,
         });
       } else {
-        setTasks(res.data);
+        setTasks([]);
       }
     } catch (e) {
       const err = e.response?.data;
@@ -207,8 +208,9 @@ const Tasks = () => {
     setTimeout(() => setPromoMsg(''), 3000);
   };
 
-  const available = tasks.filter(t => !t.is_completed);
-  const completed = tasks.filter(t => t.is_completed);
+  const taskList = Array.isArray(tasks) ? tasks : [];
+  const available = taskList.filter(t => !t.is_completed);
+  const completed = taskList.filter(t => t.is_completed);
   const currentEarning = LEVEL_EARNINGS.find(l => l.level === Math.min(userLevel, 9))?.earning || 7;
 
   if (loading) return (

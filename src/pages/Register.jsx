@@ -5,7 +5,7 @@ import logo from '../assets/tasklogo.jpeg';
 
 const Register = () => {
   const [searchParams] = useSearchParams();
-  const refCode = searchParams.get('ref') || '';
+  const refCode = (searchParams.get('ref') || '').trim().toUpperCase();
   const [formData, setFormData] = useState({
     username: '', email: '', password: '', password2: '', phone: '', referral_code: refCode
   });

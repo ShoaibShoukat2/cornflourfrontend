@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import api, { readCache } from '../api/axios';
+import { AuthContext } from '../context/AuthContext';
 import { NavIcon } from '../components/NavIcons';
 
 const Referrals = () => {
+  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState(readCache('/referrals/stats/'));
-  const [referrals, setReferrals] = useState(readCache('/referrals/list/') || []);
+  const [referrals, setReferrals] = useState(() => {
+    const cached = readCache('/referrals/list/');
+    return Array.isArray(cached) ? cached : [];
+  });
   const [copied, setCopied] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -19,7 +24,7 @@ const Referrals = () => {
         api.get('/referrals/list/'),
       ]);
       if (statsRes.status === 'fulfilled') setStats(statsRes.value.data);
-      if (refRes.status === 'fulfilled') setReferrals(refRes.value.data || []);
+      if (refRes.status === 'fulfilled') setReferrals(Array.isArray(refRes.value.data) ? refRes.value.data : []);
       if (statsRes.status !== 'fulfilled') setLoadError(true);
     } catch {
       setLoadError(true);
@@ -27,13 +32,9 @@ const Referrals = () => {
   };
 
   const shareLink = (() => {
-    const code = stats?.referral_code;
-    if (!code) return stats?.referral_link || '';
-    const host = window.location.hostname;
-    const origin = host === 'instovaearn.com' || host === 'www.instovaearn.com'
-      ? 'https://www.instovaearn.com'
-      : window.location.origin;
-    return `${origin}/register?ref=${encodeURIComponent(code)}`;
+    const code = String(stats?.referral_code || user?.referral_code || '').trim().toUpperCase();
+    if (!code) return '';
+    return `https://www.instovaearn.com/register?ref=${encodeURIComponent(code)}`;
   })();
 
   const copyToClipboard = async () => {

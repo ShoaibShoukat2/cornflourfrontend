@@ -15,7 +15,8 @@ const TABS = [
 
 const money = (units) => {
   const value = Number(units || 0) * 100;
-  return `Rs ${value.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const safe = Number.isFinite(value) ? value : 0;
+  return `Rs ${safe.toFixed(2)}`;
 };
 
 const taskMoney = (reward) => {
@@ -29,7 +30,12 @@ const Dashboard = () => {
   const cachedDash = readCache('/auth/dashboard-stats/');
   const [wallet, setWallet] = useState(cachedDash?.wallet || null);
   const [overview, setOverview] = useState(cachedDash);
-  const [tasks, setTasks] = useState(readCache('/tasks/')?.tasks || []);
+  const [tasks, setTasks] = useState(() => {
+    const cached = readCache('/tasks/');
+    if (Array.isArray(cached?.tasks)) return cached.tasks;
+    if (Array.isArray(cached)) return cached;
+    return [];
+  });
   const [channels, setChannels] = useState(readCache('/admin/contact-links/'));
   const [loadError, setLoadError] = useState(false);
 
@@ -51,7 +57,11 @@ const Dashboard = () => {
     } else if (!readCache('/auth/dashboard-stats/')) {
       setLoadError(true);
     }
-    if (taskRes.status === 'fulfilled') setTasks(taskRes.value.data.tasks || []);
+    if (taskRes.status === 'fulfilled') {
+      const incoming = taskRes.value.data;
+      const list = Array.isArray(incoming?.tasks) ? incoming.tasks : (Array.isArray(incoming) ? incoming : []);
+      setTasks(list);
+    }
     if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
   };
 
@@ -73,7 +83,7 @@ const Dashboard = () => {
   const plan = overview?.plan;
   const hasPackage = plan?.status === 'approved' || user?.has_package;
   const channelUrl = channels?.whatsapp_channel_link || '/contact';
-  const recent = tasks.slice(0, 3);
+  const recent = (Array.isArray(tasks) ? tasks : []).slice(0, 3);
 
   return (
     <section className="lux-page lux-home">
@@ -130,7 +140,7 @@ const Dashboard = () => {
             <Link to="/tasks">View All</Link>
           </header>
           {recent.length === 0 && <p className="lux-member-empty">Tasks appear here after a package is active.</p>}
-          {recent.map((task) => (
+          {recent.map((task, index) => (
             <Link key={task.id} to="/tasks" className="lux-home-task">
               <span className={`lux-bloom ${['is-rose', 'is-lilac', 'is-blush'][index % 3]}`} aria-hidden="true" />
               <div>
