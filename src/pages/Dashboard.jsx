@@ -65,21 +65,7 @@ const Dashboard = () => {
     if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
   };
 
-  if (!wallet) {
-    return (
-      <section className="lux-page">
-        <div className="lux-empty">
-          {loadError ? (
-            <>
-              <p>Dashboard load nahi hui</p>
-              <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
-            </>
-          ) : <p>Loading...</p>}
-        </div>
-      </section>
-    );
-  }
-
+  const walletView = wallet || { main_balance: 0 };
   const plan = overview?.plan;
   const hasPackage = plan?.status === 'approved' || user?.has_package;
   const channelUrl = channels?.whatsapp_channel_link || '/contact';
@@ -97,9 +83,16 @@ const Dashboard = () => {
           ))}
         </nav>
 
+        {loadError && !wallet && (
+          <p className="lux-status lux-status-warn">
+            Dashboard load nahi hui
+            <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
+          </p>
+        )}
+
         <article className="lux-wallet-hero">
           <p className="lux-kicker">Your Balance</p>
-          <p className="lux-wallet-amount">{money(wallet.main_balance)}</p>
+          <p className="lux-wallet-amount">{money(walletView.main_balance)}</p>
           <p className="lux-home-note">Available for withdrawal</p>
         </article>
 

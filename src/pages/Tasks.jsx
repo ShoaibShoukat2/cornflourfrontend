@@ -121,7 +121,6 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 const Tasks = () => {
   const cachedTasks = readCache('/tasks/');
   const [tasks, setTasks] = useState(Array.isArray(cachedTasks?.tasks) ? cachedTasks.tasks : []);
-  const [loading, setLoading] = useState(!cachedTasks);
   const [locked, setLocked] = useState(false);
   const [weeklyLocked, setWeeklyLocked] = useState(false);
   const [weeklyStatus, setWeeklyStatus] = useState(cachedTasks ? {
@@ -153,7 +152,6 @@ const Tasks = () => {
   };
 
   const fetchTasks = async () => {
-    if (!readCache('/tasks/')) setLoading(true);
     setLocked(false);
     setWeeklyLocked(false);
     setLoadError(false);
@@ -186,7 +184,7 @@ const Tasks = () => {
       } else {
         setLoadError(true);
       }
-    } finally { setLoading(false); }
+    }
   };
 
   const fetchProfile = async () => {
@@ -213,13 +211,7 @@ const Tasks = () => {
   const completed = taskList.filter(t => t.is_completed);
   const currentEarning = LEVEL_EARNINGS.find(l => l.level === Math.min(userLevel, 9))?.earning || 7;
 
-  if (loading) return (
-    <div className="neon-loading">
-      <div className="neon-spinner"></div>
-    </div>
-  );
-
-  if (loadError) return (
+  if (loadError && taskList.length === 0) return (
     <div className="neon-loading p-4">
       <div className="neon-card p-8 text-center max-w-sm w-full space-y-3">
         <p className="text-white font-semibold">Tasks load nahi hue</p>

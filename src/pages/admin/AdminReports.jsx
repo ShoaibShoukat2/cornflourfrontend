@@ -38,11 +38,7 @@ const ApprovedUsers = () => {
     u.email.toLowerCase().includes(search.toLowerCase())
   ) || [];
 
-  if (loading) return (
-    <div className="flex justify-center py-12">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return null;
 
   if (error || !data) return (
     <div className="text-center py-12 space-y-3">
@@ -122,11 +118,7 @@ const NewUserRequests = ({ onRefresh }) => {
     catch { flash('❌ Failed'); }
   };
 
-  if (loading && !data) return (
-    <div className="flex justify-center py-12">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading && !data) return null;
 
   if (error && !data) return (
     <div className="text-center py-12 space-y-3">

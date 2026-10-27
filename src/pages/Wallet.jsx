@@ -84,20 +84,13 @@ const Wallet = () => {
   const pendingUnits = withdrawals.filter((row) => row.status === 'pending').reduce((sum, row) => sum + Number(row.amount || 0), 0);
   const rejectedUnits = withdrawals.filter((row) => row.status === 'rejected').reduce((sum, row) => sum + Number(row.amount || 0), 0);
 
-  if (!wallet) {
-    return (
-      <section className="lux-page">
-        <div className="lux-empty">
-          {loadError ? (
-            <>
-              <p>Wallet load nahi hui</p>
-              <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
-            </>
-          ) : <p>Loading...</p>}
-        </div>
-      </section>
-    );
-  }
+  const walletView = wallet || {
+    main_balance: 0,
+    is_first_withdrawal: false,
+    minimum_withdrawal_first: 0,
+    minimum_withdrawal: 0,
+    total_withdrawn: 0,
+  };
 
   return (
     <section className="lux-page">
@@ -111,10 +104,16 @@ const Wallet = () => {
         </header>
 
         {message && <p className="lux-status">{message}</p>}
+        {loadError && !wallet && (
+          <p className="lux-status lux-status-warn">
+            Wallet load nahi hui
+            <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
+          </p>
+        )}
 
         <article className="lux-wallet-hero">
           <p className="lux-kicker">Current Balance</p>
-          <p className="lux-wallet-amount">{rupees(wallet.main_balance)}</p>
+          <p className="lux-wallet-amount">{rupees(walletView.main_balance)}</p>
         </article>
 
         <section className="lux-wallet-actions">
@@ -131,7 +130,7 @@ const Wallet = () => {
             <p className="lux-progress-title">Withdraw</p>
             <p className="lux-level-caption">
               Minimum Rs {(
-                Number(wallet.is_first_withdrawal ? wallet.minimum_withdrawal_first : wallet.minimum_withdrawal) * 100
+                Number(walletView.is_first_withdrawal ? walletView.minimum_withdrawal_first : walletView.minimum_withdrawal) * 100
               ).toFixed(0)}
             </p>
             <input type="number" min="1" value={formData.amount} onChange={(event) => setFormData({ ...formData, amount: event.target.value })} placeholder="Amount in Rs" className="lux-input" required />
@@ -176,7 +175,7 @@ const Wallet = () => {
 
         <article className="lux-wallet-hero">
           <p className="lux-kicker">Total Approved Withdrawals</p>
-          <p className="lux-wallet-amount">{rupees(wallet.total_withdrawn)}</p>
+          <p className="lux-wallet-amount">{rupees(walletView.total_withdrawn)}</p>
         </article>
 
         <section className="lux-shortcuts">

@@ -156,7 +156,7 @@ const UserDetail = ({ userId, onBack }) => {
     } catch (e) { flash(e.response?.data?.error || 'Failed'); }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>;
+  if (loading) return null;
   if (!data) return <div className="text-center text-gray-400 py-10">User not found</div>;
 
   const w = data.wallet;
@@ -678,12 +678,7 @@ const AdminDashboard = () => {
     return <UserDetail userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
   }
 
-  if (loading) return (
-    <div className="flex flex-col justify-center items-center h-64 gap-3">
-      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm text-gray-400">Loading dashboard...</p>
-    </div>
-  );
+  if (loading) return null;
 
   if (!stats) return (
     <div className="text-center py-20 space-y-3">
@@ -741,7 +736,7 @@ const AdminDashboard = () => {
           disabled={refreshing}
           className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-orange-300 transition disabled:opacity-60"
         >
-          <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          <ArrowPathIcon className="w-4 h-4" />
           Refresh
         </button>
       </div>

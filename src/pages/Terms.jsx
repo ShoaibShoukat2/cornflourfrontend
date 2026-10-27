@@ -17,20 +17,13 @@ const Terms = () => {
 
   useEffect(() => { load(); }, []);
 
-  if (!sections.length) {
+  if (error && !sections.length) {
     return (
-      <section className="neon-loading">
-        {error ? (
-          <div className="text-center space-y-3 px-4">
-            <p className="neon-loading-text">Terms load nahi hui</p>
-            <button onClick={load} className="neon-btn text-sm px-5 py-2">Retry</button>
-          </div>
-        ) : (
-          <>
-            <span className="neon-spinner" />
-            <p className="neon-loading-text">Loading...</p>
-          </>
-        )}
+      <section className="lux-page">
+        <div className="lux-empty">
+          <p>Terms load nahi hui</p>
+          <button type="button" onClick={load} className="lux-withdraw">Retry</button>
+        </div>
       </section>
     );
   }

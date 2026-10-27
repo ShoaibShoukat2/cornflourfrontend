@@ -198,13 +198,7 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
     return () => clearInterval(id);
   }, [load]);
 
-  if (loading && !charts) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 flex justify-center">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading && !charts) return null;
 
   if (!charts) {
     return (

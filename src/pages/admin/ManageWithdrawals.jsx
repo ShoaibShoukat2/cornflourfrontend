@@ -76,11 +76,7 @@ const ManageWithdrawals = () => {
     { label: 'Total',    value: all.length,       amt: null,             color: 'from-blue-500 to-blue-600',     icon: '📋', key: 'all'      },
   ];
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
+  if (loading) return null;
 
   if (message && all.length === 0) return (
     <div className="text-center py-20 space-y-3">

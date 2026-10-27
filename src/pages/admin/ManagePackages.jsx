@@ -122,12 +122,6 @@ const ManagePackages = () => {
             <p className="text-center text-gray-400 py-8">No payments found</p>
           )}
 
-          {loading && (
-            <div className="flex justify-center py-10">
-              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-
           <div className="space-y-4">
             {payments.map(p => (
               <div key={p.id} className="border border-gray-100 rounded-2xl p-4">

@@ -149,11 +149,7 @@ const ManageTasks = () => {
     } catch { flash('Failed to update'); }
   };
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
+  if (loading) return null;
 
   if (loadError && tasks.length === 0 && !showForm) return (
     <div className="text-center py-20 space-y-3">

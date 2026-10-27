@@ -31,8 +31,10 @@ const Referrals = () => {
     }
   };
 
+  const statsView = stats || {};
+
   const shareLink = (() => {
-    const code = String(stats?.referral_code || user?.referral_code || '').trim().toUpperCase();
+    const code = String(statsView.referral_code || user?.referral_code || '').trim().toUpperCase();
     if (!code) return '';
     return `https://www.instovaearn.com/register?ref=${encodeURIComponent(code)}`;
   })();
@@ -58,24 +60,9 @@ const Referrals = () => {
     return referrals;
   }, [filter, referrals]);
 
-  if (!stats) {
-    return (
-      <section className="lux-page">
-        <div className="lux-empty">
-          {loadError ? (
-            <>
-              <p>Team load nahi hui</p>
-              <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
-            </>
-          ) : <p>Loading...</p>}
-        </div>
-      </section>
-    );
-  }
-
-  const referred = stats.referred_total ?? ((stats.direct_referrals || 0) + (stats.indirect_referrals || 0));
-  const active = stats.active_members ?? stats.total_team ?? stats.total_referrals ?? 0;
-  const pending = stats.pending_members ?? Math.max(0, referred - active);
+  const referred = statsView.referred_total ?? ((statsView.direct_referrals || 0) + (statsView.indirect_referrals || 0));
+  const active = statsView.active_members ?? statsView.total_team ?? statsView.total_referrals ?? 0;
+  const pending = statsView.pending_members ?? Math.max(0, referred - active);
 
   const flowers = ['is-rose', 'is-lilac', 'is-blush', 'is-violet'];
 
@@ -92,6 +79,13 @@ const Referrals = () => {
             <p>Grow together, learn together</p>
           </div>
         </article>
+
+        {loadError && !stats && (
+          <p className="lux-status lux-status-warn">
+            Team load nahi hui
+            <button type="button" onClick={fetchData} className="lux-withdraw">Retry</button>
+          </p>
+        )}
 
         <section className="lux-team-stats">
           <article className="is-rose">
@@ -111,7 +105,7 @@ const Referrals = () => {
           </article>
           <article className="is-level">
             <span><NavIcon name="star" size={18} /></span>
-            <strong>Level {stats.level ?? 0}</strong>
+            <strong>Level {statsView.level ?? 0}</strong>
             <small>Team Level</small>
           </article>
         </section>
@@ -132,8 +126,8 @@ const Referrals = () => {
               {copied ? 'Copied' : 'Copy Link'}
             </button>
           </div>
-          {stats.ads_locked && (
-            <p className="lux-link-note">Is hafte {stats.weekly_joinings}/{stats.weekly_joinings_required} joining. Ads unlock ke liye ek member activate karwayein.</p>
+          {statsView.ads_locked && (
+            <p className="lux-link-note">Is hafte {statsView.weekly_joinings}/{statsView.weekly_joinings_required} joining. Ads unlock ke liye ek member activate karwayein.</p>
           )}
         </article>
 
