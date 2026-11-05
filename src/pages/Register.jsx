@@ -21,6 +21,11 @@ const Register = () => {
     if (!formData.username.trim()) return setError('Name is required');
     if (formData.username.length < 3) return setError('Name must be at least 3 characters long');
     if (!formData.email.trim()) return setError('Email is required');
+    // Proper email format validation
+    const emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(formData.email.trim())) {
+      return setError('Please enter a valid email address (e.g. name@gmail.com)');
+    }
     if (!formData.phone.trim()) return setError('Phone number is required');
     if (!formData.password) return setError('Password is required');
     if (formData.password !== formData.password2) return setError('Passwords do not match');

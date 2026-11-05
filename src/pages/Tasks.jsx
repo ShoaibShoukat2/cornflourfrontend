@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
-import taskLogo from '../assets/tasklogo.jpeg';
 
 const LEVEL_EARNINGS = [
   { level: 0, earning: 7 },
@@ -16,6 +15,22 @@ const LEVEL_EARNINGS = [
   { level: 8, earning: 62 },
   { level: 9, earning: 70 },
 ];
+
+// 5 unique flower emojis matched to 5 plans — same as Package.jsx
+const PLAN_FLOWERS = {
+  normal:      { flower: '🌸', name: 'Cherry Blossom' },
+  super:       { flower: '🌺', name: 'Hibiscus' },
+  premium:     { flower: '🌻', name: 'Sunflower' },
+  high_octane: { flower: '🌹', name: 'Rose' },
+};
+// Extra flowers for tasks without a matched plan — cycle through extras
+const EXTRA_FLOWERS = ['🌼', '🌷', '🪻', '🪷', '💐'];
+const getTaskFlower = (task, index) => {
+  const plan = task.plan_key && PLAN_FLOWERS[task.plan_key];
+  if (plan) return plan;
+  const f = EXTRA_FLOWERS[index % EXTRA_FLOWERS.length];
+  return { flower: f, name: 'Blossom' };
+};
 
 // ── Single Task Card ───────────────────────────────────────────────────────────
 const TaskCard = ({ task, index, onDone, currentEarning }) => {

@@ -2,43 +2,48 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import logo from '../assets/tasklogo.jpeg';
 
+// 5 different flowers for 5 plans — each unique
 const PACKAGES = [
   {
     key: 'normal',
     name: 'Normal',
+    flower: '🌸',
+    flowerName: 'Cherry Blossom',
     price: 700,
-    emoji: '🌱',
-    color: '#6B7280',
-    gradient: 'linear-gradient(135deg, #833ab4 0%, #c13584 50%, #f77737 100%)',
+    color: '#a855f7',
+    gradient: 'linear-gradient(135deg, #6d28d9 0%, #a855f7 50%, #c084fc 100%)',
     features: ['Daily Tasks', 'Referral Bonus', 'JazzCash / EasyPaisa'],
   },
   {
     key: 'super',
     name: 'SUPER',
+    flower: '🌺',
+    flowerName: 'Hibiscus',
     price: 1400,
-    emoji: '⭐',
-    color: '#F97316',
-    gradient: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #f77737 100%)',
+    color: '#f97316',
+    gradient: 'linear-gradient(135deg, #c2410c 0%, #f97316 50%, #fb923c 100%)',
     badge: 'POPULAR',
     features: ['Daily Tasks', 'Rs 50 Referral Bonus', 'Daily Bonus', 'Withdrawals'],
   },
   {
     key: 'premium',
     name: 'Premium',
+    flower: '🌻',
+    flowerName: 'Sunflower',
     price: 3200,
-    emoji: '💎',
-    color: '#8B5CF6',
-    gradient: 'linear-gradient(135deg, #405de6 0%, #833ab4 50%, #c13584 100%)',
+    color: '#eab308',
+    gradient: 'linear-gradient(135deg, #a16207 0%, #eab308 50%, #facc15 100%)',
     badge: 'PREMIUM',
     features: ['Unlimited Tasks', 'High Referral Bonus', 'Priority Withdrawals', 'Daily Bonus'],
   },
   {
     key: 'high_octane',
     name: 'High Octane',
+    flower: '🌹',
+    flowerName: 'Rose',
     price: 4500,
-    emoji: '🚀',
-    color: '#F59E0B',
-    gradient: 'linear-gradient(135deg, #c13584 0%, #f77737 50%, #fcaf45 100%)',
+    color: '#ef4444',
+    gradient: 'linear-gradient(135deg, #991b1b 0%, #ef4444 50%, #f87171 100%)',
     badge: 'VIP',
     features: ['Unlimited Tasks', 'Max Referral Bonus', 'Instant Withdrawals', 'VIP Support'],
   },
@@ -50,6 +55,8 @@ const Package = () => {
   const [account, setAccount] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [senderName, setSenderName] = useState('');
+  const [senderNumber, setSenderNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [statusInfo, setStatusInfo] = useState(null);
@@ -78,6 +85,7 @@ const Package = () => {
 
   const handleBuyClick = async (pkg) => {
     setError(''); setSelectedPkg(pkg);
+    setSenderName(''); setSenderNumber('');
     try {
       const res = await api.get('/auth/payment-account/');
       setAccount(res.data); setStep('payment');
@@ -93,10 +101,17 @@ const Package = () => {
   };
 
   const handleSubmit = async () => {
+    if (!senderName.trim()) { setError('Sender name is required'); return; }
+    if (!senderNumber.trim()) { setError('Sender number is required'); return; }
     if (!screenshot) { setError('Please upload your payment screenshot'); return; }
     setLoading(true); setError('');
     try {
-      await api.post('/auth/submit-payment/', { screenshot, package_name: selectedPkg.key });
+      await api.post('/auth/submit-payment/', {
+        screenshot,
+        package_name: selectedPkg.key,
+        sender_name: senderName.trim(),
+        sender_number: senderNumber.trim(),
+      });
       setStep('submitted');
     } catch (e) { setError(e.response?.data?.error || 'Submission failed'); }
     finally { setLoading(false); }
@@ -147,10 +162,11 @@ const Package = () => {
   if (step === 'payment' && account && selectedPkg) return (
     <div className="py-8 px-4">
       <div className="max-w-sm mx-auto space-y-4">
-        {/* Header */}
+        {/* Header with flower */}
         <div className="text-center text-white mb-6">
-          <div className="text-4xl mb-2">{selectedPkg.emoji}</div>
-          <h2 className="text-xl font-black">{selectedPkg.name} Package</h2>
+          <div className="text-6xl mb-2 animate-bounce">{selectedPkg.flower}</div>
+          <p className="text-sm font-semibold text-white/60">{selectedPkg.flowerName}</p>
+          <h2 className="text-xl font-black mt-1">{selectedPkg.name} Package</h2>
           <p className="text-3xl font-black mt-1" style={{ color: selectedPkg.color }}>Rs {selectedPkg.price}</p>
         </div>
 
@@ -175,6 +191,33 @@ const Package = () => {
               <p className="text-white text-opacity-60 text-xs opacity-60">Amount</p>
               <p className="font-black text-2xl" style={{ color: selectedPkg.color }}>Rs {selectedPkg.price}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Sender Info — Only 2 fields (no Transaction Number) */}
+        <div className="bg-white bg-opacity-10 backdrop-blur rounded-3xl p-5 border border-white border-opacity-20 space-y-3">
+          <p className="text-white text-sm font-bold text-center mb-1">Your Sender Details</p>
+
+          <div>
+            <label className="text-white/60 text-xs block mb-1">Sender Name <span className="text-red-400">*</span></label>
+            <input
+              value={senderName}
+              onChange={e => setSenderName(e.target.value)}
+              placeholder="Enter sender name"
+              className="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm focus:outline-none focus:border-white/50"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-white/60 text-xs block mb-1">Sender Number <span className="text-red-400">*</span></label>
+            <input
+              value={senderNumber}
+              onChange={e => setSenderNumber(e.target.value)}
+              placeholder="Enter sender number"
+              className="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm focus:outline-none focus:border-white/50"
+              required
+            />
           </div>
         </div>
 
@@ -216,7 +259,7 @@ const Package = () => {
 
         {error && <div className="bg-red-500 bg-opacity-20 border border-red-400 text-red-300 text-sm px-4 py-3 rounded-2xl text-center mb-4">{error}</div>}
 
-        {/* Package Cards */}
+        {/* Package Cards — each with unique flower */}
         <div className="space-y-4">
           {packages.map(pkg => (
             <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-2xl neon-card-glow animate-fadeIn"
@@ -228,9 +271,13 @@ const Package = () => {
               )}
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl">{pkg.emoji}</span>
+                  {/* Flower emoji — animated */}
+                  <span className="text-4xl" style={{ display: 'inline-block', animation: 'flowerSway 2s ease-in-out infinite' }}>
+                    {pkg.flower}
+                  </span>
                   <div>
                     <p className="text-white font-black text-lg leading-none">{pkg.name}</p>
+                    <p className="text-white/70 text-xs mt-0.5">{pkg.flowerName}</p>
                     <p className="text-white text-opacity-80 text-2xl font-black mt-0.5">Rs {pkg.price}</p>
                   </div>
                 </div>
@@ -244,7 +291,7 @@ const Package = () => {
                 <button onClick={() => handleBuyClick(pkg)}
                   className="w-full bg-white font-black py-3 rounded-2xl text-sm shadow-lg hover:opacity-90 transition"
                   style={{ color: pkg.color }}>
-                  Buy Now — Rs {pkg.price}
+                  {pkg.flower} Bloom Now — Rs {pkg.price}
                 </button>
               </div>
             </div>
@@ -255,7 +302,7 @@ const Package = () => {
         <div className="mt-6 bg-white bg-opacity-10 rounded-3xl p-5 border border-white border-opacity-10">
           <p className="text-white font-bold text-center mb-4">How to Buy</p>
           <div className="space-y-3">
-            {['Choose a package & tap Buy Now', 'Send payment via JazzCash / EasyPaisa', 'Upload your payment screenshot', 'Account activated within 24 hours'].map((t, i) => (
+            {['Choose a package & tap Bloom Now', 'Send payment via JazzCash / EasyPaisa', 'Enter sender name & number, upload screenshot', 'Account activated within 24 hours'].map((t, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{i + 1}</div>
                 <p className="text-white text-opacity-80 text-sm opacity-80">{t}</p>
@@ -265,6 +312,13 @@ const Package = () => {
         </div>
 
       </div>
+
+      <style>{`
+        @keyframes flowerSway {
+          0%, 100% { transform: rotate(-5deg) scale(1); }
+          50% { transform: rotate(5deg) scale(1.1); }
+        }
+      `}</style>
     </div>
   );
 };
