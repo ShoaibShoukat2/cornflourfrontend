@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
@@ -9,20 +9,17 @@ const rupees = (units) => {
 };
 
 const AnimatedRupees = ({ units }) => {
-  const target = Number(units || 0);
+  const rawTarget = Number(units || 0);
+  const target = Number.isFinite(rawTarget) ? rawTarget : 0;
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!Number.isFinite(target)) {
-      setValue(0);
-      return undefined;
-    }
+    let frame;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(target);
-      return undefined;
+      frame = requestAnimationFrame(() => setValue(target));
+      return () => cancelAnimationFrame(frame);
     }
 
-    let frame;
     const start = performance.now();
     const duration = 750;
     const animate = (now) => {
@@ -52,9 +49,7 @@ const Wallet = () => {
   const [message, setMessage] = useState('');
   const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoadError(false);
     try {
       const [walletRes, withdrawalsRes, txRes] = await Promise.allSettled([
@@ -69,7 +64,12 @@ const Wallet = () => {
     } catch {
       setLoadError(true);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchData, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData]);
 
   const handleWithdraw = async (event) => {
     event.preventDefault();

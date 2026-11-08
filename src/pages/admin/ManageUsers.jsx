@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
@@ -29,14 +29,7 @@ const UserDetail = ({ userId, onBack }) => {
   ]);
   const [loginConfirm, setLoginConfirm] = useState(false);
 
-  useEffect(() => {
-    fetchDetail();
-    api.get('/auth/plans/').then(res => {
-      if (Array.isArray(res.data) && res.data.length) setPlans(res.data);
-    }).catch(() => {});
-  }, [userId]);
-
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`/admin/user-full/${userId}/`);
@@ -55,7 +48,17 @@ const UserDetail = ({ userId, onBack }) => {
       });
     } catch { setMsg('Failed to load user'); }
     finally { setLoading(false); }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchDetail();
+      api.get('/auth/plans/').then(res => {
+        if (Array.isArray(res.data) && res.data.length) setPlans(res.data);
+      }).catch(() => {});
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchDetail]);
 
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
   const saveInfo = async () => {
@@ -85,7 +88,7 @@ const UserDetail = ({ userId, onBack }) => {
     flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); setSubRemarks(''); fetchDetail();
   };
   const approvePkg = async (id) => { try { await api.post(`/admin/approve-package/${id}/`); flash('✅ Approved'); fetchDetail(); } catch (e) { flash(e.response?.data?.error || 'Failed'); } };
-  const rejectPkg = async (id) => { const r = prompt('Reason:') || 'Rejected'; try { await api.post(`/admin/reject-package/${id}/`, { reason: r }); flash('✅ Rejected'); fetchDetail(); } catch (e) { flash('Failed'); } };
+  const rejectPkg = async (id) => { const r = prompt('Reason:') || 'Rejected'; try { await api.post(`/admin/reject-package/${id}/`, { reason: r }); flash('✅ Rejected'); fetchDetail(); } catch { flash('Failed'); } };
   const savePackageEdit = async (event) => {
     event.preventDefault();
     if (!packageEdit) return;
@@ -390,14 +393,7 @@ const ManageUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => { fetchUsers(); }, 400);
-    return () => clearTimeout(timer);
-  }, [searchTerm, statusFilter, page]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const search = searchTerm.trim();
@@ -415,7 +411,14 @@ const ManageUsers = () => {
       setMessage('');
     } catch { setMessage('Failed to load users'); }
     finally { setLoading(false); }
-  };
+  }, [page, searchTerm, statusFilter]);
+
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchUsers, 400);
+    return () => window.clearTimeout(timer);
+  }, [fetchUsers]);
 
   if (selectedUserId) {
     return <UserDetail userId={selectedUserId} onBack={() => { setSelectedUserId(null); fetchUsers(); }} />;

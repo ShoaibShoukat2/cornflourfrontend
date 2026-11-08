@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
@@ -133,26 +133,21 @@ const Tasks = () => {
   const [promoMsg, setPromoMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [userLevel, setUserLevel] = useState(0);
-  const [showLevelChart, setShowLevelChart] = useState(false);
   const [dailyLimit, setDailyLimit] = useState(cachedTasks?.daily_limit || 0);
   const [completedToday, setCompletedToday] = useState(cachedTasks?.completed_today || 0);
   const [walletBalance, setWalletBalance] = useState(readCache('/wallet/')?.main_balance ?? null);
   const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    fetchTasks();
-    fetchProfile();
-    fetchWallet();
-  }, [refresh]);
-
-  const fetchWallet = async () => {
+  const fetchWallet = useCallback(async () => {
     try {
       const res = await api.get('/wallet/');
       setWalletBalance(res.data.main_balance);
-    } catch {}
-  };
+    } catch {
+      setLoadError(true);
+    }
+  }, []);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLocked(false);
     setWeeklyLocked(false);
     setLoadError(false);
@@ -186,14 +181,25 @@ const Tasks = () => {
         setLoadError(true);
       }
     }
-  };
+  }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await api.get('/auth/profile/');
       setUserLevel(res.data.level ?? 0);
-    } catch {}
-  };
+    } catch {
+      setLoadError(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchTasks();
+      fetchProfile();
+      fetchWallet();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [refresh, fetchTasks, fetchProfile, fetchWallet]);
 
   const redeemPromo = async () => {
     if (!promoCode.trim()) return;

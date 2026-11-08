@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
 
 const ManagePackages = () => {
@@ -28,17 +28,17 @@ const ManagePackages = () => {
     }).catch(() => {});
   }, []);
 
-  // Fetch payments when filter changes
-  useEffect(() => { fetchPayments(); }, [filter]);
-
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`/admin/package-payments/?status=${filter}`);
       setPayments(res.data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  };
+  }, [filter]);
+
+  // Fetch payments when filter changes
+  useEffect(() => { fetchPayments(); }, [fetchPayments]);
 
   const saveAccount = async () => {
     try {

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import api, { readCache } from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { NavIcon } from '../components/NavIcons';
@@ -14,9 +14,7 @@ const Referrals = () => {
   const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoadError(false);
     try {
       const [statsRes, refRes] = await Promise.allSettled([
@@ -29,7 +27,12 @@ const Referrals = () => {
     } catch {
       setLoadError(true);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchData, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData]);
 
   const statsView = stats || {};
 

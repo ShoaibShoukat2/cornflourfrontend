@@ -68,7 +68,9 @@ const Package = () => {
       const next = {};
       (res.data || []).forEach((plan) => { next[plan.key] = Number(plan.price); });
       setPriceMap(next);
-    }).catch(() => {});
+    }).catch(() => {
+      setError('Could not load updated plan prices. Please refresh before sending payment.');
+    });
   }, []);
 
   const packages = PACKAGES.map((pkg) => ({ ...pkg, price: priceMap[pkg.key] || pkg.price }));
@@ -80,7 +82,9 @@ const Package = () => {
       if (res.data.status === 'pending') setStep('submitted');
       if (res.data.status === 'approved') setStep('active');
       if (res.data.status === 'rejected') setStep('rejected');
-    } catch {}
+    } catch {
+      setError('Could not load your package status. Please refresh the page.');
+    }
   };
 
   const handleBuyClick = async (pkg) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
@@ -48,12 +48,7 @@ const Dashboard = () => {
   const [channels, setChannels] = useState(readCache('/admin/contact-links/'));
   const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-    fetchUser();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoadError(false);
     const [dashRes, taskRes, linkRes] = await Promise.allSettled([
       api.get('/auth/dashboard-stats/'),
@@ -72,7 +67,15 @@ const Dashboard = () => {
       setTasks(list);
     }
     if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchData();
+      fetchUser();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData, fetchUser]);
 
   const walletView = wallet || { main_balance: 0 };
   const plan = overview?.plan;

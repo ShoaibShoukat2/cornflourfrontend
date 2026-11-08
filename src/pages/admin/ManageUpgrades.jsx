@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../../api/axios';
 
 const today = () => {
@@ -18,7 +18,7 @@ const ManageUpgrades = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const load = async (nextStatus = status, nextDate = selectedDate, nextSearch = appliedSearch) => {
+  const load = useCallback(async (nextStatus, nextDate, nextSearch) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ status: nextStatus, date: nextDate });
@@ -31,16 +31,16 @@ const ManageUpgrades = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { load('pending', selectedDate, ''); }, [selectedDate]);
+  useEffect(() => { load('pending', today(), ''); }, [load]);
 
   const approve = async (row) => {
     const note = window.prompt('Approval note (optional):') ?? '';
     try {
       await api.post(`/admin/approve-upgrade/${row.id}/`, { note });
       setMessage(`${row.username} upgraded to ${row.to_label}`);
-      load();
+      load(status, selectedDate, appliedSearch);
     } catch (error) {
       setMessage(error.response?.data?.error || 'Approve failed');
     }
@@ -52,7 +52,7 @@ const ManageUpgrades = () => {
     try {
       await api.post(`/admin/reject-upgrade/${row.id}/`, { reason });
       setMessage(`${row.username} upgrade rejected`);
-      load();
+      load(status, selectedDate, appliedSearch);
     } catch (error) {
       setMessage(error.response?.data?.error || 'Reject failed');
     }
@@ -131,7 +131,7 @@ const ManageUpgrades = () => {
           <button
             key={item}
             type="button"
-            onClick={() => { setStatus(item); load(item); }}
+            onClick={() => { setStatus(item); load(item, selectedDate, appliedSearch); }}
             className={`rounded-full px-3 py-1.5 text-xs font-bold capitalize ${status === item ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'}`}
           >
             {item} {item !== 'all' ? `(${counts[item]})` : `(${data?.total || 0})`}
