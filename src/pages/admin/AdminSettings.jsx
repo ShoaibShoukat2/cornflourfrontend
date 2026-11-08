@@ -29,6 +29,12 @@ const GeneralSettings = () => {
     daily_bonus: '', max_tasks_per_day: '', maintenance_mode: false,
     whatsapp_channel_link: '', whatsapp_community_link: '',
     approval_hours: 5, support_phone: '', frontend_url: '',
+    contact_admin_name: '', contact_admin_purpose: '', contact_instructions: '',
+    whatsapp_contact_number: '', botim_contact_number: '', botim_contact_link: '',
+    whatsapp_icon: '', botim_icon: '',
+    whatsapp_channel_name: 'Official WhatsApp Channel', whatsapp_channel_purpose: '',
+    whatsapp_channel_icon: '', whatsapp_community_name: 'Official WhatsApp Community',
+    whatsapp_community_purpose: '', whatsapp_community_icon: '',
     package_price_normal: '', package_price_super: '', package_price_premium: '', package_price_high_octane: '',
     upgrade_payment_method: '', upgrade_account_number: '', upgrade_trade_id_note: '',
     upgrade_center_number: '', upgrade_proof_note: '', upgrade_submit_note: '', upgrade_rules: '',
@@ -50,6 +56,20 @@ const GeneralSettings = () => {
         whatsapp_community_link: r.data.whatsapp_community_link || '',
         approval_hours: r.data.approval_hours ?? 5,
         support_phone: r.data.support_phone || '',
+        contact_admin_name: r.data.contact_admin_name || '',
+        contact_admin_purpose: r.data.contact_admin_purpose || '',
+        contact_instructions: r.data.contact_instructions || '',
+        whatsapp_contact_number: r.data.whatsapp_contact_number || '',
+        botim_contact_number: r.data.botim_contact_number || '',
+        botim_contact_link: r.data.botim_contact_link || '',
+        whatsapp_icon: r.data.whatsapp_icon || '',
+        botim_icon: r.data.botim_icon || '',
+        whatsapp_channel_name: r.data.whatsapp_channel_name || 'Official WhatsApp Channel',
+        whatsapp_channel_purpose: r.data.whatsapp_channel_purpose || '',
+        whatsapp_channel_icon: r.data.whatsapp_channel_icon || '',
+        whatsapp_community_name: r.data.whatsapp_community_name || 'Official WhatsApp Community',
+        whatsapp_community_purpose: r.data.whatsapp_community_purpose || '',
+        whatsapp_community_icon: r.data.whatsapp_community_icon || '',
         frontend_url: r.data.frontend_url || '',
         package_price_normal: r.data.package_prices?.normal ?? '',
         package_price_super: r.data.package_prices?.super ?? '',
@@ -81,6 +101,16 @@ const GeneralSettings = () => {
     { key: 'daily_bonus', label: '📅 Daily Bonus (decimal)', type: 'number' },
     { key: 'approval_hours', label: '⏱ Plan Approval Limit (hours)', type: 'number', hint: 'Shown to users. Default 5.' },
     { key: 'support_phone', label: '📞 Official Support Number', type: 'text' },
+    { key: 'contact_admin_name', label: 'Contact Admin / Leader Name', type: 'text' },
+    { key: 'contact_admin_purpose', label: 'Contact Admin Role / Purpose', type: 'text' },
+    { key: 'contact_instructions', label: 'Contact Instructions', type: 'textarea' },
+    { key: 'whatsapp_contact_number', label: 'WhatsApp Contact Number', type: 'tel' },
+    { key: 'botim_contact_number', label: 'Botim Contact Number', type: 'tel' },
+    { key: 'botim_contact_link', label: 'Botim Direct Contact Link', type: 'url', hint: 'Use the official Botim contact/deep link for this account.' },
+    { key: 'whatsapp_channel_name', label: 'Official Channel Name', type: 'text' },
+    { key: 'whatsapp_channel_purpose', label: 'Official Channel Purpose', type: 'text' },
+    { key: 'whatsapp_community_name', label: 'Official Community Name', type: 'text' },
+    { key: 'whatsapp_community_purpose', label: 'Official Community Purpose', type: 'text' },
     { key: 'frontend_url', label: '🔗 Referral Site URL', type: 'text' },
     { key: 'package_price_normal', label: '🌱 Normal Plan Price (Rs)', type: 'number' },
     { key: 'package_price_super', label: '⭐ Super Plan Price (Rs)', type: 'number' },
@@ -98,6 +128,22 @@ const GeneralSettings = () => {
     { key: 'whatsapp_community_link', label: '👥 WhatsApp Community Link', type: 'url' },
   ];
 
+  const uploadIcon = (key, file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      flash('❌ Please select an image file');
+      return;
+    }
+    if (file.size > 256 * 1024) {
+      flash('❌ Icon must be 256KB or smaller');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setForm((current) => ({ ...current, [key]: reader.result }));
+    reader.onerror = () => flash('❌ Could not read the selected icon');
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-4">
       <Flash msg={msg} />
@@ -105,10 +151,33 @@ const GeneralSettings = () => {
         {fields.map(f => (
           <div key={f.key}>
             <label className="text-xs font-semibold text-gray-500 mb-1 block">{f.label}</label>
-            <input type={f.type} value={form[f.key]}
-              onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+            {f.type === 'textarea' ? (
+              <textarea value={form[f.key]}
+                onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+            ) : (
+              <input type={f.type} value={form[f.key]}
+                onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
+            )}
             {f.hint && <p className="text-xs text-gray-400 mt-1">{f.hint}</p>}
+          </div>
+        ))}
+        {[
+          { key: 'whatsapp_icon', label: 'WhatsApp Contact Icon' },
+          { key: 'botim_icon', label: 'Botim Contact Icon' },
+          { key: 'whatsapp_channel_icon', label: 'WhatsApp Channel Icon' },
+          { key: 'whatsapp_community_icon', label: 'WhatsApp Community Icon' },
+        ].map(({ key, label }) => (
+          <div key={key} className="rounded-xl border border-gray-200 p-4">
+            <label className="text-xs font-semibold text-gray-500 mb-2 block">{label}</label>
+            <div className="flex items-center gap-3">
+              {form[key] && <img src={form[key]} alt="" className="w-10 h-10 object-contain rounded-lg" />}
+              <input type="file" accept="image/*"
+                onChange={event => uploadIcon(key, event.target.files?.[0])}
+                className="min-w-0 text-xs" />
+            </div>
           </div>
         ))}
         <div className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl">

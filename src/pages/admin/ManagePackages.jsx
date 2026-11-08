@@ -7,6 +7,14 @@ const ManagePackages = () => {
   const [accountSaved, setAccountSaved] = useState(false);
   const [filter, setFilter] = useState('pending');
   const [preview, setPreview] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [editScreenshot, setEditScreenshot] = useState(null);
+  const [plans, setPlans] = useState([
+    { key: 'normal', name: 'Normal' },
+    { key: 'super', name: 'Super' },
+    { key: 'premium', name: 'Premium' },
+    { key: 'high_octane', name: 'High Octane' },
+  ]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -14,6 +22,9 @@ const ManagePackages = () => {
   useEffect(() => {
     api.get('/admin/payment-account/').then(res => {
       if (res.data?.bank_name) setAccount(res.data);
+    }).catch(() => {});
+    api.get('/auth/plans/').then(res => {
+      if (Array.isArray(res.data) && res.data.length) setPlans(res.data);
     }).catch(() => {});
   }, []);
 
@@ -52,6 +63,38 @@ const ManagePackages = () => {
       setMessage('✅ Rejected');
       fetchPayments();
     } catch (e) { console.error(e); }
+  };
+
+  const beginEdit = (payment) => {
+    setEditing({
+      ...payment,
+      package_name: payment.package_name || 'normal',
+      amount: String(payment.amount ?? ''),
+      sender_name: payment.sender_name || '',
+      sender_number: payment.sender_number || '',
+    });
+    setEditScreenshot(null);
+  };
+
+  const saveEdit = async (event) => {
+    event.preventDefault();
+    if (!editing) return;
+    try {
+      const payload = {
+        package_name: editing.package_name,
+        amount: editing.amount,
+        sender_name: editing.sender_name,
+        sender_number: editing.sender_number,
+      };
+      if (editScreenshot) payload.screenshot = editScreenshot;
+      await api.post(`/admin/package-payments/${editing.id}/edit/`, payload);
+      setEditing(null);
+      setEditScreenshot(null);
+      setMessage('✅ Payment request updated. Final saved details will be used on approval.');
+      fetchPayments();
+    } catch (error) {
+      setMessage(error.response?.data?.error || 'Could not save payment request');
+    }
   };
 
   return (
@@ -130,7 +173,9 @@ const ManagePackages = () => {
                     <p className="font-bold text-gray-800">{p.username}</p>
                     <p className="text-xs text-gray-400">{p.email}</p>
                     <p className="text-xs text-gray-400 mt-1">{new Date(p.submitted_at).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 mt-1">Plan: {plans.find(plan => plan.key === p.package_name)?.name || p.package_name}</p>
                     <p className="text-sm font-bold text-orange-500 mt-1">Rs {p.amount}</p>
+                    {p.sender_name && <p className="text-xs text-gray-500 mt-1">Sender: {p.sender_name} · {p.sender_number}</p>}
                     {p.admin_note && <p className="text-xs text-gray-500 mt-1">Note: {p.admin_note}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -147,6 +192,12 @@ const ManagePackages = () => {
                         View Screenshot
                       </button>
                     )}
+                    {p.status !== 'approved' && (
+                      <button type="button" onClick={() => beginEdit(p)}
+                        className="rounded-lg bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100">
+                        Edit Details
+                      </button>
+                    )}
                     {p.status === 'pending' && (
                       <div className="flex gap-2">
                         <button onClick={() => approve(p.id)}
@@ -158,6 +209,12 @@ const ManagePackages = () => {
                           Reject
                         </button>
                       </div>
+                    )}
+                    {p.status === 'rejected' && (
+                      <button type="button" onClick={() => approve(p.id)}
+                        className="rounded-lg bg-green-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-green-600">
+                        Re-Approve
+                      </button>
                     )}
                   </div>
                 </div>
@@ -178,6 +235,63 @@ const ManagePackages = () => {
               Close
             </button>
           </div>
+        </div>
+      )}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setEditing(null)}>
+          <form onSubmit={saveEdit} onClick={event => event.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
+            <h2 className="text-lg font-black text-gray-800">Edit Payment Request</h2>
+            <label className="block text-xs font-semibold text-gray-500">
+              Selected Plan
+              <select value={editing.package_name}
+                onChange={event => setEditing({ ...editing, package_name: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800">
+                {plans.map(plan => <option key={plan.key} value={plan.key}>{plan.name}</option>)}
+              </select>
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Payment Amount (Rs)
+              <input type="number" min="0.01" step="0.01" required value={editing.amount}
+                onChange={event => setEditing({ ...editing, amount: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Sender Name
+              <input value={editing.sender_name}
+                onChange={event => setEditing({ ...editing, sender_name: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Sender Number
+              <input value={editing.sender_number}
+                onChange={event => setEditing({ ...editing, sender_number: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            {editing.screenshot && <img src={editScreenshot || editing.screenshot} alt="Current payment proof" className="max-h-44 rounded-xl object-contain" />}
+            <label className="block text-xs font-semibold text-gray-500">
+              Replace Payment Screenshot (optional)
+              <input type="file" accept="image/*" className="mt-2 block w-full text-sm"
+                onChange={event => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 2 * 1024 * 1024) {
+                    setMessage('Screenshot must be 2MB or smaller');
+                    event.target.value = '';
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => setEditScreenshot(reader.result);
+                  reader.onerror = () => setMessage('Could not read screenshot');
+                  reader.readAsDataURL(file);
+                }} />
+            </label>
+            <p className="text-xs text-amber-700">Edits are saved before approval and retained in the request history. Approved requests cannot be edited.</p>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setEditing(null)} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-sm font-bold text-gray-700">Cancel</button>
+              <button type="submit" className="flex-1 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white">Save Changes</button>
+            </div>
+          </form>
         </div>
       )}
     </>

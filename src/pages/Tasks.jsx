@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
+import taskLogo from '../assets/tasklogo.jpeg';
 
 const LEVEL_EARNINGS = [
   { level: 0, earning: 7 },
@@ -16,21 +17,17 @@ const LEVEL_EARNINGS = [
   { level: 9, earning: 70 },
 ];
 
-// 5 unique flower emojis matched to 5 plans — same as Package.jsx
-const PLAN_FLOWERS = {
-  normal:      { flower: '🌸', name: 'Cherry Blossom' },
-  super:       { flower: '🌺', name: 'Hibiscus' },
-  premium:     { flower: '🌻', name: 'Sunflower' },
-  high_octane: { flower: '🌹', name: 'Rose' },
-};
-// Extra flowers for tasks without a matched plan — cycle through extras
-const EXTRA_FLOWERS = ['🌼', '🌷', '🪻', '🪷', '💐'];
-const getTaskFlower = (task, index) => {
-  const plan = task.plan_key && PLAN_FLOWERS[task.plan_key];
-  if (plan) return plan;
-  const f = EXTRA_FLOWERS[index % EXTRA_FLOWERS.length];
-  return { flower: f, name: 'Blossom' };
-};
+const FLOWERS = [
+  { flower: '🌸', name: 'Cherry Blossom' },
+  { flower: '🌻', name: 'Sunflower' },
+  { flower: '🌷', name: 'Tulip' },
+  { flower: '🌹', name: 'Rose' },
+  { flower: '🌼', name: 'Daisy' },
+  { flower: '🌺', name: 'Hibiscus' },
+  { flower: '🪷', name: 'Lotus' },
+  { flower: '🪻', name: 'Hyacinth' },
+];
+const getTaskFlower = (index) => FLOWERS[index % FLOWERS.length];
 
 // ── Single Task Card ───────────────────────────────────────────────────────────
 const TaskCard = ({ task, index, onDone, currentEarning }) => {
@@ -78,20 +75,12 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
   const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
+  const taskFlower = getTaskFlower(index);
 
   const stage = (
     <div className={`lux-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
-      <span className="lux-orbit lux-orbit-a" />
-      <span className="lux-orbit lux-orbit-b" />
-      <span className="lux-spark lux-spark-a" />
-      <span className="lux-spark lux-spark-b" />
-      <span className="lux-float lux-float-heart" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2 4 4 0 017 2c0 4.6-7 9-7 9z" /></svg>
-      </span>
-      <span className="lux-float lux-float-plane" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M3 11.5L21 4l-7.2 16-2.3-6.2L3 11.5z" /></svg>
-      </span>
-      <img src={taskLogo} alt="" className="lux-task-logo" />
+      <span className="lux-flower-name">{taskFlower.name}</span>
+      <span className="lux-flower-emoji" aria-hidden="true">{taskFlower.flower}</span>
       {phase === 'timer' && (
         <div className="lux-stage-overlay">
           <span className="lux-timer">{mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : secs}</span>
@@ -100,18 +89,15 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
         </div>
       )}
       {phase === 'done' && <div className="lux-stage-overlay"><span className="lux-stage-note">Completed</span></div>}
-      {phase === 'idle' && (
-        <span className="lux-tap">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V6.5a1.5 1.5 0 013 0V11M11 10.5V5.5a1.5 1.5 0 013 0V11M14 10.8V7.5a1.5 1.5 0 013 0V13c0 4-2 7-6 7h-1c-2.5 0-4-1.2-5-3L3 13.5a1.4 1.4 0 012.2-1.6L8 14" /></svg>
-          Tap to Start
-        </span>
-      )}
     </div>
   );
 
   return (
     <article className="lux-task">
       {stage}
+      {phase === 'idle' && (
+        <button type="button" onClick={startTask} className="lux-claim">Bloom Now</button>
+      )}
       {phase === 'ready' && (
         <button type="button" onClick={completeTask} className="lux-claim">Claim Rs {currentEarning}</button>
       )}

@@ -262,7 +262,7 @@ const Package = () => {
         {/* Package Cards — each with unique flower */}
         <div className="space-y-4">
           {packages.map(pkg => (
-            <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-2xl neon-card-glow animate-fadeIn"
+            <div key={pkg.key} className="relative rounded-3xl overflow-hidden shadow-xl animate-fadeIn"
               style={{ background: pkg.gradient }}>
               {pkg.badge && (
                 <div className="absolute top-3 right-3 bg-white bg-opacity-25 text-white text-xs font-black px-3 py-1 rounded-full">
@@ -272,13 +272,12 @@ const Package = () => {
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   {/* Flower emoji — animated */}
-                  <span className="text-4xl" style={{ display: 'inline-block', animation: 'flowerSway 2s ease-in-out infinite' }}>
+                  <span className="text-5xl" style={{ display: 'inline-block', animation: 'flowerSway 2s ease-in-out infinite' }}>
                     {pkg.flower}
                   </span>
                   <div>
                     <p className="text-white font-black text-lg leading-none">{pkg.name}</p>
-                    <p className="text-white/70 text-xs mt-0.5">{pkg.flowerName}</p>
-                    <p className="text-white text-opacity-80 text-2xl font-black mt-0.5">Rs {pkg.price}</p>
+                    <p className="text-white text-opacity-90 text-2xl font-black mt-1">Rs {pkg.price}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">

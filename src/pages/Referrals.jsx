@@ -150,6 +150,7 @@ const Referrals = () => {
               <span className={`lux-bloom ${flowers[index % flowers.length]}`} aria-hidden="true" />
               <div>
                 <strong>{member.username}</strong>
+                <p className="lux-member-email">{member.email}</p>
                 <p>Joined {new Date(member.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
               </div>
               <span className={`lux-member-status ${member.status === 'active' ? 'is-active' : 'is-pending'}`}>

@@ -8,6 +8,36 @@ const rupees = (units) => {
   return `Rs ${value.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
+const AnimatedRupees = ({ units }) => {
+  const target = Number(units || 0);
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (!Number.isFinite(target)) {
+      setValue(0);
+      return undefined;
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setValue(target);
+      return undefined;
+    }
+
+    let frame;
+    const start = performance.now();
+    const duration = 750;
+    const animate = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - ((1 - progress) ** 3);
+      setValue(target * eased);
+      if (progress < 1) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+
+  return `Rs ${(value * 100).toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 const Wallet = () => {
   const [wallet, setWallet] = useState(readCache('/wallet/'));
   const [withdrawals, setWithdrawals] = useState([]);
@@ -111,9 +141,12 @@ const Wallet = () => {
           </p>
         )}
 
-        <article className="lux-wallet-hero">
-          <p className="lux-kicker">Current Balance</p>
-          <p className="lux-wallet-amount">{rupees(walletView.main_balance)}</p>
+        <article className="lux-wallet-hero lux-wallet-balance">
+          <div>
+            <p className="lux-kicker">Current Balance</p>
+            <p className="lux-wallet-amount"><AnimatedRupees units={walletView.main_balance} /></p>
+          </div>
+          <span className="lux-wallet-hero-icon" aria-hidden="true"><NavIcon name="wallet" size={28} /></span>
         </article>
 
         <section className="lux-wallet-actions">
@@ -166,16 +199,16 @@ const Wallet = () => {
             <Link to="/transactions">View Details</Link>
           </header>
           <div>
-            <p><strong>{rupees(summary.ads)}</strong><span>Ads Watching</span></p>
-            <p><strong>{rupees(summary.tasks)}</strong><span>Task Rewards</span></p>
-            <p><strong>{rupees(summary.level)}</strong><span>Level Bonus</span></p>
-            <p><strong>{rupees(summary.referral)}</strong><span>Referral Income</span></p>
+            <p className="is-ads"><i aria-hidden="true">▶</i><strong><AnimatedRupees units={summary.ads} /></strong><span>Ads Watching</span></p>
+            <p className="is-tasks"><i aria-hidden="true">✿</i><strong><AnimatedRupees units={summary.tasks} /></strong><span>Task Rewards</span></p>
+            <p className="is-level"><i aria-hidden="true">★</i><strong><AnimatedRupees units={summary.level} /></strong><span>Level Bonus</span></p>
+            <p className="is-referral"><i aria-hidden="true">♧</i><strong><AnimatedRupees units={summary.referral} /></strong><span>Referral Income</span></p>
           </div>
         </article>
 
-        <article className="lux-wallet-hero">
+        <article className="lux-wallet-hero lux-wallet-approved">
           <p className="lux-kicker">Total Approved Withdrawals</p>
-          <p className="lux-wallet-amount">{rupees(walletView.total_withdrawn)}</p>
+          <p className="lux-wallet-amount"><AnimatedRupees units={walletView.total_withdrawn} /></p>
         </article>
 
         <section className="lux-shortcuts">
