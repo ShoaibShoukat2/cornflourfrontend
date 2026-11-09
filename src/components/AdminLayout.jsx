@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../api/axios';
 import { NavIcon } from './NavIcons';
 import logo from '../assets/tasklogo.jpeg';
+import PaymentProof from './PaymentProof';
 
 // ── Login As User Modal ────────────────────────────────────────────────────────
 const LoginAsUserModal = ({ onClose, onConfirm }) => {
@@ -157,13 +158,7 @@ const PendingPackagesPanel = ({ onClose }) => {
                   <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">PENDING</span>
                 </div>
               </div>
-              {p.screenshot && (
-                <button onClick={() => setPreview(p.screenshot)}
-                  className="w-full mb-3 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-orange-400 transition">
-                  <img src={p.screenshot} alt="Payment proof" loading="lazy" decoding="async" className="w-full object-cover" style={{ maxHeight: 160 }} />
-                  <p className="text-xs text-gray-400 py-1.5 text-center">Tap to enlarge</p>
-                </button>
-              )}
+              <div className="mb-3"><PaymentProof id={p.id} /></div>
               <div className="flex gap-2">
                 <button onClick={() => approve(p.id, p.username)} className="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition">✅ Approve</button>
                 <button onClick={() => reject(p.id, p.username)} className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-600 transition">❌ Reject</button>

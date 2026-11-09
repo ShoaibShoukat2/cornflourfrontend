@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import PaymentProof from '../../components/PaymentProof';
 
 const Tab = ({ active, onClick, icon, label, badge }) => (
   <button onClick={onClick}
@@ -161,13 +162,7 @@ const NewUserRequests = ({ onRefresh }) => {
                 <p className="text-xs text-gray-400 capitalize">{r.package_name}</p>
               </div>
             </div>
-            {r.screenshot && (
-              <button onClick={() => setPreview(r.screenshot)}
-                className="w-full mb-3 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-orange-400 transition">
-                <img src={r.screenshot} alt="proof" loading="lazy" className="w-full object-cover" style={{ maxHeight: 140 }} />
-                <p className="text-xs text-gray-400 py-1 text-center">Tap to enlarge</p>
-              </button>
-            )}
+            <div className="mb-3"><PaymentProof id={r.id} /></div>
             <div className="flex gap-2">
               <button onClick={() => approve(r.id, r.username)} className="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition">✅ Approve</button>
               <button onClick={() => reject(r.id, r.username)} className="flex-1 bg-red-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-red-600 transition">❌ Reject</button>

@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
+import PaymentProof from '../../components/PaymentProof';
 import { AuthContext } from '../../context/AuthContext';
 
 const UserDetail = ({ userId, onBack }) => {
@@ -142,7 +143,7 @@ const UserDetail = ({ userId, onBack }) => {
               <p className="text-xs text-gray-400 mt-1">{new Date(packagePayment.submitted_at).toLocaleString()}</p>
             </div>
             <div className="flex gap-2">
-              {packagePayment.screenshot && <button onClick={() => setScreenshotPreview(packagePayment.screenshot)} className="text-xs text-blue-500 underline">View Screenshot</button>}
+              {packagePayment.id && <PaymentProof id={packagePayment.id} />}
               {packagePayment.status === 'pending' && <>
                 <button onClick={() => approvePkg(packagePayment.id)} className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600">✅ Approve</button>
                 <button onClick={() => rejectPkg(packagePayment.id)} className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600">❌ Reject</button>

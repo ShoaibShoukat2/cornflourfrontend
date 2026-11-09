@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
+import PaymentProof from '../../components/PaymentProof';
 
 const ManageUpgrades = () => {
   const [data, setData] = useState(null);
@@ -72,9 +73,7 @@ const ManageUpgrades = () => {
                 <p className="text-xs text-gray-400">Txn {row.transaction_id}</p>
               </div>
             </div>
-            {row.screenshot && (
-              <button onClick={() => setPreview(row.screenshot)} className="mt-3 text-xs font-bold text-blue-600">View payment proof</button>
-            )}
+            <div className="mt-3"><PaymentProof id={row.id} kind="upgrade" /></div>
             {row.admin_note && <p className="text-xs text-gray-500 mt-2">{row.admin_note}</p>}
             {row.status === 'pending' && (
               <div className="flex gap-2 mt-3">

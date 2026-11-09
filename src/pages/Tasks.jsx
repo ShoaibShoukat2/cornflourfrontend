@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
+import taskLogo from '../assets/tasklogo.jpeg';
 
 const LEVEL_EARNINGS = [
   { level: 0, earning: 7 },
@@ -45,7 +46,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
     // Immediately start timer and open URL — don't wait for API
     if (task.url) window.open(task.url, '_blank');
     setPhase('timer');
-    setTimeLeft(task.time_required);
+    setTimeLeft(Math.max(1, Number(task.time_required) || 60));
     intervalRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -75,9 +76,10 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 
   useEffect(() => () => clearInterval(intervalRef.current), []);
 
+  const required = Math.max(1, Number(task.time_required) || 60);
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
-  const progress = ((task.time_required - timeLeft) / task.time_required) * 100;
+  const progress = Math.min(100, Math.max(0, ((required - timeLeft) / required) * 100));
 
   const stage = (
     <div className={`lux-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
@@ -224,6 +226,8 @@ const Tasks = () => {
   const taskList = Array.isArray(tasks) ? tasks : [];
   const available = taskList.filter(t => !t.is_completed);
   const completed = taskList.filter(t => t.is_completed);
+  const remainingToday = Math.max(0, Number(dailyLimit || 0) - Number(completedToday || 0));
+  const visible = available.slice(0, remainingToday);
   const currentEarning = LEVEL_EARNINGS.find(l => l.level === Math.min(userLevel, 9))?.earning || 7;
 
   if (loadError && taskList.length === 0) return (
@@ -288,20 +292,20 @@ const Tasks = () => {
         </p>
 
         <section className="lux-stats">
-          <article><span className="lux-stat-icon"><NavIcon name="user" size={18} /></span><strong>{available.length}</strong><span>Available</span></article>
+          <article><span className="lux-stat-icon"><NavIcon name="user" size={18} /></span><strong>{visible.length}</strong><span>Available</span></article>
           <article><span className="lux-stat-icon"><NavIcon name="check" size={18} /></span><strong>{completedToday}</strong><span>Done Today</span></article>
           <article><span className="lux-stat-icon"><NavIcon name="clock" size={18} /></span><strong>{dailyLimit}</strong><span>Daily Limit</span></article>
           <article className="lux-stat-gold"><span className="lux-stat-icon"><NavIcon name="coin" size={18} /></span><strong>Rs {(completedToday * currentEarning).toFixed(0)}</strong><span>Earned</span></article>
         </section>
 
-        {available.length === 0 ? (
+        {visible.length === 0 ? (
           <section className="lux-empty">
-            <p>All tasks completed</p>
-            <span>Check back later for new tasks</span>
+            <p>{available.length > 0 ? "Today's task limit is finished" : 'All tasks completed'}</p>
+            <span>{available.length > 0 ? 'Your next tasks open tomorrow. New members can complete the tasks allowed by their plan.' : 'Check back later for new tasks'}</span>
           </section>
         ) : (
           <div className="lux-task-grid">
-            {available.map((task, index) => (
+            {visible.map((task, index) => (
               <TaskCard
                 key={task.id}
                 task={task}

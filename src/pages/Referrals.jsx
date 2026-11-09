@@ -120,7 +120,7 @@ const Referrals = () => {
           </div>
           <div className="lux-link-row">
             <NavIcon name="link" size={14} />
-            <span>{shareLink}</span>
+            <a href={shareLink || '/register'} target="_blank" rel="noreferrer">{shareLink || 'Referral link is loading'}</a>
             <button type="button" onClick={copyToClipboard}>
               <NavIcon name="tasks" size={14} />
               {copied ? 'Copied' : 'Copy Link'}

@@ -63,21 +63,22 @@ const Levels = () => {
   const requirements = Array.isArray(level.requirements) && level.requirements.length
     ? level.requirements
     : [0, 7, 20, 35, 50, 100, 120, 300, 450, 800];
-  const current = Number(level.current || 0);
+  const current = Math.max(0, Math.min(9, Number(level.current ?? level.level ?? 0) || 0));
   const approved = Number(level.approved_direct || 0);
-  const working = current < 9 ? current + 1 : 9;
-  const target = Number(requirements[working] || 0);
-  const shown = Math.min(approved, target || approved);
+  const focus = current === 0 ? 1 : current;
+  const nextLevel = Math.min(current + 1, 9);
+  const target = Number(requirements[nextLevel] || 0);
+  const shown = current >= 9 ? target : Math.min(approved, target || approved);
   const percent = current >= 9 ? 100 : (target > 0 ? Math.min(100, Math.round((approved / target) * 100)) : 0);
 
   const rows = requirements.slice(1).map((needed, index) => {
     const number = index + 1;
     const goal = Number(needed || 0);
-    if (number < working || current >= 9) {
+    if (current >= 9 || number < current) {
       return { number, state: 'done', note: `${goal} / ${goal} milestones` };
     }
-    if (number === working && current < 9) {
-      return { number, state: 'current', note: `${approved} / ${goal} milestones` };
+    if (number === focus) {
+      return { number, state: 'current', note: current === 0 ? `${approved} / ${goal} milestones` : `${approved} / ${Number(requirements[number] || goal)} milestones` };
     }
     return { number, state: 'locked', note: 'Complete more approved activity' };
   });
@@ -96,7 +97,7 @@ const Levels = () => {
             <span className="lux-medal"><Crown /></span>
             <div>
               <p className="lux-progress-title">Your Progress</p>
-              <p className="lux-level-plaque">LEVEL {working}</p>
+              <p className="lux-level-plaque">LEVEL {current}</p>
               <p className="lux-level-count">{current >= 9 ? `${target} / ${target}` : `${shown} / ${target}`}</p>
               <p className="lux-level-caption">approved activity milestones</p>
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import PaymentProof from '../../components/PaymentProof';
 
 const ManagePackages = () => {
   const [payments, setPayments] = useState([]);
@@ -141,12 +142,7 @@ const ManagePackages = () => {
                     }`}>
                       {p.status.toUpperCase()}
                     </span>
-                    {p.screenshot && (
-                      <button onClick={() => setPreview(p.screenshot)}
-                        className="text-xs text-blue-500 underline">
-                        View Screenshot
-                      </button>
-                    )}
+                    <PaymentProof id={p.id} />
                     {p.status === 'pending' && (
                       <div className="flex gap-2">
                         <button onClick={() => approve(p.id)}

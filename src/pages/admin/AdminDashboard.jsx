@@ -25,6 +25,7 @@ import {
   BoltIcon,
 } from '@heroicons/react/24/outline';
 import api from '../../api/axios';
+import PaymentProof from '../../components/PaymentProof';
 import { AuthContext } from '../../context/AuthContext';
 import DashboardCharts from '../../components/admin/DashboardCharts';
 
@@ -260,10 +261,7 @@ const UserDetail = ({ userId, onBack }) => {
               {packagePayment.admin_note && <p className="text-xs text-gray-500 italic mt-0.5">Note: {packagePayment.admin_note}</p>}
             </div>
             <div className="flex items-center gap-2">
-              {packagePayment.screenshot && (
-                <button onClick={() => setScreenshotPreview(packagePayment.screenshot)}
-                  className="text-xs text-blue-500 underline">View Screenshot</button>
-              )}
+              {packagePayment.id && <PaymentProof id={packagePayment.id} />}
               {packagePayment.status === 'pending' && (
                 <>
                   <button onClick={() => approvePkg(packagePayment.id)}
