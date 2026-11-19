@@ -13,8 +13,17 @@ const savedUser = () => {
 };
 
 const rememberUser = (next) => {
-  if (next) sessionStorage.setItem('instova_user', JSON.stringify(next));
-  else sessionStorage.removeItem('instova_user');
+  if (!next) {
+    sessionStorage.removeItem('instova_user');
+    return;
+  }
+  const stored = { ...next };
+  delete stored.profile_picture;
+  try {
+    sessionStorage.setItem('instova_user', JSON.stringify(stored));
+  } catch {
+    /* A full-size photo must not block the next page open. */
+  }
 };
 
 export const AuthProvider = ({ children }) => {
@@ -23,8 +32,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(Boolean(typeof localStorage !== 'undefined' && localStorage.getItem('token')) && !cached);
 
   const applyUser = (next) => {
-    setUser(next);
+    setUser((current) => {
+      if (!next) return null;
+      const sentPicture = Object.prototype.hasOwnProperty.call(next, 'profile_picture');
+      if (!sentPicture && current?.profile_picture && current.id === next.id) {
+        return { ...next, profile_picture: current.profile_picture };
+      }
+      return next;
+    });
     rememberUser(next);
+  };
+
+  const loadPicture = () => {
+    window.setTimeout(() => {
+      api.get('/auth/profile/', { quiet: true }).then((res) => {
+        if (res.data?.profile_picture) applyUser(res.data);
+      }).catch(() => {});
+    }, 1200);
   };
 
   useEffect(() => {
@@ -38,8 +62,9 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get('/auth/profile/');
+      const response = await api.get('/auth/profile/', { params: { lite: 1 } });
       applyUser(response.data);
+      if (!response.data?.is_staff) loadPicture();
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
@@ -54,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     const response = await api.post('/auth/login/', { email, password });
     localStorage.setItem('token', response.data.token);
     applyUser(response.data.user);
+    if (!response.data.user?.is_staff) loadPicture();
     return response.data;
   };
 
@@ -61,6 +87,7 @@ export const AuthProvider = ({ children }) => {
     const response = await api.post('/auth/register/', userData);
     localStorage.setItem('token', response.data.token);
     applyUser(response.data.user);
+    loadPicture();
     return response.data;
   };
 
@@ -75,7 +102,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, fetchUser }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, fetchUser, applyUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -17,7 +17,7 @@ const ProfileAvatar = ({
   className = '',
   onUploadDone,
 }) => {
-  const { user, fetchUser } = useContext(AuthContext);
+  const { user, applyUser } = useContext(AuthContext);
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -52,9 +52,7 @@ const ProfileAvatar = ({
         const res = await api.post('/auth/upload-profile-picture/', {
           profile_picture: reader.result,
         });
-        if (res.data.user) {
-          await fetchUser();
-        }
+        if (res.data.user) applyUser(res.data.user);
         onUploadDone?.(res.data.message);
       } catch (err) {
         setError(err.response?.data?.error || 'Upload failed');
@@ -70,8 +68,8 @@ const ProfileAvatar = ({
     setError('');
     setUploading(true);
     try {
-      await api.post('/auth/remove-profile-picture/');
-      await fetchUser();
+      const res = await api.post('/auth/remove-profile-picture/');
+      if (res.data.user) applyUser(res.data.user);
       onUploadDone?.('Profile picture removed');
     } catch (err) {
       setError(err.response?.data?.error || 'Could not remove photo');

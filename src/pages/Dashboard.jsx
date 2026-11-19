@@ -26,7 +26,7 @@ const taskMoney = (reward) => {
 };
 
 const Dashboard = () => {
-  const { user, fetchUser } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const cachedDash = readCache('/auth/dashboard-stats/');
   const [wallet, setWallet] = useState(cachedDash?.wallet || null);
   const [overview, setOverview] = useState(cachedDash);
@@ -41,7 +41,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
-    fetchUser();
   }, []);
 
   const fetchData = async () => {

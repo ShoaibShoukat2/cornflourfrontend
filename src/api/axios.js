@@ -15,7 +15,9 @@ const cacheKey = (url) => `api-cache:${url}`;
 const writeCache = (url, data) => {
   cache.set(url, data);
   try {
-    sessionStorage.setItem(cacheKey(url), JSON.stringify(data));
+    const raw = JSON.stringify(data);
+    if (raw.length > 80000) return;
+    sessionStorage.setItem(cacheKey(url), raw);
   } catch {
     /* Large responses stay in memory only. */
   }
@@ -74,6 +76,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Token ${token}`;
   }
+  if (config.quiet) return config;
   pending += 1;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     emit({ kind: 'offline', message: 'No internet connection. Data will appear when you are back online.' });
@@ -85,6 +88,7 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
+    if (response.config.quiet) return response;
     pending = Math.max(0, pending - 1);
     if ((response.config.method || 'get').toLowerCase() === 'get') {
       writeCache(response.config.url, response.data);
@@ -99,6 +103,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (error.config?.quiet) return Promise.reject(error);
     pending = Math.max(0, pending - 1);
     if (pending === 0 && slowTimer) {
       clearTimeout(slowTimer);
