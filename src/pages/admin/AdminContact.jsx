@@ -1,61 +1,128 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import logo from '../../assets/tasklogo.jpeg';
+
+const INITIAL_FORM = {
+  contact_admin_name: '',
+  contact_admin_purpose: '',
+  contact_instructions: '',
+  support_phone: '',
+  whatsapp_contact_number: '',
+  botim_contact_number: '',
+  botim_contact_link: '',
+  whatsapp_icon: '',
+  botim_icon: '',
+};
+const CONTACT_KEYS = Object.keys(INITIAL_FORM);
 
 const AdminContact = () => {
-  const [links, setLinks] = useState({
-    whatsapp_channel_link: 'https://whatsapp.com/channel/0029VbBqz5bICVfmQKIAdV0n',
-    whatsapp_community_link: 'https://chat.whatsapp.com/L7v0Ehc0YpgGfiosYceZCn',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    api.get('/admin/contact-links/')
-      .then((res) => {
-        setLinks((prev) => ({
-          whatsapp_channel_link: res.data?.whatsapp_channel_link || prev.whatsapp_channel_link,
-          whatsapp_community_link: res.data?.whatsapp_community_link || prev.whatsapp_community_link,
-        }));
-      })
-      .catch(() => {});
+    api.get('/admin/site-settings/')
+      .then(({ data }) => setForm((current) => ({ ...current, ...data })))
+      .catch((error) => setMessage(error.response?.data?.error || 'Could not load contact settings'))
+      .finally(() => setLoading(false));
   }, []);
 
+  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  const uploadIcon = (key, file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setMessage('Select an image file for the icon');
+      return;
+    }
+    if (file.size > 256 * 1024) {
+      setMessage('Icons must be 256KB or smaller');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => update(key, reader.result);
+    reader.onerror = () => setMessage('Could not read the selected icon');
+    reader.readAsDataURL(file);
+  };
+
+  const save = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setMessage('');
+    try {
+      const payload = Object.fromEntries(CONTACT_KEYS.map((key) => [key, form[key] || '']));
+      await api.post('/admin/update-settings/', payload);
+      setMessage('Contact settings saved');
+    } catch (error) {
+      setMessage(error.response?.data?.error || 'Could not save contact settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const fields = [
+    { key: 'contact_admin_name', label: 'Admin / Leader Name', type: 'text' },
+    { key: 'contact_admin_purpose', label: 'Purpose / Role', type: 'text' },
+    { key: 'contact_instructions', label: 'Instructions for Users', type: 'textarea' },
+    { key: 'support_phone', label: 'Support Number (WhatsApp fallback)', type: 'tel' },
+    { key: 'whatsapp_contact_number', label: 'WhatsApp Number', type: 'tel' },
+    { key: 'botim_contact_number', label: 'Botim Number', type: 'tel' },
+    { key: 'botim_contact_link', label: 'Botim Direct Chat Link', type: 'url' },
+  ];
+
   return (
-    <div className="flex items-center justify-center p-4 min-h-[60vh]">
-      <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm text-center">
+    <section className="mx-auto max-w-3xl space-y-5">
+      <header>
+        <h1 className="text-2xl font-black text-gray-800">Contact Us Settings</h1>
+        <p className="mt-1 text-sm text-gray-500">Manage the support contact details shown on the user Contact Us page.</p>
+      </header>
 
-        <img src={logo} alt="INSTOVA" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover shadow-lg" />
-        <h1 className="text-2xl font-black text-gray-800 mb-1">Contact Us</h1>
-        <p className="text-gray-500 text-sm mb-8">Join our official WhatsApp groups for support and updates</p>
+      {message && (
+        <p role="status" className={`rounded-xl border px-4 py-3 text-sm font-semibold ${message.includes('saved') ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-800'}`}>
+          {message}
+        </p>
+      )}
+      {loading ? <p className="text-sm text-gray-500">Loading contact settings…</p> : (
+        <form onSubmit={save} className="space-y-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {fields.map((field) => (
+              <label key={field.key} className={`block text-xs font-semibold text-gray-600 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
+                {field.label}
+                {field.type === 'textarea' ? (
+                  <textarea rows={4} value={form[field.key] || ''} onChange={(event) => update(field.key, event.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-800 focus:border-orange-400 focus:outline-none" />
+                ) : (
+                  <input type={field.type} value={form[field.key] || ''} onChange={(event) => update(field.key, event.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-800 focus:border-orange-400 focus:outline-none" />
+                )}
+              </label>
+            ))}
+          </div>
 
-        <div className="space-y-4">
-          <a
-            href={links.whatsapp_channel_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl text-base shadow-lg transition"
-          >
-            <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            📢 Official Channel
-          </a>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              { key: 'whatsapp_icon', label: 'WhatsApp Icon' },
+              { key: 'botim_icon', label: 'Botim Icon' },
+            ].map(({ key, label }) => (
+              <label key={key} className="block rounded-xl border border-gray-200 p-4 text-xs font-semibold text-gray-600">
+                {label}
+                <span className="mt-3 flex items-center gap-3">
+                  {form[key] && <img src={form[key]} alt="" className="h-11 w-11 rounded-lg object-contain" />}
+                  <input type="file" accept="image/*" onChange={(event) => uploadIcon(key, event.target.files?.[0])}
+                    className="min-w-0 text-xs" />
+                </span>
+                <span className="mt-2 block font-normal text-gray-400">Image up to 256KB</span>
+              </label>
+            ))}
+          </div>
 
-          <a
-            href={links.whatsapp_community_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl text-base shadow-lg transition"
-          >
-            <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            👥 Official Community
-          </a>
-        </div>
-
-        <p className="text-xs text-gray-400 mt-6">INSTOVA — Support & Updates</p>
-      </div>
-    </div>
+          <button type="submit" disabled={saving}
+            className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 text-sm font-bold text-white disabled:opacity-60 sm:w-auto">
+            {saving ? 'Saving…' : 'Save Contact Settings'}
+          </button>
+        </form>
+      )}
+    </section>
   );
 };
 

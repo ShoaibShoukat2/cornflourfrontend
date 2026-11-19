@@ -10,7 +10,6 @@ import PaymentProof from './PaymentProof';
 const LoginAsUserModal = ({ onClose, onConfirm }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [selected, setSelected] = useState(null);
   const inputRef = useRef(null);
 

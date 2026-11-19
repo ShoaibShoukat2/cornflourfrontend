@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import PaymentProof from '../../components/PaymentProof';
@@ -20,11 +20,17 @@ const UserDetail = ({ userId, onBack }) => {
   const [transactions, setTransactions] = useState([]);
   const [packagePayment, setPackagePayment] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
+  const [packageEdit, setPackageEdit] = useState(null);
+  const [packageEditScreenshot, setPackageEditScreenshot] = useState(null);
+  const [plans, setPlans] = useState([
+    { key: 'normal', name: 'Normal' },
+    { key: 'super', name: 'Super' },
+    { key: 'premium', name: 'Premium' },
+    { key: 'high_octane', name: 'High Octane' },
+  ]);
   const [loginConfirm, setLoginConfirm] = useState(false);
 
-  useEffect(() => { fetchDetail(); }, [userId]);
-
-  const fetchDetail = async () => {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`/admin/user-full/${userId}/`);
@@ -43,7 +49,17 @@ const UserDetail = ({ userId, onBack }) => {
       });
     } catch { setMsg('Failed to load user'); }
     finally { setLoading(false); }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchDetail();
+      api.get('/auth/plans/').then(res => {
+        if (Array.isArray(res.data) && res.data.length) setPlans(res.data);
+      }).catch(() => {});
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchDetail]);
 
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
   const saveInfo = async () => {
@@ -73,7 +89,36 @@ const UserDetail = ({ userId, onBack }) => {
     flash(`✅ Rs ${subAmt} deducted`); setSubAmt(''); setSubRemarks(''); fetchDetail();
   };
   const approvePkg = async (id) => { try { await api.post(`/admin/approve-package/${id}/`); flash('✅ Approved'); fetchDetail(); } catch (e) { flash(e.response?.data?.error || 'Failed'); } };
-  const rejectPkg = async (id) => { const r = prompt('Reason:') || 'Rejected'; try { await api.post(`/admin/reject-package/${id}/`, { reason: r }); flash('✅ Rejected'); fetchDetail(); } catch (e) { flash('Failed'); } };
+  const rejectPkg = async (id) => { const r = prompt('Reason:') || 'Rejected'; try { await api.post(`/admin/reject-package/${id}/`, { reason: r }); flash('✅ Rejected'); fetchDetail(); } catch { flash('Failed'); } };
+  const savePackageEdit = async (event) => {
+    event.preventDefault();
+    if (!packageEdit) return;
+    try {
+      const payload = {
+        package_name: packageEdit.package_name,
+        amount: packageEdit.amount,
+        sender_name: packageEdit.sender_name,
+        sender_number: packageEdit.sender_number,
+      };
+      if (packageEditScreenshot) payload.screenshot = packageEditScreenshot;
+      await api.post(`/admin/package-payments/${packageEdit.id}/edit/`, payload);
+      setPackageEdit(null);
+      setPackageEditScreenshot(null);
+      flash('✅ Payment request updated');
+      fetchDetail();
+    } catch (error) {
+      flash(error.response?.data?.error || 'Could not update payment request');
+    }
+  };
+  const startPackageEdit = () => {
+    setPackageEdit({
+      ...packagePayment,
+      amount: String(packagePayment.amount ?? ''),
+      sender_name: packagePayment.sender_name || '',
+      sender_number: packagePayment.sender_number || '',
+    });
+    setPackageEditScreenshot(null);
+  };
   const approveW = async (id) => { const n = prompt('Note (optional):') ?? ''; try { await api.post(`/admin/approve-withdrawal/${id}/`, { note: n }); flash('✅ Approved'); fetchDetail(); } catch (e) { flash(e.response?.data?.error || 'Failed'); } };
   const rejectW = async (id) => { const r = prompt('Reason:'); if (!r) return; try { await api.post(`/admin/reject-withdrawal/${id}/`, { reason: r }); flash('✅ Rejected'); fetchDetail(); } catch { flash('Failed'); } };
   const doLogin = async () => { await logout(); localStorage.setItem('prefill_email', data.email); navigate('/login'); };
@@ -116,7 +161,7 @@ const UserDetail = ({ userId, onBack }) => {
 
       {/* Upliner / Referrer Info */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">🔗 Upliner (Referred By)</p>
+        <p className="admin-detail-heading mb-2">Refer By</p>
         {data.referred_by ? (
           <div className="flex items-center gap-3 bg-blue-50 rounded-xl px-4 py-3">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0">
@@ -125,7 +170,6 @@ const UserDetail = ({ userId, onBack }) => {
             <div className="min-w-0 flex-1">
               <p className="font-bold text-gray-800 text-sm">{data.referred_by.username}</p>
               <p className="text-xs text-gray-500">{data.referred_by.email}</p>
-              <p className="text-xs text-blue-500 mt-0.5">Code: {data.referred_by.referral_code}</p>
             </div>
             <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-semibold">Upliner</span>
           </div>
@@ -136,18 +180,29 @@ const UserDetail = ({ userId, onBack }) => {
 
       {packagePayment && (
         <div className="bg-white rounded-2xl border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-3">📦 Package Payment</p>
+          <p className="admin-detail-heading mb-3">User Information</p>
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
+              <p className="text-sm font-bold text-gray-800">{data.username}</p>
+              <p className="text-xs text-gray-500">{data.email}</p>
+              <p className="text-xs text-gray-400 mt-1">Date &amp; Time: {new Date(packagePayment.submitted_at).toLocaleString()}</p>
+              {packagePayment.sender_name && <p className="text-xs text-gray-600 mt-1">Sender Name: {packagePayment.sender_name}</p>}
+              {packagePayment.sender_number && <p className="text-xs text-gray-600">Sender Number: {packagePayment.sender_number}</p>}
+              <p className="admin-detail-heading mt-3">Payment Details</p>
+              <p className="text-sm font-bold text-gray-800">
+                {plans.find(plan => plan.key === packagePayment.package_name)?.name || packagePayment.package_name}
+                {' · '}Rs {packagePayment.amount}
+              </p>
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${packagePayment.status==='pending'?'bg-yellow-100 text-yellow-700':packagePayment.status==='approved'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}`}>{packagePayment.status.toUpperCase()}</span>
-              <p className="text-xs text-gray-400 mt-1">{new Date(packagePayment.submitted_at).toLocaleString()}</p>
             </div>
             <div className="flex gap-2">
               {packagePayment.id && <PaymentProof id={packagePayment.id} />}
+              {packagePayment.status !== 'approved' && <button onClick={startPackageEdit} className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">Edit</button>}
               {packagePayment.status === 'pending' && <>
                 <button onClick={() => approvePkg(packagePayment.id)} className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-600">✅ Approve</button>
                 <button onClick={() => rejectPkg(packagePayment.id)} className="bg-red-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-600">❌ Reject</button>
               </>}
+              {packagePayment.status === 'rejected' && <button onClick={() => approvePkg(packagePayment.id)} className="rounded-lg bg-green-500 px-4 py-1.5 text-xs font-bold text-white">Re-Approve</button>}
             </div>
           </div>
         </div>
@@ -174,7 +229,7 @@ const UserDetail = ({ userId, onBack }) => {
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase">📜 Full Earning History ({transactions.length})</p>
+          <p className="admin-detail-heading">Earning History ({transactions.length})</p>
         </div>
         {transactions.length === 0 ? <p className="text-sm text-gray-400 text-center py-4">No transactions yet</p> : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -199,7 +254,7 @@ const UserDetail = ({ userId, onBack }) => {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-3">💸 Withdrawal History ({withdrawals.length})</p>
+        <p className="admin-detail-heading mb-3">Withdraw Details ({withdrawals.length})</p>
         {withdrawals.length === 0 ? <p className="text-sm text-gray-400 text-center py-4">No withdrawals yet</p> : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {withdrawals.map(wd => (
@@ -228,7 +283,7 @@ const UserDetail = ({ userId, onBack }) => {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase mb-4">Edit User Info</p>
+        <p className="admin-detail-heading mb-4">User Account</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[['Username','username','text'],['Email','email','email'],['Phone','phone','text'],['Level','level','number'],['Balance (Rs)','balance','number'],['New Password','password','password']].map(([label,key,type]) => (
             <div key={key}>
@@ -248,6 +303,65 @@ const UserDetail = ({ userId, onBack }) => {
             <img src={screenshotPreview} alt="screenshot" className="w-full rounded-xl object-contain max-h-96" />
             <button onClick={() => setScreenshotPreview(null)} className="mt-3 w-full bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-semibold">Close</button>
           </div>
+        </div>
+      )}
+
+      {packageEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setPackageEdit(null)}>
+          <form onSubmit={savePackageEdit} onClick={event => event.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
+            <h2 className="admin-detail-heading">Edit Payment Request</h2>
+            <label className="block text-xs font-semibold text-gray-500">
+              Selected Plan
+              <select value={packageEdit.package_name}
+                onChange={event => setPackageEdit({ ...packageEdit, package_name: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800">
+                {plans.map(plan => <option key={plan.key} value={plan.key}>{plan.name}</option>)}
+              </select>
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Payment Amount (Rs)
+              <input type="number" min="0.01" step="0.01" required value={packageEdit.amount}
+                onChange={event => setPackageEdit({ ...packageEdit, amount: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Sender Name
+              <input value={packageEdit.sender_name}
+                onChange={event => setPackageEdit({ ...packageEdit, sender_name: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            <label className="block text-xs font-semibold text-gray-500">
+              Sender Number
+              <input value={packageEdit.sender_number}
+                onChange={event => setPackageEdit({ ...packageEdit, sender_number: event.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-800" />
+            </label>
+            {(packageEditScreenshot || packageEdit.screenshot) && (
+              <img src={packageEditScreenshot || packageEdit.screenshot} alt="Payment proof preview" className="max-h-44 rounded-xl object-contain" />
+            )}
+            <label className="block text-xs font-semibold text-gray-500">
+              Replace Payment Screenshot (optional)
+              <input type="file" accept="image/*" className="mt-2 block w-full text-sm"
+                onChange={event => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 2 * 1024 * 1024) {
+                    flash('Screenshot must be 2MB or smaller');
+                    event.target.value = '';
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => setPackageEditScreenshot(reader.result);
+                  reader.onerror = () => flash('Could not read screenshot');
+                  reader.readAsDataURL(file);
+                }} />
+            </label>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setPackageEdit(null)} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-sm font-bold text-gray-700">Cancel</button>
+              <button type="submit" className="flex-1 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white">Save Changes</button>
+            </div>
+          </form>
         </div>
       )}
 
@@ -280,14 +394,7 @@ const ManageUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => { fetchUsers(); }, 400);
-    return () => clearTimeout(timer);
-  }, [searchTerm, statusFilter, page]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const search = searchTerm.trim();
@@ -305,7 +412,14 @@ const ManageUsers = () => {
       setMessage('');
     } catch { setMessage('Failed to load users'); }
     finally { setLoading(false); }
-  };
+  }, [page, searchTerm, statusFilter]);
+
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchUsers, 400);
+    return () => window.clearTimeout(timer);
+  }, [fetchUsers]);
 
   if (selectedUserId) {
     return <UserDetail userId={selectedUserId} onBack={() => { setSelectedUserId(null); fetchUsers(); }} />;

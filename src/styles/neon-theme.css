@@ -2211,6 +2211,17 @@ body {
   font-size: 0.75rem;
 }
 
+.lux-member > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lux-member .lux-member-email {
+  overflow-wrap: anywhere;
+  color: #6d5b7d;
+  line-height: 1.35;
+}
+
 .lux-member-avatar {
   width: 38px;
   height: 38px;
@@ -2567,6 +2578,199 @@ body {
   margin-top: 4px;
   font-size: 0.62rem;
   color: rgba(255, 255, 255, 0.75);
+}
+
+.lux-summary-card p i {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1.1rem;
+  font-style: normal;
+}
+
+.lux-summary-card p.is-ads { background: rgba(96, 165, 250, 0.2); }
+.lux-summary-card p.is-ads i { color: #93c5fd; }
+.lux-summary-card p.is-tasks { background: rgba(244, 114, 182, 0.2); }
+.lux-summary-card p.is-tasks i { color: #f9a8d4; }
+.lux-summary-card p.is-level { background: rgba(250, 204, 21, 0.18); }
+.lux-summary-card p.is-level i { color: #fde047; }
+.lux-summary-card p.is-referral { background: rgba(74, 222, 128, 0.18); }
+.lux-summary-card p.is-referral i { color: #86efac; }
+
+.lux-wallet-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lux-wallet-hero-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.lux-wallet-approved {
+  border-color: #facc15;
+  background: linear-gradient(135deg, #ec4899, #be185d);
+}
+
+.lux-wallet-approved .lux-kicker,
+.lux-wallet-approved .lux-wallet-amount {
+  color: #fff;
+}
+
+.lux-wallet-approved .lux-wallet-amount {
+  font-size: 2rem;
+  text-shadow: none;
+}
+
+.lux-flower-name {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.lux-flower-emoji {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 118px;
+  place-items: center;
+  font-size: clamp(5rem, 18vw, 8rem);
+  line-height: 1;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+}
+
+.lux-tasks .lux-stage {
+  min-height: 230px;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 50% 58%, rgba(255, 105, 180, 0.26), transparent 38%),
+    linear-gradient(145deg, rgba(91, 23, 140, 0.92), rgba(39, 10, 70, 0.96));
+}
+
+.lux-tasks .lux-stage-hero {
+  min-height: 260px;
+}
+
+.lux-tasks .lux-stage .lux-tap {
+  margin-bottom: 12px;
+}
+
+.admin-detail-heading {
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: linear-gradient(90deg, #6d28d9, #be185d);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lux-task > .lux-claim {
+  width: 100%;
+  margin-left: 0;
+  cursor: pointer;
+}
+
+.lux-official-channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lux-channel-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 18px 14px;
+  border: 1px solid rgba(255, 206, 120, 0.45);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(91, 23, 140, 0.94), rgba(42, 10, 78, 0.98));
+  color: #fff;
+  text-align: center;
+}
+
+.lux-channel-card-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lux-channel-card h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.lux-channel-card p {
+  flex: 1;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.lux-channel-card .lux-join {
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 9px 18px;
+  background: linear-gradient(180deg, #ff4f9a, #c026d3);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 520px) {
+  .lux-official-channels {
+    grid-template-columns: 1fr;
+  }
+
+  .lux-team-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lux-member {
+    align-items: flex-start;
+  }
+
+  .lux-member-status {
+    flex-shrink: 0;
+  }
+
+  .lux-summary-card > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lux-wallet-amount {
+    font-size: 1.55rem;
+    overflow-wrap: anywhere;
+  }
+
+  .lux-wallet-approved .lux-wallet-amount {
+    font-size: 1.8rem;
+  }
+
+  .lux-flower-emoji {
+    min-height: 100px;
+    font-size: clamp(4.5rem, 27vw, 7rem);
+  }
 }
 
 .lux-withdraw-form {

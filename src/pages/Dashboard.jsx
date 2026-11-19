@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
@@ -25,6 +25,15 @@ const taskMoney = (reward) => {
   return `Rs ${rupees.toFixed(0)}`;
 };
 
+const safeChannelLink = (value) => {
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+};
+
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const cachedDash = readCache('/auth/dashboard-stats/');
@@ -39,11 +48,7 @@ const Dashboard = () => {
   const [channels, setChannels] = useState(readCache('/admin/contact-links/'));
   const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoadError(false);
     const [dashRes, taskRes, linkRes] = await Promise.allSettled([
       api.get('/auth/dashboard-stats/'),
@@ -62,12 +67,16 @@ const Dashboard = () => {
       setTasks(list);
     }
     if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchData, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData]);
 
   const walletView = wallet || { main_balance: 0 };
   const plan = overview?.plan;
   const hasPackage = plan?.status === 'approved' || user?.has_package;
-  const channelUrl = channels?.whatsapp_channel_link || '/contact';
   const recent = (Array.isArray(tasks) ? tasks : []).slice(0, 3);
 
   return (
@@ -110,19 +119,35 @@ const Dashboard = () => {
           <Link to="/levels"><span><NavIcon name="star" size={18} /></span><strong>Levels</strong><small>Track progress</small></Link>
         </section>
 
-        <article className="lux-channel">
-          <img src={logo} alt="INSTOVA" className="lux-channel-logo" />
-          <div>
-            <h2>INSTOVA Official Channels</h2>
-            <p>Stay updated, get latest news and support.</p>
-          </div>
-          <a href={channelUrl} target="_blank" rel="noreferrer" className="lux-join">Join Now ›</a>
-          <div className="lux-channel-links">
-            {channels?.whatsapp_channel_link && <a href={channels.whatsapp_channel_link} target="_blank" rel="noreferrer">WA</a>}
-            {channels?.whatsapp_community_link && <a href={channels.whatsapp_community_link} target="_blank" rel="noreferrer">Chat</a>}
-            <Link to="/contact">Web</Link>
-          </div>
-        </article>
+        <section className="lux-official-channels" aria-label="Official channels">
+          {[
+            {
+              key: 'channel',
+              name: channels?.whatsapp_channel_name || 'Official WhatsApp Channel',
+              purpose: channels?.whatsapp_channel_purpose || 'Official announcements and updates.',
+              icon: channels?.whatsapp_channel_icon,
+              url: safeChannelLink(channels?.whatsapp_channel_link),
+            },
+            {
+              key: 'community',
+              name: channels?.whatsapp_community_name || 'Official WhatsApp Community',
+              purpose: channels?.whatsapp_community_purpose || 'Community support and discussion.',
+              icon: channels?.whatsapp_community_icon,
+              url: safeChannelLink(channels?.whatsapp_community_link),
+            },
+          ].map((channel) => (
+            <article key={channel.key} className="lux-channel-card">
+              <img src={channel.icon || logo} alt="" className="lux-channel-card-icon" />
+              <h2>{channel.name}</h2>
+              <p>{channel.purpose}</p>
+              {channel.url && (
+                <a href={channel.url} target="_blank" rel="noopener noreferrer" className="lux-join">
+                  Join Now ›
+                </a>
+              )}
+            </article>
+          ))}
+        </section>
 
         <article className="lux-member-card">
           <header>
