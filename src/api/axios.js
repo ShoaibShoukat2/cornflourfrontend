@@ -7,7 +7,7 @@ const onInstova = typeof window !== 'undefined' && (
 
 const api = axios.create({
   baseURL: onInstova ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:8000/api'),
-  timeout: 25000,
+  timeout: 50000,
 });
 
 const cache = new Map();
@@ -103,11 +103,6 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
     } else if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       emit({ kind: 'offline', message: 'No internet connection. Data will appear when you are back online.' });
-    } else if (!error.response || error.code === 'ECONNABORTED') {
-      emit({
-        kind: 'error',
-        message: 'The server did not answer in time. Please try again.',
-      });
     }
     return Promise.reject(error);
   }
