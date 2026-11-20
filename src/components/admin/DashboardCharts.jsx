@@ -177,7 +177,7 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
     inFlight.current = true;
     setError(false);
     try {
-      const res = await api.get(`/admin/dashboard-charts/?days=${days}`);
+      const res = await api.get(`/admin/dashboard-charts/?days=${days}`, { quiet: true });
       setCharts(res.data);
     } catch (e) {
       console.error(e);

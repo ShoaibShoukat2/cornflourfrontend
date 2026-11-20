@@ -38,22 +38,11 @@ const writeCache = (url, data) => {
 };
 const listeners = new Set();
 let pending = 0;
-let slowTimer = null;
 let netState = { kind: 'ok', message: '' };
 
 const emit = (next) => {
   netState = next;
   listeners.forEach((listener) => listener(netState));
-};
-
-const armSlowTimer = () => {
-  if (slowTimer || pending === 0) return;
-  slowTimer = setTimeout(() => {
-    slowTimer = null;
-    if (pending > 0 && netState.kind !== 'offline') {
-      emit({ kind: 'slow', message: 'Internet is slow. Your data is still loading.' });
-    }
-  }, 1400);
 };
 
 export const subscribeNetwork = (listener) => {
@@ -80,8 +69,7 @@ if (typeof window !== 'undefined') {
     emit({ kind: 'offline', message: 'No internet connection. Data will appear when you are back online.' });
   });
   window.addEventListener('online', () => {
-    if (pending > 0) emit({ kind: 'slow', message: 'Back online. Loading your data now.' });
-    else emit({ kind: 'ok', message: '' });
+    if (netState.kind === 'offline') emit({ kind: 'ok', message: '' });
   });
 }
 
@@ -94,35 +82,23 @@ api.interceptors.request.use((config) => {
   pending += 1;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     emit({ kind: 'offline', message: 'No internet connection. Data will appear when you are back online.' });
-  } else {
-    armSlowTimer();
   }
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
-    if (response.config.quiet) return response;
-    pending = Math.max(0, pending - 1);
     if ((response.config.method || 'get').toLowerCase() === 'get') {
       writeCache(requestKey(response.config.url, response.config.params), response.data);
     }
-    if (pending === 0) {
-      if (slowTimer) {
-        clearTimeout(slowTimer);
-        slowTimer = null;
-      }
-      if (netState.kind !== 'offline') emit({ kind: 'ok', message: '' });
-    }
+    if (response.config.quiet) return response;
+    pending = Math.max(0, pending - 1);
+    if (pending === 0 && netState.kind !== 'offline') emit({ kind: 'ok', message: '' });
     return response;
   },
   (error) => {
     if (error.config?.quiet) return Promise.reject(error);
     pending = Math.max(0, pending - 1);
-    if (pending === 0 && slowTimer) {
-      clearTimeout(slowTimer);
-      slowTimer = null;
-    }
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
     } else if (typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -130,9 +106,7 @@ api.interceptors.response.use(
     } else if (!error.response || error.code === 'ECONNABORTED') {
       emit({
         kind: 'error',
-        message: error.code === 'ECONNABORTED'
-          ? 'The server is taking too long. This is a slow connection, not missing data.'
-          : 'Data could not load. Please check your internet connection.',
+        message: 'The server did not answer in time. Please try again.',
       });
     }
     return Promise.reject(error);

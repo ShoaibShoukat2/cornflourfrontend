@@ -24,7 +24,7 @@ import {
   UserPlusIcon,
   BoltIcon,
 } from '@heroicons/react/24/outline';
-import api from '../../api/axios';
+import api, { readCache } from '../../api/axios';
 import PaymentProof from '../../components/PaymentProof';
 import { AuthContext } from '../../context/AuthContext';
 import DashboardCharts from '../../components/admin/DashboardCharts';
@@ -633,10 +633,9 @@ const UserSearch = ({ onSelect }) => {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [recent, setRecent] = useState(null);
+  const [stats, setStats] = useState(() => readCache('/admin/dashboard-stats/'));
+  const [recent, setRecent] = useState(() => readCache('/admin/recent-activities/'));
   const [pendingPackages, setPendingPackages] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [chartRefresh, setChartRefresh] = useState(0);
@@ -644,43 +643,33 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const fetchData = async (silent = false) => {
-    if (!silent) setLoading(true);
-    else setRefreshing(true);
+  const fetchData = (silent = false) => {
+    if (silent) setRefreshing(true);
     setError('');
-    try {
-      const [statsRes, recentRes, pkgRes] = await Promise.allSettled([
-        api.get('/admin/dashboard-stats/'),
-        api.get('/admin/recent-activities/'),
-        api.get('/admin/package-payments/count/'),
-      ]);
-      if (statsRes.status === 'fulfilled') {
-        setStats(statsRes.value.data);
-        setChartRefresh((t) => t + 1);
+    const statsReq = api.get('/admin/dashboard-stats/').then((res) => {
+      setStats(res.data);
+      setChartRefresh((t) => t + 1);
+    }).catch(() => {
+      if (!readCache('/admin/dashboard-stats/')) {
+        setError('Dashboard numbers are still loading. Tap Retry.');
       }
-      if (recentRes.status === 'fulfilled') setRecent(recentRes.value.data);
-      if (pkgRes.status === 'fulfilled') setPendingPackages(pkgRes.value.data.count || 0);
-      if (statsRes.status !== 'fulfilled') {
-        setError('Dashboard data load nahi hui. Internet check karke Retry dabain.');
-      }
-    } catch (e) {
-      console.error(e);
-      setError('Dashboard data load nahi hui. Retry karein.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    });
+    const recentReq = api.get('/admin/recent-activities/', { quiet: true }).then((res) => {
+      setRecent(res.data);
+    }).catch(() => {});
+    const pkgReq = api.get('/admin/package-payments/count/', { quiet: true }).then((res) => {
+      setPendingPackages(res.data.count || 0);
+    }).catch(() => {});
+    return Promise.allSettled([statsReq, recentReq, pkgReq]).finally(() => setRefreshing(false));
   };
 
   if (selectedUserId) {
     return <UserDetail userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
   }
 
-  if (loading) return null;
-
   if (!stats) return (
     <div className="text-center py-20 space-y-3">
-      <p className="text-gray-500">{error || 'No data available'}</p>
+      <p className="text-gray-500">{error || 'Loading overview…'}</p>
       <button
         onClick={() => fetchData()}
         className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition"
