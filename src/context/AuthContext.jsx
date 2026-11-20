@@ -51,18 +51,9 @@ export const AuthProvider = ({ children }) => {
     }, 1200);
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUser = async () => {
+  const fetchUser = async (quiet = false) => {
     try {
-      const response = await api.get('/auth/profile/', { params: { lite: 1 } });
+      const response = await api.get('/auth/profile/', { params: { lite: 1 }, quiet });
       applyUser(response.data);
       if (!response.data?.is_staff) loadPicture();
     } catch (error) {
@@ -74,6 +65,22 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return undefined;
+    }
+    // A saved session can open the dashboard immediately. Refresh the profile
+    // after the overview request, so the two do not fight for the same worker.
+    if (savedUser()) {
+      const timer = window.setTimeout(() => { fetchUser(true); }, 8000);
+      return () => window.clearTimeout(timer);
+    }
+    fetchUser(false);
+    return undefined;
+  }, []);
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login/', { email, password });

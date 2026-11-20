@@ -189,14 +189,17 @@ const AdminLayout = ({ children }) => {
   const [loginAsUserOpen, setLoginAsUserOpen] = useState(false);
 
   useEffect(() => {
-    fetchPendingCount();
+    const timer = window.setTimeout(fetchPendingCount, 4000);
     const interval = setInterval(fetchPendingCount, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      window.clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchPendingCount = async () => {
     try {
-      const res = await api.get('/admin/package-payments/count/');
+      const res = await api.get('/admin/package-payments/count/', { quiet: true });
       setPendingCount(res.data.count);
     } catch { }
   };

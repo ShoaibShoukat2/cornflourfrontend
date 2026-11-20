@@ -639,28 +639,33 @@ const AdminDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [chartRefresh, setChartRefresh] = useState(0);
+  const [showCharts, setShowCharts] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => { fetchData(); }, []);
 
-  const fetchData = (silent = false) => {
+  const fetchData = async (silent = false) => {
     if (silent) setRefreshing(true);
     setError('');
-    const statsReq = api.get('/admin/dashboard-stats/').then((res) => {
+    try {
+      const res = await api.get('/admin/dashboard-stats/');
       setStats(res.data);
-      setChartRefresh((t) => t + 1);
-    }).catch(() => {
+    } catch {
       if (!readCache('/admin/dashboard-stats/')) {
-        setError('Dashboard numbers are still loading. Tap Retry.');
+        setError('Overview numbers could not load. Tap Retry.');
       }
-    });
-    const recentReq = api.get('/admin/recent-activities/', { quiet: true }).then((res) => {
-      setRecent(res.data);
-    }).catch(() => {});
-    const pkgReq = api.get('/admin/package-payments/count/', { quiet: true }).then((res) => {
-      setPendingPackages(res.data.count || 0);
-    }).catch(() => {});
-    return Promise.allSettled([statsReq, recentReq, pkgReq]).finally(() => setRefreshing(false));
+    }
+    try {
+      const recentRes = await api.get('/admin/recent-activities/', { quiet: true });
+      setRecent(recentRes.data);
+    } catch { /* Recent names can arrive on the next refresh. */ }
+    try {
+      const pkgRes = await api.get('/admin/package-payments/count/', { quiet: true });
+      setPendingPackages(pkgRes.data.count || 0);
+    } catch { /* The sidebar count uses the same endpoint. */ }
+    setShowCharts(true);
+    setChartRefresh((n) => n + 1);
+    setRefreshing(false);
   };
 
   if (selectedUserId) {
@@ -772,7 +777,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Live charts — profit, users, packages */}
-      <DashboardCharts refreshToken={chartRefresh} />
+      {showCharts && <DashboardCharts refreshToken={chartRefresh} />}
 
       {/* Info + Task row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
