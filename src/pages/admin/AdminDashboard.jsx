@@ -633,16 +633,21 @@ const UserSearch = ({ onSelect }) => {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
-  const [stats, setStats] = useState(() => readCache('/admin/dashboard-stats/'));
-  const [recent, setRecent] = useState(() => readCache('/admin/recent-activities/'));
-  const [pendingPackages, setPendingPackages] = useState(0);
+  const cachedStats = readCache('/admin/dashboard-stats/');
+  const [stats, setStats] = useState(() => cachedStats);
+  const [recent, setRecent] = useState(() => cachedStats?.recent || readCache('/admin/recent-activities/'));
+  const [pendingPackages, setPendingPackages] = useState(() => cachedStats?.pending_packages || 0);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [chartRefresh, setChartRefresh] = useState(0);
   const [showCharts, setShowCharts] = useState(false);
   const [error, setError] = useState('');
+  const chartTimer = useRef(null);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    return () => window.clearTimeout(chartTimer.current);
+  }, []);
 
   const fetchData = async (silent = false) => {
     if (silent) setRefreshing(true);
@@ -650,21 +655,18 @@ const AdminDashboard = () => {
     try {
       const res = await api.get('/admin/dashboard-stats/');
       setStats(res.data);
+      if (res.data.recent) setRecent(res.data.recent);
+      if (res.data.pending_packages != null) setPendingPackages(res.data.pending_packages);
     } catch {
       if (!readCache('/admin/dashboard-stats/')) {
         setError('Overview numbers could not load. Tap Retry.');
       }
     }
-    try {
-      const recentRes = await api.get('/admin/recent-activities/', { quiet: true });
-      setRecent(recentRes.data);
-    } catch { /* Recent names can arrive on the next refresh. */ }
-    try {
-      const pkgRes = await api.get('/admin/package-payments/count/', { quiet: true });
-      setPendingPackages(pkgRes.data.count || 0);
-    } catch { /* The sidebar count uses the same endpoint. */ }
-    setShowCharts(true);
-    setChartRefresh((n) => n + 1);
+    window.clearTimeout(chartTimer.current);
+    chartTimer.current = window.setTimeout(() => {
+      setShowCharts(true);
+      setChartRefresh((n) => n + 1);
+    }, 2500);
     setRefreshing(false);
   };
 
