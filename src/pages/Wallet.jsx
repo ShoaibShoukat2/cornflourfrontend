@@ -49,21 +49,18 @@ const Wallet = () => {
   const [message, setMessage] = useState('');
   const [loadError, setLoadError] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setLoadError(false);
-    try {
-      const [walletRes, withdrawalsRes, txRes] = await Promise.allSettled([
-        api.get('/wallet/'),
-        api.get('/wallet/withdrawals/'),
-        api.get('/wallet/transactions/'),
-      ]);
-      if (walletRes.status === 'fulfilled') setWallet(walletRes.value.data);
-      if (withdrawalsRes.status === 'fulfilled') setWithdrawals(withdrawalsRes.value.data || []);
-      if (txRes.status === 'fulfilled') setTransactions(txRes.value.data || []);
-      if (walletRes.status !== 'fulfilled') setLoadError(true);
-    } catch {
-      setLoadError(true);
-    }
+    const walletReq = api.get('/wallet/').then((res) => {
+      setWallet(res.data);
+    }).catch(() => setLoadError(true));
+    const withdrawalsReq = api.get('/wallet/withdrawals/').then((res) => {
+      setWithdrawals(res.data || []);
+    }).catch(() => {});
+    const txReq = api.get('/wallet/transactions/').then((res) => {
+      setTransactions(res.data || []);
+    }).catch(() => {});
+    return Promise.allSettled([walletReq, withdrawalsReq, txReq]);
   }, []);
 
   useEffect(() => {

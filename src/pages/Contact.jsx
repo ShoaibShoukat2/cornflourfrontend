@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../api/axios';
+import api, { readCache } from '../api/axios';
 import logo from '../assets/tasklogo.jpeg';
 
 const safeExternalLink = (value, allowBotim = false) => {
@@ -13,7 +13,7 @@ const safeExternalLink = (value, allowBotim = false) => {
 };
 
 const Contact = () => {
-  const [contact, setContact] = useState(null);
+  const [contact, setContact] = useState(() => readCache('/admin/contact-links/'));
 
   useEffect(() => {
     api.get('/admin/contact-links/')

@@ -14,19 +14,15 @@ const Referrals = () => {
   const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('all');
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setLoadError(false);
-    try {
-      const [statsRes, refRes] = await Promise.allSettled([
-        api.get('/referrals/stats/'),
-        api.get('/referrals/list/'),
-      ]);
-      if (statsRes.status === 'fulfilled') setStats(statsRes.value.data);
-      if (refRes.status === 'fulfilled') setReferrals(Array.isArray(refRes.value.data) ? refRes.value.data : []);
-      if (statsRes.status !== 'fulfilled') setLoadError(true);
-    } catch {
-      setLoadError(true);
-    }
+    const statsReq = api.get('/referrals/stats/').then((res) => {
+      setStats(res.data);
+    }).catch(() => setLoadError(true));
+    const listReq = api.get('/referrals/list/').then((res) => {
+      setReferrals(Array.isArray(res.data) ? res.data : []);
+    }).catch(() => {});
+    return Promise.allSettled([statsReq, listReq]);
   }, []);
 
   useEffect(() => {

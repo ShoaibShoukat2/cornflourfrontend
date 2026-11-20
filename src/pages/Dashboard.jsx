@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import api, { readCache } from '../api/axios';
+import api, { readCache, requestKey } from '../api/axios';
 import { NavIcon } from '../components/NavIcons';
 import logo from '../assets/tasklogo.jpeg';
 
@@ -34,9 +34,11 @@ const safeChannelLink = (value) => {
   }
 };
 
+const HOME_STATS = requestKey('/auth/dashboard-stats/', { scope: 'home' });
+
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
-  const cachedDash = readCache('/auth/dashboard-stats/');
+  const cachedDash = readCache(HOME_STATS);
   const [wallet, setWallet] = useState(cachedDash?.wallet || null);
   const [overview, setOverview] = useState(cachedDash);
   const [tasks, setTasks] = useState(() => {
@@ -48,25 +50,23 @@ const Dashboard = () => {
   const [channels, setChannels] = useState(readCache('/admin/contact-links/'));
   const [loadError, setLoadError] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setLoadError(false);
-    const [dashRes, taskRes, linkRes] = await Promise.allSettled([
-      api.get('/auth/dashboard-stats/'),
-      api.get('/tasks/'),
-      api.get('/admin/contact-links/'),
-    ]);
-    if (dashRes.status === 'fulfilled') {
-      setOverview(dashRes.value.data);
-      setWallet(dashRes.value.data.wallet);
-    } else if (!readCache('/auth/dashboard-stats/')) {
-      setLoadError(true);
-    }
-    if (taskRes.status === 'fulfilled') {
-      const incoming = taskRes.value.data;
+    const dash = api.get('/auth/dashboard-stats/', { params: { scope: 'home' } }).then((res) => {
+      setOverview(res.data);
+      setWallet(res.data.wallet);
+    }).catch(() => {
+      if (!readCache(HOME_STATS)) setLoadError(true);
+    });
+    const taskReq = api.get('/tasks/').then((res) => {
+      const incoming = res.data;
       const list = Array.isArray(incoming?.tasks) ? incoming.tasks : (Array.isArray(incoming) ? incoming : []);
       setTasks(list);
-    }
-    if (linkRes.status === 'fulfilled') setChannels(linkRes.value.data);
+    }).catch(() => {});
+    const linkReq = api.get('/admin/contact-links/').then((res) => {
+      setChannels(res.data);
+    }).catch(() => {});
+    return Promise.allSettled([dash, taskReq, linkReq]);
   }, []);
 
   useEffect(() => {

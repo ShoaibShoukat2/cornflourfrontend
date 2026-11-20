@@ -11,12 +11,26 @@ const api = axios.create({
 });
 
 const cache = new Map();
+const inflight = new Map();
 const cacheKey = (url) => `api-cache:${url}`;
+
+export const requestKey = (url, params) => {
+  if (!params || Object.keys(params).length === 0) return url;
+  const search = new URLSearchParams();
+  Object.keys(params).sort().forEach((key) => {
+    const value = params[key];
+    if (value !== undefined && value !== null) search.append(key, String(value));
+  });
+  const text = search.toString();
+  return text ? `${url}?${text}` : url;
+};
+
 const writeCache = (url, data) => {
   cache.set(url, data);
   try {
     const raw = JSON.stringify(data);
-    if (raw.length > 80000) return;
+    const limit = String(url).includes('contact-links') ? 1500000 : 80000;
+    if (raw.length > limit) return;
     sessionStorage.setItem(cacheKey(url), raw);
   } catch {
     /* Large responses stay in memory only. */
@@ -91,7 +105,7 @@ api.interceptors.response.use(
     if (response.config.quiet) return response;
     pending = Math.max(0, pending - 1);
     if ((response.config.method || 'get').toLowerCase() === 'get') {
-      writeCache(response.config.url, response.data);
+      writeCache(requestKey(response.config.url, response.config.params), response.data);
     }
     if (pending === 0) {
       if (slowTimer) {
@@ -124,5 +138,17 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+const originalGet = api.get.bind(api);
+api.get = (url, config = {}) => {
+  const key = requestKey(url, config.params);
+  const existing = inflight.get(key);
+  if (existing) return existing;
+  const request = originalGet(url, config).finally(() => {
+    if (inflight.get(key) === request) inflight.delete(key);
+  });
+  inflight.set(key, request);
+  return request;
+};
 
 export default api;

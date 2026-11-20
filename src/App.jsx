@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -15,18 +15,18 @@ import Wallet from './pages/Wallet';
 import Referrals from './pages/Referrals';
 import Settings from './pages/Settings';
 import ForgotPassword from './pages/ForgotPassword';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ManageUsers from './pages/admin/ManageUsers';
-import ManageWithdrawals from './pages/admin/ManageWithdrawals';
-import ManagePackages from './pages/admin/ManagePackages';
-import ManageTasks from './pages/admin/ManageTasks';
-import AdminContact from './pages/admin/AdminContact';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminReports from './pages/admin/AdminReports';
-import ManageUpgrades from './pages/admin/ManageUpgrades';
-import AdminTerms from './pages/admin/AdminTerms';
-import AdminComplaints from './pages/admin/AdminComplaints';
-import AdminHistory from './pages/admin/AdminHistory';
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'));
+const ManageWithdrawals = lazy(() => import('./pages/admin/ManageWithdrawals'));
+const ManagePackages = lazy(() => import('./pages/admin/ManagePackages'));
+const ManageTasks = lazy(() => import('./pages/admin/ManageTasks'));
+const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
+const ManageUpgrades = lazy(() => import('./pages/admin/ManageUpgrades'));
+const AdminTerms = lazy(() => import('./pages/admin/AdminTerms'));
+const AdminComplaints = lazy(() => import('./pages/admin/AdminComplaints'));
+const AdminHistory = lazy(() => import('./pages/admin/AdminHistory'));
 import Package from './pages/Package';
 import Upgrade from './pages/Upgrade';
 import Contact from './pages/Contact';
@@ -71,6 +71,7 @@ const AppContent = () => {
 
   if (isAdmin) {
     return (
+      <Suspense fallback={null}>
       <Routes>
         <Route path="/admin/dashboard" element={<AdminRoute><AdminLayout><AdminDashboard /></AdminLayout></AdminRoute>} />
         <Route path="/admin/users" element={<AdminRoute><AdminLayout><ManageUsers /></AdminLayout></AdminRoute>} />
@@ -85,6 +86,7 @@ const AppContent = () => {
         <Route path="/admin/complaints" element={<AdminRoute><AdminLayout><AdminComplaints /></AdminLayout></AdminRoute>} />
         <Route path="/admin/history" element={<AdminRoute><AdminLayout><AdminHistory /></AdminLayout></AdminRoute>} />
       </Routes>
+      </Suspense>
     );
   }
 

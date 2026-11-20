@@ -28,10 +28,13 @@ const LuxHeader = () => {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    if (!user || user.is_staff) return;
-    api.get('/auth/notifications/')
-      .then((res) => setUnread(res.data.unread || 0))
-      .catch(() => setUnread(0));
+    if (!user || user.is_staff) return undefined;
+    const timer = window.setTimeout(() => {
+      api.get('/auth/notifications/', { params: { summary: 1 } })
+        .then((res) => setUnread(res.data.unread || 0))
+        .catch(() => setUnread(0));
+    }, 700);
+    return () => window.clearTimeout(timer);
   }, [user]);
 
   if (!user || user.is_staff) return null;

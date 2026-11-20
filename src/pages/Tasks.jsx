@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import api, { readCache } from '../api/axios';
+import { AuthContext } from '../context/AuthContext';
 import { NavIcon } from '../components/NavIcons';
 import taskLogo from '../assets/tasklogo.jpeg';
 
@@ -121,6 +122,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
 
 // ── Main Tasks Page ────────────────────────────────────────────────────────────
 const Tasks = () => {
+  const { user } = useContext(AuthContext);
   const cachedTasks = readCache('/tasks/');
   const [tasks, setTasks] = useState(Array.isArray(cachedTasks?.tasks) ? cachedTasks.tasks : []);
   const [locked, setLocked] = useState(false);
@@ -133,7 +135,7 @@ const Tasks = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
   const [refresh, setRefresh] = useState(0);
-  const [userLevel, setUserLevel] = useState(0);
+  const userLevel = user?.level ?? 0;
   const [dailyLimit, setDailyLimit] = useState(cachedTasks?.daily_limit || 0);
   const [completedToday, setCompletedToday] = useState(cachedTasks?.completed_today || 0);
   const [walletBalance, setWalletBalance] = useState(readCache('/wallet/')?.main_balance ?? null);
@@ -184,23 +186,13 @@ const Tasks = () => {
     }
   }, []);
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const res = await api.get('/auth/profile/');
-      setUserLevel(res.data.level ?? 0);
-    } catch {
-      setLoadError(true);
-    }
-  }, []);
-
   useEffect(() => {
     const timer = window.setTimeout(() => {
       fetchTasks();
-      fetchProfile();
       fetchWallet();
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [refresh, fetchTasks, fetchProfile, fetchWallet]);
+  }, [refresh, fetchTasks, fetchWallet]);
 
   const redeemPromo = async () => {
     if (!promoCode.trim()) return;
