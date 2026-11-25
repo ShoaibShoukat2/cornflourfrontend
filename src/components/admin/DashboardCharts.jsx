@@ -200,7 +200,11 @@ const DashboardCharts = ({ refreshToken = 0 }) => {
 
   if (loading && !charts) return null;
 
-  if (!charts) {
+  const chartReady = Boolean(
+    charts?.labels && charts?.series && charts?.summary && charts?.user_segments && Array.isArray(charts?.package_tiers)
+  );
+
+  if (!chartReady) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center space-y-3">
         <p className="text-sm text-gray-500">{error ? 'Charts load nahi hue' : 'No chart data'}</p>

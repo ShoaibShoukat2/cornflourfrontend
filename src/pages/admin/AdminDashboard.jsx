@@ -674,7 +674,9 @@ const AdminDashboard = () => {
     return <UserDetail userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
   }
 
-  if (!stats) return (
+  const overviewReady = Boolean(stats?.users && stats?.financial && stats?.earnings_breakdown && stats?.security);
+
+  if (!overviewReady) return (
     <div className="text-center py-20 space-y-3">
       <p className="text-gray-500">{error || 'Loading overview…'}</p>
       <button

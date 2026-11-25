@@ -5,8 +5,12 @@ const onInstova = typeof window !== 'undefined' && (
   window.location.hostname === 'www.instovaearn.com'
 );
 
+// Vercel’s /api rewrite returns 502 (it cannot connect to PythonAnywhere).
+// The browser can reach the API directly, and CORS already allows this site.
+const LIVE_API = 'https://cornflour.pythonanywhere.com/api';
+
 const api = axios.create({
-  baseURL: onInstova ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:8000/api'),
+  baseURL: onInstova ? LIVE_API : (import.meta.env.VITE_API_URL || 'http://localhost:8000/api'),
   timeout: 50000,
 });
 

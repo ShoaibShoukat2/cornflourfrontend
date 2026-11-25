@@ -50,6 +50,10 @@ class PageBoundary extends Component {
     return { failed: true };
   }
 
+  componentDidCatch(error) {
+    console.error(error);
+  }
+
   render() {
     if (this.state.failed) {
       return (
@@ -71,6 +75,7 @@ const AppContent = () => {
 
   if (isAdmin) {
     return (
+      <PageBoundary key={location.pathname}>
       <Suspense fallback={null}>
       <Routes>
         <Route path="/admin/dashboard" element={<AdminRoute><AdminLayout><AdminDashboard /></AdminLayout></AdminRoute>} />
@@ -87,6 +92,7 @@ const AppContent = () => {
         <Route path="/admin/history" element={<AdminRoute><AdminLayout><AdminHistory /></AdminLayout></AdminRoute>} />
       </Routes>
       </Suspense>
+      </PageBoundary>
     );
   }
 
