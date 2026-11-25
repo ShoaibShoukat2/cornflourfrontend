@@ -18,18 +18,6 @@ const LEVEL_EARNINGS = [
   { level: 9, earning: 70 },
 ];
 
-const FLOWERS = [
-  { flower: '🌸', name: 'Cherry Blossom' },
-  { flower: '🌻', name: 'Sunflower' },
-  { flower: '🌷', name: 'Tulip' },
-  { flower: '🌹', name: 'Rose' },
-  { flower: '🌼', name: 'Daisy' },
-  { flower: '🌺', name: 'Hibiscus' },
-  { flower: '🪷', name: 'Lotus' },
-  { flower: '🪻', name: 'Hyacinth' },
-];
-const getTaskFlower = (index) => FLOWERS[index % FLOWERS.length];
-
 // ── Single Task Card ───────────────────────────────────────────────────────────
 const TaskCard = ({ task, index, onDone, currentEarning }) => {
   const [phase, setPhase] = useState('idle');
@@ -77,12 +65,19 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
   const progress = Math.min(100, Math.max(0, ((required - timeLeft) / required) * 100));
-  const taskFlower = getTaskFlower(index);
 
   const stage = (
-    <div className={`lux-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
-      <span className="lux-flower-name">{taskFlower.name}</span>
-      <span className="lux-flower-emoji" aria-hidden="true">{taskFlower.flower}</span>
+    <div className={`lux-stage lux-logo-stage${index === 0 ? ' lux-stage-hero' : ''}`} onClick={phase === 'idle' ? startTask : undefined}>
+      <span className="lux-logo-glow" aria-hidden="true" />
+      <span className="lux-orbit lux-orbit-a" aria-hidden="true" />
+      <span className="lux-orbit lux-orbit-b" aria-hidden="true" />
+      <span className="lux-spark lux-spark-a" aria-hidden="true" />
+      <span className="lux-spark lux-spark-b" aria-hidden="true" />
+      <span className="lux-spark lux-spark-c" aria-hidden="true" />
+      <span className="instova-logo-frame">
+        <span className="instova-logo-ring" aria-hidden="true" />
+        <img src={taskLogo} alt="" className="lux-task-logo" />
+      </span>
       {phase === 'timer' && (
         <div className="lux-stage-overlay">
           <span className="lux-timer">{mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : secs}</span>
@@ -98,7 +93,7 @@ const TaskCard = ({ task, index, onDone, currentEarning }) => {
     <article className="lux-task">
       {stage}
       {phase === 'idle' && (
-        <button type="button" onClick={startTask} className="lux-claim">Bloom Now</button>
+        <button type="button" onClick={startTask} className="lux-claim">Start Now</button>
       )}
       {phase === 'ready' && (
         <button type="button" onClick={completeTask} className="lux-claim">Claim Rs {currentEarning}</button>

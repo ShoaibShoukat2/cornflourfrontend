@@ -2629,26 +2629,6 @@ body {
   text-shadow: none;
 }
 
-.lux-flower-name {
-  position: relative;
-  z-index: 1;
-  margin-top: 12px;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.lux-flower-emoji {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  min-height: 118px;
-  place-items: center;
-  font-size: clamp(5rem, 18vw, 8rem);
-  line-height: 1;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
-}
 
 .lux-tasks .lux-stage {
   min-height: 230px;
@@ -2767,10 +2747,6 @@ body {
     font-size: 1.8rem;
   }
 
-  .lux-flower-emoji {
-    min-height: 100px;
-    font-size: clamp(4.5rem, 27vw, 7rem);
-  }
 }
 
 .lux-withdraw-form {
@@ -3277,4 +3253,151 @@ body {
 
 .lux-nav-item-active .lux-nav-crown .nav-icon {
   color: white;
+}
+
+@keyframes instovaOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes instovaOrbitRev {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes instovaLogoFloat {
+  0%, 100% { transform: translateY(0) scale(1) rotate(-3deg); }
+  50% { transform: translateY(-7px) scale(1.07) rotate(3deg); }
+}
+
+@keyframes instovaHalo {
+  0% { transform: scale(0.82) rotate(0deg); opacity: 0.45; }
+  50% { transform: scale(1.08) rotate(180deg); opacity: 0.95; }
+  100% { transform: scale(0.82) rotate(360deg); opacity: 0.45; }
+}
+
+@keyframes instovaSpark {
+  0%, 100% { opacity: 0.15; transform: scale(0.45); }
+  50% { opacity: 1; transform: scale(1.55); }
+}
+
+@keyframes instovaLogoGlow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 70, 160, 0.7), 0 0 22px rgba(131, 58, 180, 0.45);
+    filter: saturate(1) brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(252, 175, 69, 0.95), 0 0 32px rgba(247, 119, 55, 0.7);
+    filter: saturate(1.25) brightness(1.08);
+  }
+}
+
+.lux-tasks .lux-logo-stage {
+  isolation: isolate;
+}
+
+.lux-tasks .lux-logo-stage .lux-stage-overlay {
+  z-index: 3;
+}
+
+.lux-tasks .lux-logo-glow {
+  position: absolute;
+  width: 68%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(from 40deg, #833ab4, #fd1d1d, #f77737, #fcaf45, #405de6, #c13584, #833ab4);
+  filter: blur(12px);
+  z-index: 0;
+  animation: instovaHalo 5.5s linear infinite;
+}
+
+.lux-tasks .lux-logo-stage .lux-orbit {
+  width: 78%;
+  height: 78%;
+  border-width: 1.5px;
+  border-style: dashed;
+  border-color: rgba(255, 214, 140, 0.75);
+  animation: instovaOrbit 7s linear infinite;
+}
+
+.lux-tasks .lux-logo-stage .lux-orbit-b {
+  width: 92%;
+  height: 92%;
+  border-style: solid;
+  border-color: rgba(255, 79, 163, 0.55);
+  opacity: 0.9;
+  animation: instovaOrbitRev 11s linear infinite;
+}
+
+.lux-tasks .lux-logo-stage .lux-spark {
+  z-index: 2;
+  animation: instovaSpark 1.7s ease-in-out infinite;
+}
+
+.lux-tasks .lux-spark-c {
+  top: 72%;
+  left: 16%;
+  animation-delay: 0.55s;
+}
+
+.lux-tasks .lux-spark-b {
+  animation-delay: 0.3s;
+}
+
+.lux-tasks .instova-logo-frame {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 62%;
+  aspect-ratio: 1;
+  place-items: center;
+  animation: instovaLogoFloat 3.1s ease-in-out infinite;
+}
+
+.lux-tasks .instova-logo-ring {
+  position: absolute;
+  inset: -9%;
+  border-radius: 30%;
+  padding: 2px;
+  background: conic-gradient(#ffe7a3, #ff4fa3, #7dd3fc, #c084fc, #fcaf45, #ffe7a3);
+  animation: instovaRingSpin 2.4s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.lux-tasks .instova-logo-frame .lux-task-logo {
+  width: 100%;
+  height: auto;
+  animation: instovaLogoGlow 2.2s ease-in-out infinite;
+}
+
+.lux-tasks .instova-logo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 22%;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.55) 50%, transparent 68%);
+  background-size: 220% 100%;
+  mix-blend-mode: screen;
+  animation: shimmer 2.6s linear infinite;
+}
+
+@keyframes instovaRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux-tasks .lux-logo-glow,
+  .lux-tasks .lux-logo-stage .lux-orbit,
+  .lux-tasks .lux-logo-stage .lux-spark,
+  .lux-tasks .instova-logo-frame,
+  .lux-tasks .instova-logo-ring,
+  .lux-tasks .instova-logo-frame .lux-task-logo,
+  .lux-tasks .instova-logo-frame::after {
+    animation: none;
+  }
 }
